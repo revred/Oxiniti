@@ -1,0 +1,95 @@
+﻿@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IMakerClient MakerClient
+@inject BusinessInfoService InfoService
+
+<div class="featured-section">
+    <h2 class="section-title">Why Choose @InfoService.ApplicationName</h2>
+
+    @if (ProductTypes == null)
+    {
+        <div class="product-grid" aria-busy="true">
+            @foreach (var _ in Enumerable.Range(0, 3))
+            {
+                <div class="product-card" aria-hidden="true">
+                    <div class="product-image placeholder-wave">
+                        <!-- keep same height as real image (450px) to avoid layout shift -->
+                        <div class="placeholder w-100 h-100 rounded"></div>
+                    </div>
+
+                    <h3 class="product-title placeholder-wave">
+                        <span class="placeholder col-6"></span>
+                    </h3>
+
+                    <p class="product-description placeholder-wave">
+                        <span class="placeholder col-11 mb-2"></span>
+                        <span class="placeholder col-9 mb-2"></span>
+                        <span class="placeholder col-10"></span>
+                    </p>
+
+                    <div class="product-action placeholder-wave">
+                        <span class="btn placeholder disabled" style="width: 180px; height: 42px;"></span>
+                    </div>
+                </div>
+            }
+            <span class="visually-hidden" role="status">Loading featured product types…</span>
+        </div>
+    }
+    else if (!ProductTypes.Any())
+    {
+        <p class="text-muted">No featured product types available.</p>
+    }
+    else
+    {
+        <div class="product-grid">
+            @foreach (var p in ProductTypes)
+            {
+                <div class="product-card" @onclick="@(() => GoToProductPage(p.Slug))">
+                    <div class="product-image">
+                        <img src="@p.Asset?.Url" alt="@p.Name" />
+                    </div>
+                    <h3 class="product-title">@p.Name</h3>
+                    <p class="product-description">
+                        @p.Description
+                    </p>
+                    <div class="product-action">
+                        <a href="@($"/products/type/{p.Slug}")" class="btn btn-explore-product">Explore @p.Name</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<ProductData>? ProductTypes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Fetch all product types
+            var result = await MakerClient.ProductGroupsAsync();
+
+            // Only keep the ones marked as Home
+            ProductTypes = result.Products
+                .Where(p => p.Home is true)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"[ProductGroups] Error fetching product groups: {ex}");
+            ProductTypes = new List<ProductData>(); // fallback to empty list
+        }
+    }
+
+    private void GoToProductPage(string productType)
+    {
+        NavigationManager.NavigateTo($"/products/type/{productType}");
+    }
+
+    private void LogToConsole(string message)
+    {
+        JSRuntime.InvokeVoidAsync("console.log", message);
+    }
+}

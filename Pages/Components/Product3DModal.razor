@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNetCore.Components
+@inject IJSRuntime JS
+
+<div>
+    <button class="btn btn-primary" @onclick="() => ShowModal = true">
+        🔍 View 3D Model
+    </button>
+</div>
+
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-xl" style="max-width:90vw;">
+            <div class="modal-content" style="height:80vh;">
+                <div class="modal-header">
+                    <h5 class="modal-title">3D Viewer</h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height:calc(80vh - 56px);">
+                    <iframe class="w-100 h-100"
+                            src="@ViewerUrl"
+                            frameborder="0"
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code{
+    /// <summary>
+    /// The full URL of the .step/.stp/... file you want to view.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string FileUrl { get; set; } = "";
+
+    /// <summary>
+    /// Whether the modal is currently visible.
+    /// </summary>
+    public bool ShowModal { get; set; }
+
+    /// <summary>
+    /// Builds the iframe URL to your Vite 3D‐viewer.
+    /// </summary>
+    private string ViewerUrl =>
+        $"http://localhost:5173/?fileUrl={Uri.EscapeDataString(FileUrl)}";
+
+    private void Close()
+    {
+        ShowModal = false;
+    }
+}

@@ -1,0 +1,237 @@
+﻿.page {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+main {
+    flex: 1;
+}
+
+.sidebar {
+    background: linear-gradient(180deg, #0B1F33 0%, #1C4E6E 40%, #3D8FB5 100%);
+    color: #FFFFFF;
+}
+
+.top-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 4rem;
+    background: linear-gradient(90deg, #0B1F33 0%, #1C4E6E 100%);
+    padding: 0.75rem 1.5rem;
+    color: #FFFFFF;
+    z-index: 10;
+    flex-wrap: nowrap;
+    row-gap: 0.5rem;
+}
+
+.nav-search-wrapper {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.search-input {
+    padding: 0.5rem 0.5rem 0.5rem 2rem;
+    border: none;
+    border-radius: 2rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    width: 200px;
+    font-size: 0.9rem;
+    color: #000000 !important;
+}
+
+    .search-input::placeholder {
+        color: #333333 !important;
+    }
+
+.search-icon {
+    color: #000000 !important;
+}
+
+.top-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.nav-item-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.top-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+    .top-nav-link:hover {
+        color: #8DDCEE; 
+    }
+
+.bi {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    vertical-align: -0.125em;
+    fill: currentColor;
+}
+
+@media (max-width: 640.98px) {
+    .top-row {
+        flex-direction: column;
+        align-items: stretch;
+        height: auto;
+    }
+
+    .nav-search-wrapper {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .search-input {
+        width: 100% !important;
+    }
+
+    .top-nav-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .nav-item-wrapper {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+
+    .top-nav-link span + span {
+        display: none;
+    }
+}
+
+@media (min-width: 641px) {
+    .page {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row {
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row,
+    article {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+
+.user-icon {
+    background-color: #fff;
+    color: #1A2C54;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid #fff;
+}
+
+.user-dropdown {
+    position: relative;
+}
+
+.user-menu {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: white;
+    color: #1A2C54;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    min-width: 180px;
+    overflow: hidden;
+}
+
+.user-menu-item {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #1A2C54;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #eee;
+}
+
+    .user-menu-item:last-child {
+        border-bottom: none;
+    }
+
+    .user-menu-item:hover {
+        background-color: #f0f0f0;
+    }
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: lightyellow;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    padding: 0.6rem 1.25rem;
+    z-index: 1000;
+    color-scheme: light only;
+}
+
+    #blazor-error-ui .dismiss {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.75rem;
+        cursor: pointer;
+    }
+
+.cart-badge {
+    background: #8DDCEE;
+    color: #1A2C54; 
+    border-radius: 50%;
+    padding: 2px 7px;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.cart-highlight {
+    animation: cartPulse 1s;
+}
+
+@keyframes cartPulse {
+    0% {
+        background-color: rgba(141, 220, 238, 0.2); 
+    }
+
+    50% {
+        background-color: rgba(141, 220, 238, 0.5);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}

@@ -1,0 +1,35 @@
+﻿@inject NavigationManager NavigationManager
+
+<div class="search-container">
+    <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" placeholder="Search" class="search-input" @bind="SearchTerm" @bind:event="oninput"/>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? SearchTerm { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SearchTermChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    private async Task SearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            if (OnSearch.HasDelegate)
+            {
+                await OnSearch.InvokeAsync(SearchTerm);
+            }
+            else
+            {
+                // Default behavior - navigate to search page
+                NavigationManager.NavigateTo($"search?q={Uri.EscapeDataString(SearchTerm)}");
+            }
+        }
+    }
+}

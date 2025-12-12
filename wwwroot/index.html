@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oxiniti</title>
+    <base href="/" />
+
+    <link rel="icon" type="image/png" href="/oxiniti.png" />
+
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" />
+    <link href="HippoHex.styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+    <script src="bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <div id="app">
+        <div class="logo-loading-container">
+            <img src="/oxiniti.png" alt="Oxiniti Logo" class="logo-loading-animation" />
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="." class="reload">Reload</a>
+        <span class="dismiss">🗙</span>
+    </div>
+    <script src="./js/clickOutsideHelper.js"></script>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        let __embeddedCheckout = null;
+        let __stripe = null;
+
+        async function mountEmbeddedCheckout(stripePublicKey, clientSecret, containerSelector = '#checkout-container') {
+            // If already mounted, destroy first (idempotent)
+            if (__embeddedCheckout) {
+                try { await __embeddedCheckout.destroy(); } catch (_) { }
+                __embeddedCheckout = null;
+            }
+
+            if (!__stripe) {
+                __stripe = Stripe(stripePublicKey);
+            }
+
+            const el = document.querySelector(containerSelector);
+            if (!el) throw new Error(`Container ${containerSelector} not found`);
+            el.innerHTML = '';
+
+            __embeddedCheckout = await __stripe.initEmbeddedCheckout({ clientSecret });
+            await __embeddedCheckout.mount(containerSelector);
+            return true;
+        }
+    </script>
+
+</body>
+</html>

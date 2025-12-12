@@ -1,0 +1,34 @@
+﻿.help-banner {
+    background-color: #D4F3FF;
+    border-radius: 0.75rem;
+    height: 330px;
+    align-content: center;
+}
+
+.help-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom:20px;
+}
+
+.help-text {
+    color: #4a4a4a;
+    font-size: 1rem;
+}
+
+.button-row .btn-primary {
+    background-color: #000;
+    border: none;
+}
+
+.button-row .btn-outline-secondary {
+    background-color: #E6E6E6;
+    border: 1px solid #ccc;
+    color: #000000E5;
+}
+
+
+.button-row .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}

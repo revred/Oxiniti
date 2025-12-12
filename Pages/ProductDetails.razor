@@ -1,0 +1,516 @@
+﻿@page "/product/{Slug}"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Nav
+@inject CartService CartService
+@inject IAuthenticationService AuthenticationService
+@inject IMakerClient MakerClient
+
+<PageTitle>@(Detail?.Name ?? "Loading...")</PageTitle>
+
+@if (Detail is null)
+{
+    <div class="product-details container py-5" aria-busy="true">
+        <div class="row g-5">
+            <!-- Left: carousel/media skeleton -->
+            <div class="col-12 col-lg-6">
+                <div class="placeholder-wave">
+                    <div class="rounded placeholder w-100" style="height:500px;"></div>
+                </div>
+
+                <!-- Thumbnails skeleton -->
+                <div class="carousel-thumbs-container mt-3">
+                    <div class="thumbs-row d-flex flex-row gap-2 justify-content-center" aria-hidden="true">
+                        @foreach (var _ in Enumerable.Range(0, 5))
+                        {
+                            <div class="thumb-box">
+                                <div class="rounded placeholder" style="width:72px;height:72px;"></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: title, price, qty, buttons, description, specs skeleton -->
+            <div class="col-12 col-lg-6" aria-hidden="true">
+                <!-- FID chip skeleton (optional) -->
+                <div class="d-inline-flex align-items-center gap-2 small bg-white rounded px-2 py-1 border mb-2">
+                    <span class="placeholder col-3"></span>
+                    <span class="placeholder col-2"></span>
+                    <span class="btn btn-sm disabled placeholder" style="width:84px;height:28px;"></span>
+                </div>
+
+                <!-- Title -->
+                <div class="placeholder-wave mb-2">
+                    <span class="placeholder col-7"></span>
+                </div>
+
+                <!-- Price -->
+                <div class="placeholder-wave mb-3">
+                    <span class="placeholder col-2"></span>
+                </div>
+
+                <!-- Quantity controls -->
+                <div class="mb-3">
+                    <div class="placeholder-wave mb-2">
+                        <span class="placeholder col-2"></span>
+                    </div>
+                    <div class="d-inline-flex align-items-center gap-2">
+                        <span class="btn btn-outline-secondary disabled placeholder" style="width:40px;height:38px;"></span>
+                        <span class="placeholder" style="width:40px;height:24px;"></span>
+                        <span class="btn btn-outline-secondary disabled placeholder" style="width:40px;height:38px;"></span>
+                    </div>
+                </div>
+
+                <!-- Add to cart & login buttons -->
+                <div class="placeholder-wave mb-2">
+                    <span class="btn w-100 disabled placeholder" style="height:48px;"></span>
+                </div>
+                <div class="placeholder-wave mb-4">
+                    <span class="btn w-100 disabled placeholder" style="height:48px;"></span>
+                </div>
+
+                <!-- Description -->
+                <div class="placeholder-wave mb-4">
+                    <span class="placeholder col-12 mb-2"></span>
+                    <span class="placeholder col-11 mb-2"></span>
+                    <span class="placeholder col-9"></span>
+                </div>
+
+                <!-- Specs accordion block -->
+                <div class="accordion" id="specAccordion">
+                    @foreach (var _ in Enumerable.Range(0, 3))
+                    {
+                        <div class="accordion-item rounded-4 overflow-hidden mb-2 border">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" disabled>
+                                    <span class="placeholder col-4"></span>
+                                </button>
+                            </h2>
+                            <div class="accordion-collapse collapse show">
+                                <div class="accordion-body">
+                                    <div class="placeholder-wave">
+                                        <span class="placeholder col-12 mb-2"></span>
+                                        <span class="placeholder col-10 mb-2"></span>
+                                        <span class="placeholder col-8"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- You May Also Like (4 cards) -->
+        <h4 class="mt-5 mb-3 placeholder-wave">
+            <span class="placeholder col-3"></span>
+        </h4>
+        <div class="row g-4" aria-hidden="true">
+            @foreach (var _ in Enumerable.Range(0, 4))
+            {
+                <div class="col-6 col-md-3">
+                    <div class="card h-100">
+                        <div class="placeholder-wave">
+                            <div class="card-img-top placeholder" style="height:180px;"></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="placeholder-wave mb-2">
+                                <span class="placeholder col-8"></span>
+                            </div>
+                            <div class="placeholder-wave">
+                                <span class="placeholder col-5"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <span class="visually-hidden" role="status">Loading product details…</span>
+    </div>
+}
+else
+{
+    <div class="product-details container py-5">
+        <div class="row g-5">
+            <!-- Left: Main Image Only -->
+            <div class="col-12 col-lg-6">
+                <div id="carouselExampleControls" class="carousel slide carousel-dark" data-bs-ride="false">
+                    <div class="carousel-inner">
+                        @for (int i = 0; i < SortedAssets.Count; i++)
+                        {
+                            var asset = SortedAssets[i];
+                            <div class="carousel-item @(i == 0 ? "active" : "") position-relative @(asset.Is3DFile ? "is-3d" : "")">
+                                @if (asset.Is3DFile)
+                                {
+                                    <iframe src="@($"https://happy-stone-0cb14df10.6.azurestaticapps.net?fileUrl={asset.Url}&showControls=false")"
+                                            style="width: 100%; height: 500px; border: none; border-radius: 0.5rem;"
+                                            allowfullscreen
+                                            loading="lazy">
+                                    </iframe>
+
+                                    <!-- Bottom-right expand button -->
+                                    <button class="btn btn-light expand-3d-btn position-absolute bottom-0 end-0 m-2 z-3"
+                                            type="button"
+                                            title="Expand 3D View"
+                                            @onclick="() => Open3DModal(asset.Url)">
+                                        <i class="bi bi-arrows-fullscreen"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <img src="@asset.Url" class="d-block w-100 rounded" alt="@Detail.Name" />
+                                }
+                            </div>
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+                <div class="carousel-thumbs-container mt-3">
+                    <div class="thumbs-row d-flex flex-row gap-2 justify-content-center">
+                        @for (int i = 0; i < SortedAssets.Count; i++)
+                        {
+                            var asset = SortedAssets[i];
+                            var idx = i; 
+                            <div class="thumb-box @(i == 0 ? "active" : "")"
+                                @onclick="() => OnThumbnailClick(idx)">
+                                @if (asset.Is3DFile)
+                                {
+                                    <div class="thumb-3d-text">3D</div>
+                                }
+                                else
+                                {
+                                    <img src="@asset.Url" alt="Thumbnail" />
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Right: Info, Purchase & Accordion -->
+            <div class="col-12 col-lg-6">
+                @if(Detail is not null)
+                {
+                    @if (AuthenticationService.IsMakerAIUser == true)
+                    {
+                        <div class="d-inline-flex align-items-center gap-1 small bg-white rounded px-2 py-1 border mb-2">
+                            <span class="text-muted">FID:</span>
+                            <code class="me-1">@Detail.FriendlyID</code>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    title="Copy FriendlyID"
+                                    @onclick:stopPropagation
+                                    @onclick="@(() => CopyDetailFIDAsync(Detail.FriendlyID))">
+                                @if (DetailCopyState == "copied")
+                                {
+                                    <i class="bi bi-check2 text-success"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-clipboard"></i>
+                                }
+                            </button>
+                        </div>
+                    }
+
+                    <h2>@Detail.Name</h2>
+                    <p class="fs-4 fw-bold text-purple">$@Detail.Price</p>
+                    <div class="mb-3">
+                        <label class="form-label">Quantity</label>
+                        <div class="d-inline-flex align-items-center">
+                            <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(-1)">–</button>
+                            <span class="px-3">@Quantity</span>
+                            <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(+1)">+</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-dark w-100 mb-2" @onclick="AddToCart">
+                        @if (AddedMessage != null)
+                        {
+                            @AddedMessage
+                        }
+                        else
+                        {
+                            <text>Add to cart</text>
+                        }
+                    </button>
+                    @if(!AuthenticationService.IsAuthenticated){
+                        <button class="btn btn-gradient w-100 mb-4">
+                            Login/Register to Buy
+                        </button>
+                    }
+
+                    <p>@Detail.Description</p>
+
+                    <!-- Specs Accordion -->
+                    <div class="accordion" id="specAccordion">
+                        @((MarkupString)Detail.ReadMeHtml)
+                    </div>
+                }
+            </div>
+        </div>
+
+      @*   <!-- Revolution Banner -->
+        <RevolutionBanner /> *@
+
+        <!-- You May Also Like -->
+        @if (AlsoLike?.Any() ?? false)
+        {
+            <h4 class="mt-5 mb-3">You may also like</h4>
+            <div class="row g-4">
+                @foreach (var p in AlsoLike)
+                {
+                    <div class="col-6 col-md-3">
+                        <div class="card h-100 cursor-pointer"
+                             @onclick="@(() => Nav.NavigateTo($"/product/{p.Slug}"))">
+                            <img src="@p.Asset.Url"
+                                 class="card-img-top"
+                                 alt="@p.Name" />
+                            <div class="card-body">
+                                <h6 class="card-title">@p.Name</h6>
+                                <p class="mb-0">@(p.Price.ToString()):C</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <ShopInsightsBanner/>
+        <!-- Footer -->
+        <Footer />
+    </div>
+
+    <!-- Fullscreen 3D Viewer Modal -->
+    <div class="modal fade" id="viewer3dModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <iframe id="viewer3dFrame"
+                            src="@ViewerUrl"
+                            style="width:100%; height:100vh; border:0;"
+                            allowfullscreen
+                            loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@code {
+    [Parameter] public required string Slug { get; set; }
+    private ProductDetailsReply? Detail { get; set; }
+    private int Quantity { get; set; } = 1;
+    private bool _eventAttached = false;
+    private string? AddedMessage;
+    public IReadOnlyList<Maker.RampEdge.DigitalAsset> SortedAssets => Detail?.Assets.OrderBy(a => a.Is3DFile).ToList() ?? [];
+    private IList<ProductData> AlsoLike { get; set; } = [];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_eventAttached && Detail is not null)
+        {
+            _eventAttached = true;
+            await JSRuntime.InvokeVoidAsync("attachCarouselEvent", "#carouselExampleControls");
+        }
+
+        try
+        {
+            await LoadSimilarProductsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ProductDetail] Error loading similar products: {ex}");
+        }
+    }
+
+    private async Task LoadSimilarProductsAsync()
+    {
+        try
+        {
+            var result = await MakerClient.ProductsBySlugAsync(new ProductRequest
+            {
+                Slug = Slug,
+                Search = "",
+                SortBy = "",
+                Page = 1,
+                PageSize = 4
+            });
+
+            AlsoLike = result.Products.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ProductDetail] ProductsBySlugAsync failed: {ex}");
+            AlsoLike = new List<ProductData>();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Detail = await MakerClient.ProductDetailsAsync(new ProductRequest
+            {
+                Slug = Slug,
+                Search = "",
+                SortBy = "",
+                Page = 1,
+                PageSize = 4
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ProductDetail] ProductDetailsAsync failed: {ex}");
+            Detail = null;
+        }
+
+        try
+        {
+            var cart = await CartService.GetCartItems();
+            var existing = cart.FirstOrDefault(c => c.Slug == Slug);
+            if (existing != null)
+            {
+                Quantity = existing.Quantity;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ProductDetail] Error loading cart: {ex}");
+        }
+    }
+
+    private void ChangeQuantity(int delta)
+        => Quantity = Math.Max(1, Quantity + delta);
+
+    private async Task OnThumbnailClick(int index)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("selectCarouselSlide", "#carouselExampleControls", index);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ProductDetail] Error selecting carousel slide: {ex}");
+        }
+    }
+
+    private async Task AddToCart()
+    {
+        if (Detail is null) return;
+
+        try
+        {
+            await CartService.AddToCart(Detail, Quantity);
+
+            AddedMessage = $"{Quantity} item{(Quantity > 1 ? "s" : "")} added!";
+            StateHasChanged();
+
+            await Task.Delay(1000);
+
+            AddedMessage = null;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ProductDetail] Error adding to cart: {ex}");
+        }
+    }
+    private string? ViewerUrl;
+
+    private async Task Open3DModal(string fileUrl)
+    {
+        ViewerUrl = $"https://happy-stone-0cb14df10.6.azurestaticapps.net?fileUrl={fileUrl}&showControls=true";
+        StateHasChanged();
+
+        // Show modal with JSInterop (just calls Bootstrap API)
+        await JSRuntime.InvokeVoidAsync("blazorShow3DModal");
+    }
+    private string? DetailCopyState;
+
+    private async Task CopyDetailFIDAsync(string fid)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", fid);
+            DetailCopyState = "copied";
+            StateHasChanged();
+
+            await Task.Delay(1200);
+            if (DetailCopyState == "copied")
+            {
+                DetailCopyState = null;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ProductDetail] Copy failed: {ex}");
+            DetailCopyState = "failed";
+            StateHasChanged();
+            await Task.Delay(1500);
+            DetailCopyState = null;
+            StateHasChanged();
+        }
+    }
+
+}
+
+<script>
+    window.selectCarouselSlide = (carouselId, index) => {
+        const carousel = bootstrap.Carousel.getOrCreateInstance(document.querySelector(carouselId));
+        carousel.to(index);
+    };
+
+    window.attachCarouselEvent = (carouselId) => {
+        const el = document.querySelector(carouselId);
+        if (!el) return;
+        const nextButton = el.querySelector(".carousel-control-next");
+        el.addEventListener('slid.bs.carousel', function (event) {
+            const thumbs = document.querySelectorAll('.thumb-box');
+            thumbs.forEach(t => t.classList.remove('active'));
+            if (thumbs[event.to]) {
+                thumbs[event.to].classList.add('active');
+            }
+
+            // Detect if the active slide is 3D
+            const slides = el.querySelectorAll(".carousel-item");
+            const activeSlide = slides[event.to];
+            if (activeSlide && activeSlide.classList.contains("is-3d")) {
+                nextButton.style.display = "none";
+            } else {
+                nextButton.style.display = "";
+            }
+        });
+
+        // Also set initial visibility on page load
+        const initialActive = el.querySelector(".carousel-item.active");
+        if (initialActive && initialActive.classList.contains("is-3d")) {
+            nextButton.style.display = "none";
+        }
+    };
+
+    window.blazorShow3DModal = () => {
+      const modalEl = document.getElementById('viewer3dModal');
+      if (!modalEl) return;
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        const iframe = document.getElementById('viewer3dFrame');
+        if (iframe) iframe.src = "";
+      }, { once: true });
+    };
+</script>

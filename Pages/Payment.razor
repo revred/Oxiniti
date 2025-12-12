@@ -1,0 +1,96 @@
+﻿@page "/payment"
+@using System.IdentityModel.Tokens.Jwt
+@using System.Net.Http.Json
+@inject IJSRuntime JS
+@inject IOptions<StripeSettings> StripeOptions
+@inject IOptions<RampEdgeSettings> MakerSettings
+@inject CartService CartService
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager Nav
+@inject IMakerClient MakerClient
+
+<div id="checkout-container" style="min-height:600px"></div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Address { get; set; }
+
+    private bool _mounted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _mounted) return;
+
+        if (string.IsNullOrWhiteSpace(Address))
+        {
+            Nav.NavigateTo("/checkout");
+            return;
+        }
+
+        try
+        {
+            var payload = await BuildCreateSessionRequest();
+            var response = await MakerClient.CreateCheckoutSessionAsync(payload);
+
+            await JS.InvokeVoidAsync("mountEmbeddedCheckout",
+                StripeOptions.Value.PublicKey,
+                response.ClientSecret);
+
+            _mounted = true;
+        }
+        catch
+        {
+            // If mount fails, just redirect or show an error UI
+            Nav.NavigateTo("/checkout");
+        }
+    }
+
+    private async Task<CreateSessionRequest> BuildCreateSessionRequest()
+    {
+        var items = await CartService.GetCartItems();
+
+        var reqItems = items.Select(ci => new Item
+            {
+                BarId = ci.BarId,
+                Slug = string.IsNullOrWhiteSpace(ci.Slug) ? "Item" : ci.Slug,
+                Quantity = ci.Quantity,
+                Price = (int)(ci.Price * 100)
+            }).ToList();
+
+        var token = AuthenticationService.AccessToken;
+        var email = GetEmailFromAccessToken(token) ?? string.Empty;
+
+        var baseUrl = Nav.BaseUri;
+
+        // Read ReturnUrl from appsettings.json
+        var returnUrl = StripeOptions.Value.ReturnUrl;
+
+        // Convert to absolute if needed
+        if (!returnUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            returnUrl = baseUrl.TrimEnd('/') + "/" + returnUrl.TrimStart('/');
+        }
+
+        return new CreateSessionRequest
+            {
+                EmailAddress = email,
+                Address = long.TryParse(Address, out var addr) ? addr : 0,
+                Items = reqItems,
+                BusinessUnitKey = MakerSettings.Value.BusinessUnitKey,
+                ReturnUrl = returnUrl
+            };
+    }
+
+
+    private static string? GetEmailFromAccessToken(string? accessToken)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken)) return null;
+        var handler = new JwtSecurityTokenHandler();
+        if (!handler.CanReadToken(accessToken)) return null;
+
+        var jwt = handler.ReadJwtToken(accessToken);
+        return jwt.Claims.FirstOrDefault(c =>
+            c.Type == "email" || c.Type == JwtRegisteredClaimNames.Email)?.Value;
+    }
+}

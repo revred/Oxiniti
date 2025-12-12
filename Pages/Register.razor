@@ -1,0 +1,118 @@
+﻿@page "/register"
+@inject NavigationManager Nav
+@inject IMakerClient MakerClient
+
+<div class="login-container">
+    <div class="login-form">
+        <h2>Create Account ✨</h2>
+        <p class="subtitle">Join us today. It takes only a few steps to get started!</p>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input @bind="email" type="email" placeholder="Example@email.com" />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input @bind="password" type="password" placeholder="at least 8 characters" />
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input @bind="confirmPassword" type="password" placeholder="repeat your password" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="error-message">@errorMessage</p>
+        }
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <p class="success-message">@successMessage</p>
+        }
+
+        <button class="primary-button" @onclick="OnRegister" disabled="@isBusy">
+            @(isBusy ? "Registering..." : "Sign up")
+        </button>
+
+        <div class="separator">
+            <span>Or</span>
+        </div>
+        <div class="signup-link">
+            Already have an account? <a href="/login">Sign in</a>
+        </div>
+    </div>
+
+    <div class="login-image">
+        <img src="images/login.jpg" alt="Register illustration" />
+    </div>
+</div>
+
+@code {
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string confirmPassword = string.Empty;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private bool isBusy = false;
+
+    private async Task OnRegister()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            errorMessage = "Please fill in all fields.";
+            return;
+        }
+
+        if (password != confirmPassword)
+        {
+            errorMessage = "Passwords do not match.";
+            return;
+        }
+
+        if (!IsPasswordStrong(password))
+        {
+            errorMessage = "Password must be at least 8 characters long and contain uppercase, lowercase, digit, and special character.";
+            return;
+        }
+
+        isBusy = true;
+        try
+        {
+            var result = await MakerClient.RegisterAsync(body: new RegisterUserRequest
+            {
+                Email = email,
+                Password = password
+            });
+
+            if (result.IsSuccess)
+            {
+                Nav.NavigateTo("/email-verification", forceLoad: false);
+            }
+            else
+            {
+                errorMessage = result?.Message ?? "Registration failed. Please try again.";
+                Console.WriteLine($"[Register] Failed: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            Console.WriteLine($"[Register] Exception: {ex}");
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private bool IsPasswordStrong(string password)
+    {
+        // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+        var regex = new System.Text.RegularExpressions.Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$");
+        return regex.IsMatch(password);
+    }
+}

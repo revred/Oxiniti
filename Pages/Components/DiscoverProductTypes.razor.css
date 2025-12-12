@@ -1,0 +1,43 @@
+﻿.types-section {
+    background-color: #D4F3FF;
+}
+
+.types-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.card-img-top {
+    height: 340px;
+    object-fit: cover;
+}
+
+.card-body {
+    padding-top: 2rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 2rem;
+}
+
+.card-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #828282;
+}
+
+.row {
+    --bs-gutter-y: 70px;
+    padding-bottom: 60px;
+}

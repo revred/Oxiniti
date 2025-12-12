@@ -1,0 +1,29 @@
+﻿@page "/services/{Key}"
+@inject BusinessInfoService InfoService
+
+<h3>@Key</h3>
+
+@if (Value != null)
+{
+    <div>
+        @((MarkupString)Value)
+    </div>
+}
+else
+{
+    <p>Service not found.</p>
+}
+
+@code {
+    [Parameter] public string Key { get; set; } = string.Empty;
+
+    public string? Value { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (InfoService.Contents.TryGetValue(Key, out var val))
+        {
+            Value = val;
+        }
+    }
+}

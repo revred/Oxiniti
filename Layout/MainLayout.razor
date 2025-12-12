@@ -1,0 +1,241 @@
+﻿@inherits LayoutComponentBase
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager Nav
+@inject CartService CartService
+@inject IOptions<RampEdgeSettings> MakerSettings
+@inject IJSRuntime JSRuntime
+@inject IMakerClient MakerClient
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <div class="nav-search-wrapper">
+                <HippoHex.Pages.Inputs.SearchBox />
+            </div>
+
+            <div class="top-nav-actions">
+                @if (!AuthenticationService.IsAuthenticated)
+                {
+                    <div class="nav-item-wrapper">
+                        <a href="login" class="top-nav-link">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Login
+                        </a>
+                    </div>
+                }
+
+                <!-- Moved Cart to the beginning -->
+                <div class="nav-item-wrapper">
+                    <a href="cart" class="top-nav-link @(HighlightCart ? "cart-highlight" : "")">
+                        <i class="bi bi-cart"></i>
+                        Cart
+                        @if (CartCount > 0)
+                        {
+                            <span class="cart-badge">@CartCount</span>
+                        }
+                    </a>
+                </div>
+
+                <!-- Moved User Icon to the end -->
+                @if (AuthenticationService.IsAuthenticated)
+                {
+                    <div class="nav-item-wrapper user-dropdown">
+                        <div class="user-icon" @onclick="HandleUserIconClick">
+                            @UserInitial
+                        </div>
+                        @if (IsUserMenuOpen)
+                        {
+                            <div id="user-menu" class="user-menu">
+                                <a href="account" class="user-menu-item">
+                                    <i class="bi bi-person-circle"></i> Account
+                                </a>
+                                @if (AuthenticationService.IsMakerAIUser == true)
+                                {
+                                    <a @onclick="GoToMakerAIAsync" target="_blank" class="user-menu-item">
+                                        <i class="bi bi-robot"></i> Go To Maker AI
+                                    </a>
+                                }
+                                <a href="/orders" class="user-menu-item">
+                                    <i class="bi bi-receipt"></i> My Orders
+                                </a>
+                                <a href="#" @onclick="Logout" class="user-menu-item">
+                                    <i class="bi bi-box-arrow-left"></i> Logout
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private int CartCount;
+    private bool HighlightCart;
+    private bool IsUserMenuOpen = false;
+
+    private DotNetObjectReference<MainLayout>? _dotNetRef;
+
+    private string UserInitial =>
+        !string.IsNullOrWhiteSpace(AuthenticationService?.UserName)
+            ? AuthenticationService.UserName[0].ToString().ToUpper()
+            : "G";
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationService.OnChange += StateHasChanged;
+        CartService.OnChange += UpdateCartCount;
+
+        try
+        {
+            await AuthenticationService.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error initializing authentication: {ex}");
+        }
+
+        try
+        {
+            await CartService.SyncLocalCartToServerIfNeeded();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error syncing local cart: {ex}");
+        }
+
+        await UpdateCartCountAsync();
+    }
+
+    [JSInvokable]
+    public async void CloseUserMenu()
+    {
+        if (IsUserMenuOpen)
+        {
+            IsUserMenuOpen = false;
+            StateHasChanged();
+        }
+        await JSRuntime.InvokeVoidAsync("unregisterClickOutside", "user-menu");
+    }
+
+    private async void HandleUserIconClick()
+    {
+        if (!AuthenticationService.IsAuthenticated)
+            return;
+
+        if (!IsUserMenuOpen)
+        {
+            IsUserMenuOpen = true;
+            StateHasChanged();
+
+            // Ensure DOM is ready
+            await Task.Yield();
+
+            _dotNetRef ??= DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync(
+                "registerClickOutside",
+                "user-menu",
+                _dotNetRef,
+                "CloseUserMenu"
+            );
+        }
+        else
+        {
+            IsUserMenuOpen = false;
+            await JSRuntime.InvokeVoidAsync("unregisterClickOutside", "user-menu");
+            StateHasChanged();
+        }
+    }
+
+    private async Task Logout()
+    {
+        try
+        {
+            await AuthenticationService.LogoutAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error during logout: {ex}");
+        }
+
+        try
+        {
+            await CartService.ClearCart();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error clearing cart: {ex}");
+        }
+
+        Nav.NavigateTo("/");
+    }
+
+    private void UpdateCartCount() => _ = UpdateCartCountAsync();
+
+    private async Task UpdateCartCountAsync()
+    {
+        try
+        {
+            var items = await CartService.GetCartItems();
+            CartCount = items.Count;
+
+            HighlightCart = true;
+            StateHasChanged();
+
+            await Task.Delay(1000);
+            HighlightCart = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error updating cart count: {ex}");
+        }
+    }
+
+    bool IsGoToMakerAIRunning = false;
+
+    private async Task GoToMakerAIAsync()
+    {
+        if (IsGoToMakerAIRunning) return;
+        IsGoToMakerAIRunning = true;
+
+        try
+        {
+            var result = await MakerClient.RequestSsoCodeAsync(body : new RequestSsoCodeRequest
+            {
+                AccessToken = AuthenticationService.AccessToken,
+                RefreshToken = AuthenticationService.RefreshToken
+            });
+
+            if (!string.IsNullOrWhiteSpace(result.Code))
+            {
+                string makerAiUrl = $"{MakerSettings.Value.MakerProductBaseUrl}?code={result.Code}";
+                await JSRuntime.InvokeVoidAsync("window.open", makerAiUrl, "_blank");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error generating SSO code: {ex}");
+        }
+        finally
+        {
+            IsGoToMakerAIRunning = false;
+        }
+    }
+}

@@ -1,0 +1,27 @@
+﻿.info-cards{
+    margin-bottom: 50px;
+
+}
+.info-card {
+    background-color: #E8EAEE;
+    border-radius: 0.5rem;
+}
+
+    .info-card h5 {
+        font-size: 1.6rem;
+        font-weight:bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card p {
+        color: #000000;
+        margin-bottom: 1rem;
+    }
+
+    .info-card .btn-dark {
+        background-color: #000;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        padding:15px;
+    }

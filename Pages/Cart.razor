@@ -1,0 +1,126 @@
+﻿@page "/cart"
+@inject CartService CartService
+@inject NavigationManager Nav
+@inject IAuthenticationService AuthenticationService
+
+<div class="container py-5">
+    <h2 class="mb-4">Your Cart</h2>
+    @if (CartItems == null)
+    {
+        @foreach (var _ in Enumerable.Range(0, 3))   // show 3 skeleton rows while loading
+        {
+            <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light" aria-hidden="true">
+                <!-- Image placeholder -->
+                <div class="product-img col-auto">
+                    <div class="placeholder-wave">
+                        <div class="rounded placeholder" style="width:200px; height:140px;"></div>
+                    </div>
+                </div>
+
+                <!-- Info placeholders -->
+                <div class="product-info col">
+                    <div class="placeholder-wave mb-2">
+                        <span class="placeholder col-6"></span>
+                    </div>
+                    <div class="placeholder-wave mb-2">
+                        <span class="placeholder col-10"></span>
+                    </div>
+                    <div class="placeholder-wave mb-2">
+                        <span class="placeholder col-4"></span>
+                    </div>
+                    <div class="placeholder-wave">
+                        <span class="btn btn-outline-danger disabled placeholder" style="width:100px; height:32px;"></span>
+                    </div>
+                </div>
+
+                <!-- Action button placeholder -->
+                <div class="product-action col-auto">
+                    <div class="placeholder-wave">
+                        <span class="btn btn-gradient disabled placeholder" style="width:160px; height:48px;"></span>
+                    </div>
+                </div>
+            </div>
+        }
+        <span class="visually-hidden" role="status">Loading your cart…</span>
+    }
+    else if (!CartItems.Any())
+    {
+        <p>Your cart is empty.</p>
+    }
+    else
+    {
+        @foreach (var p in CartItems)
+        {
+            <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light">
+                <div class="product-img col-auto">
+                    <img src="@p.Assets.FirstOrDefault(a => !a.Is3DFile)?.Url"
+                         class="img-fluid rounded"
+                         alt="@p.Name"
+                         style="width:200px;" />
+                </div>
+                <div class="product-info col">
+                    <h5 class="mb-1">@p.Name</h5>
+                    <p class="text-muted mb-2 description">
+                        @Shorten(p.Description, 150)
+                    </p>
+                    <p class="mb-2"><strong>Quantity:</strong> @p.Quantity</p>
+                    <button class="btn btn-outline-danger btn-sm mb-2" @onclick="() => RemoveFromCart(p.Slug)">
+                        Remove
+                    </button>
+                </div>
+                <div class="product-action col-auto">
+                    <button class="btn btn-gradient btn-lg"
+                            @onclick="@(() => Nav.NavigateTo($"/product/{p.Slug}"))">
+                        View Details →
+                    </button>
+                </div>
+            </div>
+        }
+
+        <div class="d-flex gap-3 mt-4">
+            <button class="btn btn-secondary" @onclick="ClearCart">Clear Cart</button>
+            <button class="btn btn-primary" @onclick="HandleCheckout">Proceed to Checkout</button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<CartItem>? CartItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartItems = await CartService.GetCartItems();
+    }
+
+    private async Task RemoveFromCart(string slug)
+    {
+        await CartService.RemoveFromCart(slug);
+        CartItems = await CartService.GetCartItems();
+    }
+
+    private async Task ClearCart()
+    {
+        await CartService.ClearCart();
+        CartItems = [];
+    }
+
+    private string Shorten(string text, int maxChars)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return "";
+        return text.Length <= maxChars
+            ? text
+            : text.Substring(0, maxChars) + "...";
+    }
+    private void HandleCheckout()
+    {
+        if (!AuthenticationService.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+        }
+        else
+        {
+            Nav.NavigateTo("/checkout");
+        }
+    }
+}

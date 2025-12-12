@@ -1,0 +1,56 @@
+﻿@inject NavigationManager NavigationManager
+@inject BusinessInfoService InfoService
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid" style="justify-content:center;">
+        <a class="navbar-brand" href="">
+            @if (InfoService.Asset != null)
+            {
+                <img src="@InfoService.Asset.Url"
+                     class="logo"
+                     style="width:100px;" />
+            }
+            <div class="brand-text">
+                <span>@InfoService.ApplicationName</span>
+            </div>
+        </a>
+    </div>
+</div>
+<div class="brand-tagline">
+    @InfoService.TagLine
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="products">
+                Products
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="about">
+                About
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="contact">
+                Contact
+            </NavLink>
+        </div>
+        @foreach (var item in @InfoService.Contents)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="@($"/services/{item.Key}")">
+                    @item.Key
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>

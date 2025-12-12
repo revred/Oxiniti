@@ -1,0 +1,61 @@
+﻿@inject BusinessInfoService Info
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                @if (Info.Asset != null)
+                {
+                    <img src="@Info.Asset.Url"
+                         class="logo"
+                         style="width:100px;" />
+                }
+                <div class="brand-text">
+                    <h3>@Info.ApplicationName</h3>
+                    <p class="tagline">@Info.TagLine</p>
+                </div>
+
+                <div>
+                    @((MarkupString)Info.SocialMediaLinks)
+                </div>
+            </div>
+
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/products">Products</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="/blog">Blog</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="/faqs">FAQs</a></li>
+                        <li><a href="/installation-guides">Installation Guides</a></li>
+                        <li><a href="/warranty">Warranty & Returns</a></li>
+                        <li><a href="/shipping">Shipping Info</a></li>
+                        <li><a href="/quote">Request a Custom Quote</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="/terms">Terms & Conditions</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/sitemap">Sitemap</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="copyright">@Info.CopyRightNotice</p>
+        </div>
+    </div>
+</footer>

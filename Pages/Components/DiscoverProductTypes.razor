@@ -1,0 +1,87 @@
+﻿@inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
+@inject IMakerClient MakerClient
+
+<section class="types-section p-4 rounded-3 mb-5">
+    <h3 class="types-title mb-4">Discover Our Product Types</h3>
+    <div class="row g-4" >
+        @if(ProductTypes is null)
+        {
+            @foreach (var _ in Enumerable.Range(0, 6))  // show 6 skeleton cards while loading
+            {
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card h-100" aria-hidden="true">
+                        <!-- Image placeholder -->
+                        <div class="placeholder-wave">
+                            <div class="card-img-top placeholder" style="height:200px;"></div>
+                        </div>
+
+                        <div class="card-body">
+                            <!-- Title placeholder -->
+                            <h5 class="card-title placeholder-wave">
+                                <span class="placeholder col-6"></span>
+                            </h5>
+                            <!-- Text placeholders -->
+                            <p class="card-text placeholder-wave">
+                                <span class="placeholder col-10 mb-2"></span>
+                                <span class="placeholder col-8"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            <span class="visually-hidden" role="status">Loading product types…</span>
+        }
+        else if (ProductTypes.Count == 0)
+        {
+            <div class="col-12 text-center">
+                <p class="text-muted">No product types available.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var p in ProductTypes)
+            {
+                <div class="col-12 col-sm-6 col-lg-4" @onclick="() => GoToProducts(p.Slug)">
+                    <div class="card h-100">
+                        <img src="@p.Asset?.Url" 
+                        class="card-img-top" 
+                        alt="@p.Name" />
+                        <div class="card-body">
+                            <h5 class="card-title">@p.Name</h5>
+                            <p class="card-text text-muted">@p.Description</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public ICollection<ProductData>? ProductTypes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await MakerClient.ProductGroupsAsync();
+            ProductTypes = result.Products.ToList();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"[ProductGroups] Error fetching product groups: {ex}");
+            ProductTypes = new List<ProductData>(); // fallback to empty list
+        }
+    }
+
+    private void LogToConsole(string message)
+    {
+        JSRuntime.InvokeVoidAsync("console.log", message);
+    }
+
+    private void GoToProducts(string slug)
+    {
+        Nav.NavigateTo($"/products/type/{slug}");
+    }
+}

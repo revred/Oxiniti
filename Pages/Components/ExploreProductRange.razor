@@ -1,0 +1,29 @@
+﻿<div class="range-section mb-5">
+    <h2 class="display-5 fw-bold">Explore Our Product Range</h2>
+    <p class="lead">
+        Discover Oxiniti's comprehensive range of high-precision
+    </p>
+
+    <div class="search-wrapper">
+        <i class="bi bi-search search-icon"></i>
+        <input @bind-Value="SearchTerm"
+               @bind-Value:event="oninput"
+               class="form-control search-input"
+               placeholder="Search for products by name, type, or application" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? SearchTerm { get; set; }
+    [Parameter] public EventCallback<string> SearchTermChanged { get; set; }
+
+    private string? SearchTermBacking
+    {
+        get => SearchTerm;
+        set
+        {
+            if (value == SearchTerm) return;
+            SearchTermChanged.InvokeAsync(value);
+        }
+    }
+}

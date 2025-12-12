@@ -1,0 +1,393 @@
+﻿@page "/products/{FilterType}/{Slug}"
+@inject NavigationManager Nav
+@inject CartService CartService
+@inject IMakerClient MakerClient
+@inject IAuthenticationService AuthenticationService
+@inject IJSRuntime JS
+
+<div class="container py-5">
+
+    <!-- Top Section: Title / Subtitle / Search & Filters -->
+    <div class="top-section d-flex justify-content-between align-items-start mb-5">
+        <!-- Left: Explore Range -->
+        <div class="range-section">
+            <h2 class="display-5 fw-bold">Explore Our Nanobubble Product Range</h2>
+            <p class="lead">
+                Discover Oxiniti's comprehensive range of high-precision.
+            </p>
+            <div class="search-wrapper">
+                <i class="bi bi-search search-icon"></i>
+                <input value="@SearchQuery"
+                       @oninput="HandleSearchInput"
+                       class="form-control search-input"
+                       placeholder="Search for products by name, type, or application" />
+
+            </div>
+        </div>
+
+        <!-- Right: Sort & Filter Panel -->
+        <div class="filter-panel p-4 rounded-3">
+            <div class="mb-4">
+                <label class="form-label mb-1">Sort By</label>
+                <select class="form-select w-100" @onchange="OnSortChanged">
+                    <option value="">–</option>
+                    <option value="name">Name</option>
+                    <option value="price_asc">Price: Low → High</option>
+                    <option value="price_desc">Price: High → Low</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label mb-1">Filter Product Types</label>
+                <select class="form-select w-100" @onchange="OnFilterChanged">
+                    <option value="">Select Product Types</option>
+                    @foreach (var type in AllTypes)
+                    {
+                        <option value="@type.Slug">@type.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Rows -->
+    @if (FilteredProducts is null)
+    {
+        <div class="row g-4">
+            @foreach (var _ in Enumerable.Range(0, PageSize))  // keep same count as real items/page
+            {
+                <div class="col-12">
+                    <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light">
+                        <!-- Image placeholder, reserve same width/height as real image -->
+                        <div class="product-img col-auto">
+                            <div class="placeholder-wave">
+                                <div class="rounded bg-white placeholder" style="width:200px; height:140px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Text placeholders -->
+                        <div class="product-info col">
+                            <div class="placeholder-wave">
+                                <div class="placeholder col-7 mb-2"></div>
+                                <div class="placeholder col-11 mb-2"></div>
+                                <div class="placeholder col-9 mb-2"></div>
+                                <div class="placeholder col-5 mb-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Button placeholder -->
+                        <div class="product-action col-auto">
+                            <div class="placeholder-wave">
+                                <div class="btn placeholder disabled" style="width:160px; height:48px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (!FilteredProducts.Any())
+    {
+        <p>No products found.</p>
+    }
+    else
+    {
+        @foreach (var p in FilteredProducts)
+        {
+            <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light" @onclick="() => NavigateToDetail(p.Slug)">
+
+                @* Admin FID: TOP-LEFT of the whole product element *@
+                @if (AuthenticationService.IsMakerAIUser == true)
+                {
+                    <div class="fid-badge" @onclick:stopPropagation>
+                        <span class="text-muted">FID:</span>
+                        <code class="me-1">@p.FriendlyID</code>
+                        <button class="btn btn-sm btn-outline-secondary"
+                                title="Copy FriendlyID"
+                                @onclick:stopPropagation
+                                @onclick="@(() => CopyMetaAsync(p.Slug, p.FriendlyID, label: "FriendlyID"))">
+                            @if (CopyHints.TryGetValue(p.Slug, out var hint) && hint == "copied")
+                            {
+                                <i class="bi bi-check2 text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-clipboard"></i>
+                            }
+                        </button>
+
+                    </div>
+                }
+                <div class="product-img col-auto">
+                    <img src="@p.Asset?.Url" class="img-fluid rounded" alt="@p.Name" style="width:200px;" />
+                </div>
+                <div class="product-info col">
+                <h5 class="mb-1">@p.Name</h5>
+                <p class="text-muted mb-2 description">
+                    @Shorten(p.Description, 150)
+                </p>
+
+                <p class="fw-bold text-purple">$@p.Price</p>
+            </div>
+            <div class="product-action col-auto">
+                <button @onclick:stopPropagation
+                        @onclick="() => AddToCart(p)"
+                        class="btn btn-gradient btn-lg @(HighlightedQuantities.ContainsKey(p.Slug) ? "added-highlight" : "")">
+                    @(
+                                    HighlightedQuantities.TryGetValue(p.Slug, out var q)
+                                    ? $"{q} Item{(q > 1 ? "s" : "")} Added!"
+                                    : "Add to Cart →"
+                                    )
+                </button>
+            </div>
+        </div>
+
+        }
+
+        <!-- Pager -->
+        <nav class="mt-4 text-center" aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    var pageIndex = i;
+                    <li class="page-item @(CurrentPage == pageIndex ? "active" : "")">
+                        <a class="page-link" @onclick="() => ChangePage(pageIndex)">@pageIndex</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+    <ShopInsightsBanner />
+
+    <Footer />
+</div>
+
+@code {
+    [Parameter] public string FilterType { get; set; } = "";
+    [Parameter] public string Slug { get; set; } = "";
+    private Dictionary<string, int> HighlightedQuantities = new();
+    private CancellationTokenSource? _searchDebounceCts;
+
+
+    private ICollection<ProductData>? FilteredProducts;
+    private ICollection<ProductData> AllTypes = [];
+
+    // for the sort & filter drop-downs
+    private string? SelectedSort { get; set; }
+    private string? FilterTypeSelection { get; set; }
+    private string SearchQuery { get; set; } = "";
+    private int PageSize { get; set; } = 10;
+    private int CurrentPage { get; set; } = 1;
+    private int TotalPages { get; set; } = 1;
+
+    // copy feedback per product (slug -> hint text)
+    private readonly Dictionary<string, string?> CopyHints = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // fetch all types so the “Filter Product Types” dropdown can be populated
+        try
+        {
+            var response = await MakerClient.ProductGroupsAsync();
+            AllTypes = response.Products.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Products] Error loading product groups: {ex}");
+            AllTypes = [];
+        }
+
+        // initial load
+        try
+        {
+            await LoadProducts();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Products] Initial LoadProducts failed: {ex}");
+        }
+    }
+
+    private async Task LoadProducts()
+    {
+        FilteredProducts = null;
+        StateHasChanged();
+
+        var request = new ProductRequest
+        {
+            Slug = FilterTypeSelection ?? Slug,
+            Search = SearchQuery,
+            Page = CurrentPage,
+            PageSize = PageSize,
+            SortBy = string.IsNullOrEmpty(SelectedSort) ? "" : SelectedSort
+        };
+
+        try
+        {
+            var result = await MakerClient.ProductsBySlugAsync(body: request);
+            FilteredProducts = result.Products.ToList();
+            TotalPages = result.TotalPages;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Products] Error loading products: {ex}");
+            FilteredProducts = [];
+            TotalPages = 1;
+        }
+    }
+
+    private async Task OnFilterChanged(ChangeEventArgs e)
+    {
+        FilterTypeSelection = e.Value?.ToString();
+        CurrentPage = 1;
+        try 
+        {
+            await LoadProducts(); 
+        }
+        catch (Exception ex) 
+        { 
+            Console.WriteLine($"[Products] OnFilterChanged -> LoadProducts failed: {ex}");
+        }
+    }
+
+    private async Task OnSearchChanged()
+    {
+        CurrentPage = 1;
+        try 
+        { 
+            await LoadProducts(); 
+        }
+        catch (Exception ex) 
+        { 
+            Console.WriteLine($"[Products] OnSearchChanged -> LoadProducts failed: {ex}"); 
+        }
+    }
+
+    private async Task OnSortChanged(ChangeEventArgs e)
+    {
+        SelectedSort = e.Value?.ToString();
+        CurrentPage = 1;
+        try 
+        { 
+            await LoadProducts(); 
+        }
+        catch (Exception ex) 
+        { 
+            Console.WriteLine($"[Products] OnSortChanged -> LoadProducts failed: {ex}"); 
+        }
+    }
+
+    private async Task ChangePage(int page)
+    {
+        CurrentPage = page;
+        try 
+        { 
+            await LoadProducts(); 
+        }
+        catch (Exception ex) 
+        { 
+            Console.WriteLine($"[Products] ChangePage -> LoadProducts failed: {ex}"); 
+        }
+    }
+
+    private async Task HandleSearchInput(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value?.ToString() ?? "";
+
+        _searchDebounceCts?.Cancel(); // cancel previous one
+        _searchDebounceCts = new CancellationTokenSource();
+        var token = _searchDebounceCts.Token;
+
+        try
+        {
+            // Wait for 500ms; if not canceled in that time, proceed
+            await Task.Delay(500, token);
+            CurrentPage = 1;
+            await LoadProducts();
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignore – another keystroke arrived before delay completed
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Products] HandleSearchInput -> LoadProducts failed: {ex}");
+        }
+    }
+
+    private void NavigateToDetail(string productSlug)
+        => Nav.NavigateTo($"/product/{productSlug}");
+
+    private async Task AddToCart(ProductData product)
+    {
+        try
+        {
+            await CartService.AddToCart(product);
+
+            // After adding, always get the latest quantity
+            var cart = await CartService.GetCartItems();
+            var currentQty = cart.FirstOrDefault(c => c.Slug == product.Slug)?.Quantity ?? 1;
+
+            HighlightedQuantities[product.Slug] = currentQty;
+            StateHasChanged();
+
+            // Remove highlight after 0.5s
+            await Task.Delay(500);
+
+            // Remove highlight only if the quantity didn't change again in the meantime
+            cart = await CartService.GetCartItems();
+            var updatedQty = cart.FirstOrDefault(c => c.Slug == product.Slug)?.Quantity;
+
+            if (updatedQty == currentQty)
+            {
+                HighlightedQuantities.Remove(product.Slug);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Products] Error adding to cart: {ex}");
+        }
+    }
+
+    private string Shorten(string text, int maxChars)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return "";
+        return text.Length <= maxChars
+            ? text
+            : text.Substring(0, maxChars) + "...";
+    }
+
+    private async Task CopyMetaAsync(string slug, string value, string label)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", value);
+            CopyHints[slug] = "copied";
+            StateHasChanged();
+
+            await Task.Delay(1200);
+
+            if (CopyHints.TryGetValue(slug, out var v) && v == "copied")
+            {
+                CopyHints.Remove(slug);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            CopyHints[slug] = "failed";
+            Console.WriteLine($"[Products] Copy failed: {ex}");
+            StateHasChanged();
+            await Task.Delay(1500);
+            CopyHints.Remove(slug);
+            StateHasChanged();
+        }
+    }
+
+
+    public void Dispose()
+    {
+        _searchDebounceCts?.Dispose();
+    }
+}

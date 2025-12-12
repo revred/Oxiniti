@@ -1,0 +1,308 @@
+﻿@page "/orders"
+@inject IMakerClient MakerClient
+@inject NavigationManager Nav
+
+<h2 class="mb-4">Your Orders</h2>
+
+@if (UserOrders is null)
+{
+    var skeletonCount = Math.Min(PageSize, 3);
+    <div class="accordion" id="ordersAccordion" aria-busy="true">
+        @foreach (var _ in Enumerable.Range(0, skeletonCount))
+        {
+            <div class="accordion-item rounded-4 overflow-hidden mb-3 shadow-sm border" aria-hidden="true">
+                <h2 class="accordion-header">
+                    <button class="accordion-button d-flex w-100 gap-3" type="button" disabled>
+                        <div class="d-flex flex-column flex-grow-1 text-start">
+                            <div class="placeholder-wave mb-1">
+                                <span class="placeholder col-4"></span>
+                            </div>
+                            <div class="placeholder-wave small d-flex align-items-center gap-2">
+                                <span class="placeholder col-6"></span>
+                                <span class="placeholder badge rounded-pill" style="width:90px;height:20px;"></span>
+                            </div>
+                        </div>
+                        <div class="text-end ms-auto">
+                            <div class="placeholder-wave mb-1">
+                                <span class="placeholder col-5"></span>
+                            </div>
+                            <div class="placeholder-wave small">
+                                <span class="placeholder col-7"></span>
+                            </div>
+                        </div>
+                    </button>
+                </h2>
+
+                <div class="accordion-collapse collapse show">
+                    <div class="accordion-body">
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var __ in Enumerable.Range(0, 2))
+                            {
+                                <li class="d-flex align-items-center py-2 px-1 rounded-3">
+                                    <div class="placeholder-wave me-3">
+                                        <div class="rounded border placeholder" style="width:64px;height:64px;"></div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="placeholder-wave mb-2">
+                                            <span class="placeholder col-7"></span>
+                                        </div>
+                                        <div class="placeholder-wave small d-flex gap-2">
+                                            <span class="placeholder col-3"></span>
+                                            <span class="placeholder col-2"></span>
+                                            <span class="placeholder col-2"></span>
+                                            <span class="placeholder col-3"></span>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+        <span class="visually-hidden" role="status">Loading your orders…</span>
+    </div>
+}
+else if (!UserOrders.Any())
+{
+    <p>You have no orders yet.</p>
+}
+else
+{
+    <div class="accordion" id="ordersAccordion">
+        @for (int i = 0; i < UserOrders.Count; i++)
+        {
+            var order = UserOrders[i];
+            var collapseId = $"order-{i}";
+            var headingId = $"heading-{i}";
+            var isFirst = i == 0;
+
+            <div class="accordion-item rounded-4 overflow-hidden mb-3 shadow-sm border">
+                <h2 class="accordion-header" id="@headingId">
+                    <button class="@($"accordion-button d-flex w-100 gap-3 {(isFirst ? "" : "collapsed")}")"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="@($"#{collapseId}")"
+                            aria-expanded="@(isFirst ? "true" : "false")"
+                            aria-controls="@collapseId">
+                        <div class="d-flex flex-column flex-grow-1 text-start">
+                            <div class="fw-semibold">Order #@order.OrderBarID</div>
+                            <div class="text-muted small" title="@FormatIso(order.CreatedDate)">
+                                Placed: @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
+                                &nbsp;&middot;&nbsp;
+                                <span class="badge bg-secondary">@order.Status</span>
+                            </div>
+                        </div>
+                        <div class="text-end ms-auto">
+                            <div class="fw-bold">@FormatMoney(order.Price)</div>
+                            <div class="text-muted small">Order total</div>
+                        </div>
+                    </button>
+                </h2>
+
+                <div id="@collapseId"
+                     class="@($"accordion-collapse collapse {(isFirst ? "show" : "")}")"
+                     aria-labelledby="@headingId"
+                     data-bs-parent="#ordersAccordion">
+                    <div class="accordion-body">
+                        @if (order.ProductItems is { Count: > 0 })
+                        {
+                            <ul class="list-unstyled mb-0">
+                                @foreach (var item in order.ProductItems)
+                                {
+                                    var canNavigate = !string.IsNullOrWhiteSpace(item.Slug);
+                                    <li class="@($"d-flex align-items-center py-2 px-1 hover-bg rounded-3 {(canNavigate ? "cursor-pointer" : "")}")"
+                                        @onclick="() => NavigateToProduct(item.Slug)">
+                                        <img src="@GetItemImage(item)" alt="@item.Name"
+                                             class="rounded me-3 border"
+                                             style="width:64px;height:64px;object-fit:cover;" />
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">
+                                                @item.Name
+                                                @if (canNavigate)
+                                                {
+                                                    <span class="text-primary small ms-2">View</span>
+                                                }
+                                            </div>
+                                            <div class="text-muted small">
+                                                Product ID: @item.BarID
+                                                &middot; Qty: @item.Quantity
+                                                &middot; Unit: @FormatMoney(item.Price)
+                                                &middot; Subtotal: @FormatMoney(item.Price * item.Quantity)
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-muted">No items in this order.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+    <!-- Orders Pager -->
+    @if (TotalPages > 1)
+    {
+        <nav class="mt-4 text-center" aria-label="Orders page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    // Show first 3 pages, last 2 pages, and 2 pages around the current one
+                    if (i <= 3 || i > TotalPages - 2 || (i >= CurrentPage - 1 && i <= CurrentPage + 1))
+                    {
+                        var pageIndex = i;
+                        <li class="page-item @(CurrentPage == pageIndex ? "active" : "")">
+                            <a class="page-link" @onclick="() => ChangePage(pageIndex)">@pageIndex</a>
+                        </li>
+                    }
+                    else if (i == 4 && CurrentPage > 5)
+                    {
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+                    else if (i == TotalPages - 2 && CurrentPage < TotalPages - 4)
+                    {
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+                }
+            </ul>
+        </nav>
+    }
+
+}
+
+@code {
+    private List<OrderDetail>? UserOrders;
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 10; // number of orders per page
+    private long TotalPages { get; set; } = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders(); 
+    }
+
+    private async Task LoadOrders()
+    {
+        try
+        {
+            var request = new OrderRequest
+                {
+                    Page = CurrentPage,
+                    PageSize = PageSize
+                };
+
+            var result = await MakerClient.GetAllOrdersAsync(request);
+
+            if (result?.OrderDetails != null)
+            {
+                // API already returns paginated data
+                UserOrders = result.OrderDetails.ToList();
+                TotalPages = result.TotalPages; // <-- Use backend total pages
+            }
+            else
+            {
+                UserOrders = new List<OrderDetail>();
+                TotalPages = 1;
+            }
+
+            StateHasChanged(); // Ensure UI updates
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching orders: {ex.Message}");
+            UserOrders = new List<OrderDetail>();
+            TotalPages = 1;
+        }
+    }
+
+
+    private void ApplyPaging()
+    {
+        if (UserOrders is null) return;
+
+        UserOrders = UserOrders
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
+    }
+
+    private async Task ChangePage(int page)
+    {
+        if (page < 1 || page > TotalPages)
+            return;
+
+        CurrentPage = page;
+        await LoadOrders(); // Fetch data for this page
+    }
+
+
+    private string FormatDateTime(long milliseconds)
+    {
+        try
+        {
+            // sanity guard: 9999-12-31T00:00:00Z in ms is 253402300800000
+            if (milliseconds > 0 && milliseconds < 253402300800000)
+            {
+                var dto = DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).ToLocalTime();
+                // 24h format with minutes (e.g., 18/09/2025 14:37)
+                return dto.ToString("dd/MM/yyyy HH:mm");
+            }
+        }
+        catch { }
+        return "Unknown";
+    }
+
+    private string FormatMoney(int cents) => (cents / 100.0m).ToString("C");
+
+    private void NavigateToProduct(string? slug)
+    {
+        if (!string.IsNullOrWhiteSpace(slug))
+            Nav.NavigateTo($"/product/{slug}");
+    }
+
+    // Prefer first non-3D asset; else any asset; else placeholder
+    private string GetItemImage(ProductItem item)
+    {
+        if (item?.Assets is { Count: > 0 })
+        {
+            var img = item.Assets.FirstOrDefault(a => !a.Is3DFile && !string.IsNullOrWhiteSpace(a.Url))
+                   ?? item.Assets.FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.Url));
+            if (!string.IsNullOrWhiteSpace(img?.Url))
+                return img!.Url!;
+        }
+        return "/images/placeholder.png";
+    }
+
+    private string FormatIso(long ms)
+    {
+        try
+        {
+            var dto = DateTimeOffset.FromUnixTimeMilliseconds(ms).ToLocalTime();
+            return dto.ToString("yyyy-MM-dd HH:mm:ss zzz");
+        }
+        catch { return string.Empty; }
+    }
+
+    private string FormatRelative(long ms)
+    {
+        try
+        {
+            var dt = DateTimeOffset.FromUnixTimeMilliseconds(ms).ToLocalTime();
+            var delta = DateTimeOffset.Now - dt;
+
+            if (delta.TotalSeconds < 60) return "just now";
+            if (delta.TotalMinutes < 60) return $"{(int)delta.TotalMinutes} min ago";
+            if (delta.TotalHours < 24) return $"{(int)delta.TotalHours} h ago";
+            if (delta.TotalDays < 7) return $"{(int)delta.TotalDays} d ago";
+            return dt.ToString("dd/MM/yyyy");
+        }
+        catch { return ""; }
+    }
+
+
+}

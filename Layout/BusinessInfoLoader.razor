@@ -1,0 +1,21 @@
+﻿@inject BusinessInfoService InfoService
+
+@if (!_loaded)
+{
+    <div>Loading...</div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+    bool _loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InfoService.LoadAsync();
+        _loaded = true;
+    }
+}

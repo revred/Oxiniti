@@ -1,0 +1,106 @@
+﻿@page "/login"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Nav
+@inject IAuthenticationService AuthenticationService
+@inject CartService CartService
+
+<div class="login-container">
+    <div class="login-form">
+        <h2>Welcome Back 👋</h2>
+        <p class="subtitle">Today is a new day. It's your day. You shape it.<br />Sign in to start managing your projects.</p>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input @bind="email" type="email" placeholder="Example@email.com" />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input @bind="password" type="password" placeholder="at least 8 characters" />
+        </div>
+
+        <div class="forgot-password">
+            <a href="#">Forgot Password?</a>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="error-message">@errorMessage</p>
+        }
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <p class="success-message">@successMessage</p>
+        }
+
+        <button class="primary-button" @onclick="OnLogin" disabled="@isBusy">
+            @(isBusy ? "Signing in..." : "Sign in")
+        </button>
+
+        <div class="separator">
+            <span>Or</span>
+        </div>
+        <div class="signup-link">
+            Don't you have an account? <a href="/register">Sign up</a>
+        </div>
+    </div>
+
+    <div class="login-image">
+        <img src="images/login.jpg" alt="Login illustration" />
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="error-message">@errorMessage</p>
+}
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <p class="success-message">@successMessage</p>
+}
+
+@code {
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private bool isBusy;
+
+    private async Task OnLogin()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Please fill in all fields.";
+            return;
+        }
+
+        isBusy = true;
+        try
+        {
+            bool isLoggedIn = await AuthenticationService.LoginAsync(email, password);
+            if (isLoggedIn)
+            {
+                await CartService.SyncLocalCartToServerIfNeeded();
+                successMessage = "Login successful! Redirecting...";
+                StateHasChanged();
+
+
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Login failed. Please check your credentials.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

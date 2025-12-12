@@ -30,7 +30,6 @@ class VibeChecker:
     
     def check_vibe(self, name: str = "Friend") -> tuple:
         """Check the vibe for a given name"""
-        # Use the name to seed random for consistency (same name = same vibe in session)
         vibe = random.choice(self.VIBES)
         self.session_vibes.append((name, vibe[0]))
         return vibe
@@ -80,7 +79,7 @@ def main():
     checker = VibeChecker()
     
     print(f"{Fore.GREEN}Welcome to the Vibe Checker!{Style.RESET_ALL}")
-    print(f"{Fore.YELLOW}Commands: 'check <name>', 'history', 'quit'{Style.RESET_ALL}\n")
+    print(f"{Fore.YELLOW}Commands: 'check <name>', 'history', 'help', 'quit'{Style.RESET_ALL}\n")
     
     while True:
         try:

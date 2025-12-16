@@ -3,7 +3,7 @@ using Maker.RampEdge.Services.Contracts;
 using Microsoft.JSInterop;
 using System.Text.Json;
 
-namespace HippoHex.Services;
+namespace Oxiniti.Services;
 
 public class CartService(IJSRuntime jsRuntime, IAuthenticationService authenticationService, IMakerClient makerClient)
 {
@@ -11,7 +11,7 @@ public class CartService(IJSRuntime jsRuntime, IAuthenticationService authentica
     private readonly IAuthenticationService _authenticationService = authenticationService;
     private readonly IMakerClient _makerSecureClient = makerClient;
 
-    private const string StorageKey = "hippohex_cart";
+    private const string StorageKey = "oxiniti_cart";
 
     public event Action? OnChange;
 

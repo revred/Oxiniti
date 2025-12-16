@@ -1,4 +1,4 @@
-﻿namespace HippoHex.Configuration;
+﻿namespace Oxiniti.Configuration;
 
 public class StripeSettings
 {

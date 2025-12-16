@@ -1,6 +1,6 @@
 ﻿using Maker.RampEdge;
 
-namespace HippoHex.Services
+namespace Oxiniti.Services
 {
     public class BusinessInfoService
     {
@@ -12,7 +12,7 @@ namespace HippoHex.Services
         public string SocialMediaLinks { get; private set; } = string.Empty;
         public string Testimonials { get; private set; } = string.Empty;
         public DigitalAsset? Asset { get; private set; }
-        public IDictionary<string, string> Contents { get; private set; }
+        public IDictionary<string, string> Contents { get; private set; } = new Dictionary<string, string>();
 
         private bool _loaded = false;
 

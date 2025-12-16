@@ -1,6 +1,6 @@
-using HippoHex;
-using HippoHex.Configuration;
-using HippoHex.Services;
+using Oxiniti;
+using Oxiniti.Configuration;
+using Oxiniti.Services;
 using Maker.RampEdge.Configuration;
 using Maker.RampEdge.Extensions;
 using Microsoft.AspNetCore.Components;

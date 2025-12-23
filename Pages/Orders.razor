@@ -86,52 +86,51 @@ else
                             aria-expanded="@(isFirst ? "true" : "false")"
                             aria-controls="@collapseId">
                         <div class="d-flex flex-column flex-grow-1 text-start">
-                            <div class="fw-semibold">Order #@order.OrderBarID</div>
-                            <div class="text-muted small" title="@FormatIso(order.CreatedDate)">
-                                Placed: @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
-                                @{
-                                    var s = order.Status;
-                                }
+                            @* ---------- FIRST LINE : Order ID + Status Flow ---------- *@
+                            @{
+                                var s = order.Status;
+                                int currentStep =
+                                s == "Delivered" ? 4 :
+                                s == "OutForDelivery" ? 3 :
+                                s == "Shipped" ? 2 :
+                                s == "ProjectCreated" || s == "Processing" ? 1 :
+                                0;
+                            }
 
-                                <div class="order-steps mt-2">
+                            <div class="d-flex flex-wrap align-items-center gap-3 fw-semibold">
+                                <span>#@order.OrderBarID</span>
 
-                                    <span class="step done">
-                                        <i class="bi bi-bag-check"></i> Ordered
+                                <span class="order-steps-inline">
+
+                                    <span class="step @(currentStep >= 0 ? "done" : "pending")">
+                                        <i class="bi bi-bag-check me-1"></i> Ordered
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep > 1 ? "done" : currentStep == 1 ? "current" : "pending")">
+                                        <i class="bi bi-gear me-1"></i> Processing
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep > 2 ? "done" : currentStep == 2 ? "current" : "pending")">
+                                        <i class="bi bi-truck me-1"></i> Shipped
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep > 3 ? "done" : currentStep == 3 ? "current" : "pending")">
+                                        <i class="bi bi-truck-front me-1"></i> Out For Delivery
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep == 4 ? "current" : "pending")">
+                                        <i class="bi bi-check-circle me-1"></i> Delivered
                                     </span>
 
-                                    @if (s is "ProjectCreated" or "Processing" or "Shipped" or "OutForDelivery" or "Delivered")
-                                    {
-                                        <span class="line"></span>
-                                        <span class="step current">
-                                            <i class="bi bi-gear"></i> Processing
-                                        </span>
-                                    }
-
-                                    @if (s is "Shipped" or "OutForDelivery" or "Delivered")
-                                    {
-                                        <span class="line"></span>
-                                        <span class="step current">
-                                            <i class="bi bi-truck"></i> Shipped
-                                        </span>
-                                    }
-
-                                    @if (s is "OutForDelivery" or "Delivered")
-                                    {
-                                        <span class="line"></span>
-                                        <span class="step current">
-                                            <i class="bi bi-truck-front"></i> Out For Delivery
-                                        </span>
-                                    }
-
-                                    @if (s == "Delivered")
-                                    {
-                                        <span class="line"></span>
-                                        <span class="step current">
-                                            <i class="bi bi-check-circle"></i> Delivered
-                                        </span>
-                                    }
-
-                                </div>
+                                </span>
+                            </div>
+                            @* ---------- SECOND LINE---------- *@
+                            <div class="text-muted small" title="@FormatIso(order.CreatedDate)">
+                                Placed: @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
                             </div>
                         </div>
                         <div class="text-end ms-auto">

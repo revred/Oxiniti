@@ -1,23 +1,28 @@
-﻿.order-steps {
-    display: flex;
-    align-items: center;
+﻿.order-steps-inline {
     font-size: 13px;
+    display: inline-flex;
+    align-items: center;
     flex-wrap: wrap;
 }
 
-    .order-steps .step {
-        font-weight: 600;
-        color: #0d6efd;
-        white-space: nowrap;
+    .order-steps-inline .step {
+        font-weight: 700;
     }
 
-        .order-steps .step.done {
-            color: #198754;
+        .order-steps-inline .step.done {
+            color: #198754; /* green */
         }
 
-    .order-steps .line {
-        width: 18px;
-        height: 2px;
-        background: #333333;
+        .order-steps-inline .step.current {
+            color: #0d6efd; /* blue */
+            font-weight: 800;
+        }
+
+        .order-steps-inline .step.pending {
+            color: #adb5bd; /* grey */
+        }
+
+    .order-steps-inline .sep {
         margin: 0 6px;
+        color: #333333;
     }

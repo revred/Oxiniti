@@ -1,0 +1,23 @@
+﻿.order-steps {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+    .order-steps .step {
+        font-weight: 600;
+        color: #0d6efd;
+        white-space: nowrap;
+    }
+
+        .order-steps .step.done {
+            color: #198754;
+        }
+
+    .order-steps .line {
+        width: 18px;
+        height: 2px;
+        background: #333333;
+        margin: 0 6px;
+    }

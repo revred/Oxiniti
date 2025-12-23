@@ -89,8 +89,49 @@ else
                             <div class="fw-semibold">Order #@order.OrderBarID</div>
                             <div class="text-muted small" title="@FormatIso(order.CreatedDate)">
                                 Placed: @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
-                                &nbsp;&middot;&nbsp;
-                                <span class="badge bg-secondary">@order.Status</span>
+                                @{
+                                    var s = order.Status;
+                                }
+
+                                <div class="order-steps mt-2">
+
+                                    <span class="step done">
+                                        <i class="bi bi-bag-check"></i> Ordered
+                                    </span>
+
+                                    @if (s is "ProjectCreated" or "Processing" or "Shipped" or "OutForDelivery" or "Delivered")
+                                    {
+                                        <span class="line"></span>
+                                        <span class="step current">
+                                            <i class="bi bi-gear"></i> Processing
+                                        </span>
+                                    }
+
+                                    @if (s is "Shipped" or "OutForDelivery" or "Delivered")
+                                    {
+                                        <span class="line"></span>
+                                        <span class="step current">
+                                            <i class="bi bi-truck"></i> Shipped
+                                        </span>
+                                    }
+
+                                    @if (s is "OutForDelivery" or "Delivered")
+                                    {
+                                        <span class="line"></span>
+                                        <span class="step current">
+                                            <i class="bi bi-truck-front"></i> Out For Delivery
+                                        </span>
+                                    }
+
+                                    @if (s == "Delivered")
+                                    {
+                                        <span class="line"></span>
+                                        <span class="step current">
+                                            <i class="bi bi-check-circle"></i> Delivered
+                                        </span>
+                                    }
+
+                                </div>
                             </div>
                         </div>
                         <div class="text-end ms-auto">
@@ -137,7 +178,7 @@ else
                         }
                         else
                         {
-                            <div class="text-muted">No items in this order.</div>
+                            <div class="text-muted">No items in this order</div>
                         }
                     </div>
                 </div>
@@ -183,7 +224,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadOrders(); 
+        await LoadOrders();
     }
 
     private async Task LoadOrders()
@@ -191,10 +232,10 @@ else
         try
         {
             var request = new OrderRequest
-                {
-                    Page = CurrentPage,
-                    PageSize = PageSize
-                };
+            {
+                Page = CurrentPage,
+                PageSize = PageSize
+            };
 
             var result = await MakerClient.GetAllOrdersAsync(request);
 

@@ -96,37 +96,35 @@ else
                                 s == "ProjectCreated" || s == "Processing" ? 1 :
                                 0;
                             }
+                            <div class="d-flex align-items-center gap-3 fw-semibold">
+                                @* The ID now has a fixed width to keep the tracker column straight *@
+                                <span class="order-id-fixed">#@order.OrderBarID</span>
 
-                            <div class="d-flex flex-wrap align-items-center gap-3 fw-semibold">
-                                <span>#@order.OrderBarID</span>
-
-                                <span class="order-steps-inline">
-
+                                <div class="order-steps-inline">
                                     <span class="step @(currentStep >= 0 ? "done" : "pending")">
-                                        <i class="bi bi-bag-check me-1"></i> Ordered
+                                        <i class="bi bi-bag-check"></i> Ordered
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep > 1 ? "done" : currentStep == 1 ? "current" : "pending")">
-                                        <i class="bi bi-gear me-1"></i> Processing
+                                        <i class="bi bi-gear"></i> Processing
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep > 2 ? "done" : currentStep == 2 ? "current" : "pending")">
-                                        <i class="bi bi-truck me-1"></i> Shipped
+                                        <i class="bi bi-truck"></i> Shipped
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep > 3 ? "done" : currentStep == 3 ? "current" : "pending")">
-                                        <i class="bi bi-truck-front me-1"></i> Out For Delivery
+                                        <i class="bi bi-truck-front"></i> Out For Delivery
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep == 4 ? "current" : "pending")">
-                                        <i class="bi bi-check-circle me-1"></i> Delivered
+                                        <i class="bi bi-check-circle"></i> Delivered
                                     </span>
-
-                                </span>
+                                </div>
                             </div>
                             @* ---------- SECOND LINE---------- *@
                             <div class="text-muted small" title="@FormatIso(order.CreatedDate)">

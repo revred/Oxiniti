@@ -86,11 +86,49 @@ else
                             aria-expanded="@(isFirst ? "true" : "false")"
                             aria-controls="@collapseId">
                         <div class="d-flex flex-column flex-grow-1 text-start">
-                            <div class="fw-semibold">Order #@order.OrderBarID</div>
-                            <div class="text-muted small" title="@FormatIso(order.CreatedDate)">
+                            @* ---------- FIRST LINE : Order ID + Status Flow ---------- *@
+                            @{
+                                var s = order.Status;
+                                int currentStep =
+                                s == "Delivered" ? 4 :
+                                s == "OutForDelivery" ? 3 :
+                                s == "Shipped" ? 2 :
+                                s == "ProjectCreated" || s == "Processing" ? 1 :
+                                0;
+                            }
+                            <div class="d-flex align-items-center gap-3 fw-semibold">
+                                @* The ID now has a fixed width to keep the tracker column straight *@
+                                <span class="order-id-fixed">#@order.OrderBarID</span>
+
+                                <div class="order-steps-inline">
+                                    <span class="step @(currentStep >= 0 ? "done" : "pending")">
+                                        <i class="bi bi-bag-check"></i> Ordered
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep > 1 ? "done" : currentStep == 1 ? "current" : "pending")">
+                                        <i class="bi bi-gear"></i> Processing
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep > 2 ? "done" : currentStep == 2 ? "current" : "pending")">
+                                        <i class="bi bi-truck"></i> Shipped
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep > 3 ? "done" : currentStep == 3 ? "current" : "pending")">
+                                        <i class="bi bi-truck-front"></i> Out For Delivery
+                                    </span>
+                                    <span class="sep">—</span>
+
+                                    <span class="step @(currentStep == 4 ? "current" : "pending")">
+                                        <i class="bi bi-check-circle"></i> Delivered
+                                    </span>
+                                </div>
+                            </div>
+                            @* ---------- SECOND LINE---------- *@
+                            <div class="text-muted small mt-1" title="@FormatIso(order.CreatedDate)">
                                 Placed: @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
-                                &nbsp;&middot;&nbsp;
-                                <span class="badge bg-secondary">@order.Status</span>
                             </div>
                         </div>
                         <div class="text-end ms-auto">
@@ -137,7 +175,7 @@ else
                         }
                         else
                         {
-                            <div class="text-muted">No items in this order.</div>
+                            <div class="text-muted">No items in this order</div>
                         }
                     </div>
                 </div>
@@ -183,7 +221,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadOrders(); 
+        await LoadOrders();
     }
 
     private async Task LoadOrders()
@@ -191,10 +229,10 @@ else
         try
         {
             var request = new OrderRequest
-                {
-                    Page = CurrentPage,
-                    PageSize = PageSize
-                };
+            {
+                Page = CurrentPage,
+                PageSize = PageSize
+            };
 
             var result = await MakerClient.GetAllOrdersAsync(request);
 

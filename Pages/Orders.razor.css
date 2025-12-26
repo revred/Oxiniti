@@ -1,0 +1,69 @@
+﻿.d-flex.align-items-center.gap-3.fw-semibold {
+    display: flex !important;
+    align-items: center !important; 
+    flex-wrap: nowrap !important; 
+    line-height: 1 !important; 
+}
+
+/* FIXED WIDTH ID COLUMN */
+.order-id-fixed {
+    display: inline-flex;
+    align-items: center;
+    min-width: 85px;
+    flex-shrink: 0; 
+}
+
+/* THE STATUS BAR */
+.order-steps-inline {
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0;
+}
+
+    .order-steps-inline .step {
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+        /* --- ADDED COLORS START --- */
+        .order-steps-inline .step.done {
+            color: #198754; /* green */
+        }
+
+        .order-steps-inline .step.current {
+            color: #0d6efd; /* blue */
+            font-weight: 800;
+        }
+
+        .order-steps-inline .step.pending {
+            color: #adb5bd; /* grey */
+        }
+
+        /* Standardize icon heights for vertical centering */
+        .order-steps-inline .step i {
+            margin-right: 4px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+    /* Dash separators */
+    .order-steps-inline .sep {
+        margin: 0 8px;
+        color: #adb5bd;
+        display: inline-flex;
+        align-items: center;
+    }
+
+/* RESOLUTION PROTECTION (Mobile/Tablet) */
+@media (max-width: 992px) {
+    .order-steps-inline {
+        overflow-x: auto; 
+        padding-bottom: 2px;
+    }
+}

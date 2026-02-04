@@ -1,6 +1,6 @@
 ﻿using Maker.RampEdge;
 
-namespace Oxiniti.Services
+namespace Oxyniti.Services
 {
     public class BusinessInfoService
     {

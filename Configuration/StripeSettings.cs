@@ -1,4 +1,4 @@
-﻿namespace Oxiniti.Configuration;
+﻿namespace Oxyniti.Configuration;
 
 public class StripeSettings
 {

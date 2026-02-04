@@ -45,7 +45,7 @@
     flex-direction: column;
     color: white;
     font-weight: bold;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     line-height: 1.2;
     letter-spacing: 1px;
     margin-top: 0.5rem;
@@ -54,7 +54,8 @@
 
 .brand-tagline {
     color: rgba(255, 255, 255, 0.8);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 700;
     text-align: center;
     padding: 0.5rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -64,7 +65,7 @@
 }
 
 .nav-item {
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-align: center;
     padding-bottom: 0.5rem;
 }

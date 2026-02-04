@@ -1,6 +1,6 @@
-using Oxiniti;
-using Oxiniti.Configuration;
-using Oxiniti.Services;
+using Oxyniti;
+using Oxyniti.Configuration;
+using Oxyniti.Services;
 using Maker.RampEdge.Configuration;
 using Maker.RampEdge.Extensions;
 using Microsoft.AspNetCore.Components;

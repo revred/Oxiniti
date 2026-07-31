@@ -9,3 +9,14 @@
 /.vs/oxyniti
 /.vs/Oxyniti
 /.vs
+# Blue Sharc: .sharc/ is a mix of machine-local runtime caches (cracked
+# substrate .rac files, peer/provider configs with this machine's absolute
+# install path, session logs) and derived files (state.json/tree.json/
+# governance.json, 100% rebuilt from evolution/manifest.toml by tree.build on
+# every pull/merge/checkout via the post-merge/post-checkout hook). None of
+# that is shareable or should ever be hand-edited or committed -- only the
+# Goal/Epic/Feature/Story source of truth is.
+.sharc/*
+!.sharc/evolution
+.sharc/evolution/*
+!.sharc/evolution/manifest.toml

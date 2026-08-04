@@ -19,4 +19,11 @@
 .sharc/*
 !.sharc/evolution
 .sharc/evolution/*
-!.sharc/evolution/manifest.toml
+# The event log IS the shared artifact: authoring appends here and every
+# developer needs it. The blanket .sharc/evolution/* rule above would swallow
+# it, leaving everyone with a PRIVATE backlog, so re-include it explicitly.
+!.sharc/evolution/events.jsonl
+# LEGACY: manifest.toml was the old committed intent store (retired 2026-08-03).
+# Two developers patching one TOML file conflicted on every concurrent edit.
+# Nothing reads it now; kept locally as history, no longer tracked.
+.sharc/evolution/manifest.toml

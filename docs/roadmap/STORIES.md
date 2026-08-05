@@ -150,6 +150,46 @@ Password?" link, **so that** I can regain access without contacting support.
         existing `error-message`/`success-message` pattern in
         `Login.razor`/`Register.razor`.
 
+### S-2.3.2 — Reset-password email delivers a working token link
+**As** a user who just submitted the forgot-password form, **I want** an
+email with a link that takes me straight to a reset form, **so that** I can
+regain access without support intervention.
+- Touches: backend/API call triggered from `Pages/ForgotPassword.razor`
+  (S-2.3.1); no existing email-sending or token-issuing code — confirm
+  against `IMakerClient`/RampEdge backend before scoping as frontend-only.
+- Acceptance:
+  - [ ] Submitting a known email sends a message containing a link to
+        `/reset-password?token=...`.
+  - [ ] The token expires after a bounded window (e.g. 1 hour) and is
+        single-use.
+  - [ ] Submitting an unknown email does not reveal whether the address is
+        registered (generic success message either way).
+
+### S-2.3.3 — Reset-password confirmation page sets a new password
+**As** a user who clicked the reset link from my email, **I want** a page
+that lets me set a new password, **so that** I can log back in immediately.
+- Touches: new `Pages/ResetPassword.razor` (`/reset-password?token=...`).
+- Acceptance:
+  - [ ] Valid, unexpired token shows a new-password form (with confirm
+        field) and, on submit, updates the password and redirects to
+        `/login` with a success message.
+  - [ ] Expired or already-used token shows a clear error with a link back
+        to the forgot-password form instead of a broken/blank page.
+  - [ ] Password field enforces the same validation rules as `Register.razor`.
+
+### S-2.3.4 — Resend & rate-limit forgot-password requests
+**As** a user who mistyped their email or didn't receive the reset message,
+**I want** to resend the recovery email without being blocked, **but** not
+be able to spam the endpoint, **so that** the flow is both usable and abuse
+resistant.
+- Touches: `Pages/ForgotPassword.razor`, `Pages/ResetPassword.razor` (resend
+  affordance), backend rate-limit on the reset-request endpoint.
+- Acceptance:
+  - [ ] A visible cooldown (e.g. 60s) prevents rapid repeat submissions from
+        the same form.
+  - [ ] "Resend email" on the post-submit screen re-triggers S-2.3.2 without
+        requiring the user to retype their email.
+
 ---
 
 ## E3.1 — Support & policy content hub

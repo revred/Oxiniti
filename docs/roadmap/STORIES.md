@@ -131,6 +131,48 @@ steps, **so that** I'm not stranded on a dead-end page.
         consistently with the rest of the site (`btn-gradient`/`btn-primary`
         classes already used elsewhere).
 
+### S-2.2.3 — Cancelled/refunded/failed orders don't render as "just placed"
+**As** a customer with a cancelled or failed order, **I want** the status
+tracker to say so, **so that** I don't think it's still being processed.
+- Touches: `Pages/Orders.razor` `currentStep` computation (lines ~90-97),
+  currently `s == "ProjectCreated" || s == "Processing" ? 1 : 0` — any other
+  status value falls through to step 0 ("Ordered") with no visual
+  distinction from a brand-new order.
+- Acceptance:
+  - [ ] `Cancelled`, `Refunded`, and `Failed` (or whatever the backend's
+        actual terminal-status strings are — confirm against `OrderDetail`)
+        each render a distinct, clearly-labelled state instead of falling
+        back to step 0.
+  - [ ] The five-step progress tracker doesn't imply forward progress for a
+        cancelled/failed order (e.g. it's replaced by a status badge, not
+        left mid-tracker).
+
+### S-2.2.4 — Direct link to a single order's status
+**As** a customer who just checked out (or clicked a link from an order
+email), **I want** to land on that specific order's status, **so that** I'm
+not stuck scanning the whole order history to find it.
+- Touches: new route in `Pages/Orders.razor` or a new `Pages/OrderStatus.razor`
+  (e.g. `/orders/{orderBarId}`); wire from `CheckoutReturn.razor`'s
+  "View your orders" CTA (S-2.2.2) when the resolved order id is known.
+- Acceptance:
+  - [ ] `/orders/{orderBarId}` shows that order's tracker + items,
+        pre-expanded, without requiring the user to page through `/orders`.
+  - [ ] Unknown/foreign `orderBarId` (not owned by the logged-in user) shows
+        a clear not-found state, not another user's order.
+
+### S-2.2.5 — Filter the orders list by status
+**As** a returning customer with many past orders, **I want** to filter
+`/orders` by status, **so that** I can quickly find e.g. everything still
+"Processing" without paging through delivered orders.
+- Touches: `Pages/Orders.razor` (`LoadOrders`/`OrderRequest`) — confirm
+  whether `OrderRequest` already supports a status filter server-side before
+  scoping as backend + frontend vs. frontend-only.
+- Acceptance:
+  - [ ] A status filter (dropdown or pill row) narrows the list to matching
+        orders and resets to page 1.
+  - [ ] "All" clears the filter back to the current unfiltered behavior.
+  - [ ] Filter selection persists across pagination within the same visit.
+
 ---
 
 ## E2.3 — Password recovery

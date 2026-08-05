@@ -50,6 +50,19 @@ stories in [STORIES.md](STORIES.md).
   whatever reset endpoint `IMakerClient`/the RampEdge backend exposes (or
   flags the backend gap if none exists yet — verify against `IMakerClient`
   before committing to scope).
+- **F2.3.2 — Reset-password email with a secure token link**: the backend
+  call triggered by F2.3.1 sends an email containing a time-limited reset
+  link (`/reset-password?token=...`); no email-sending or token-issuing path
+  exists anywhere in the codebase today, so this is the piece that actually
+  gets the recovery email into the user's inbox.
+- **F2.3.3 — Reset-password confirmation page**: new
+  `Pages/ResetPassword.razor` that reads the `token` query parameter,
+  validates it against the backend, and lets the user set a new password —
+  the other half of the flow F2.3.1 only starts.
+- **F2.3.4 — Resend & rate-limit handling for recovery requests**: cooldown
+  on repeat "Forgot Password?" submissions plus a "Resend email" affordance
+  on the confirmation screen, so the flow degrades gracefully under abuse or
+  a lost email.
 
 ## Under E3.1 — Support & policy content hub
 

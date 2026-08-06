@@ -84,6 +84,15 @@ stories in [STORIES.md](STORIES.md).
   on the confirmation screen, so the flow degrades gracefully under abuse or
   a lost email.
 
+## Under E2.4 — Cart quantity editing
+
+- **F2.4.1 — Increment/decrement quantity controls on `/cart`**: replace the
+  plain `<strong>Quantity:</strong> @p.Quantity` text with +/- stepper
+  controls that call `CartService`'s existing set-quantity path
+  (`AddToCartCore` already overwrites `existing.Quantity` for a known slug —
+  no new backend endpoint required), so a shopper can adjust quantity
+  in-place instead of removing and re-adding the item.
+
 ## Under E3.1 — Support & policy content hub
 
 - **F3.1.1 — FAQs page** (`/faqs`).

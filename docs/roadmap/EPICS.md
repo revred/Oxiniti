@@ -37,6 +37,14 @@ paid gets no actionable confirmation.
 `Login.razor`'s "Forgot Password?" is `href="#"`. No self-serve recovery path
 exists; every locked-out user has to be manually unblocked or abandons.
 
+### E2.4 — Cart quantity editing (P1)
+`Cart.razor` shows each line's quantity as plain text with no way to change
+it — only "Remove" and "View Details →" exist. `CartService.AddToCartCore`
+already sets quantity for an existing line (`existing.Quantity =
+finalQuantity`), so the underlying data path supports this; the gap is
+purely that the Cart page has no UI to change quantity without removing the
+item and re-adding it from the product page.
+
 ## Under G3 — Pre-sale and post-sale content for industrial buyers
 
 ### E3.1 — Support & policy content hub (P1)

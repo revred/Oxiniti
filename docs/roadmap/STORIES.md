@@ -251,6 +251,30 @@ resistant.
 
 ---
 
+## E2.4 — Cart quantity editing
+
+### S-2.4.1 — Change item quantity from the cart page (P1, S)
+**As** a shopper reviewing my cart, **I want** to change how many of an item
+I'm buying right there, **so that** I don't have to remove it and re-add it
+from the product page just to adjust quantity.
+- Touches: `Pages/Cart.razor` (replace the plain `Quantity: @p.Quantity` text
+  at line ~66 with +/- stepper controls); `Services/CartService.cs` —
+  `AddToCartCore` already sets `existing.Quantity` for a known slug, so this
+  needs a thin slug-based update method (or reuse of the existing
+  `AddToCart` overloads) rather than a new backend endpoint.
+- Acceptance:
+  - [ ] Each cart line has +/- controls (and/or a direct quantity input)
+        that update the line's quantity without a full page reload.
+  - [ ] Quantity changes persist the same way `AddToCart`/`RemoveFromCart`
+        already do (guest local cart vs. authenticated server cart via
+        `PersistCart`).
+  - [ ] Decrementing to 0 behaves the same as "Remove" (with the same
+        confirmation, if any, as the existing Remove button).
+  - [ ] Quantity cannot go below 1 via the stepper (0 removes via the
+        explicit path above, not by decrementing past 1).
+
+---
+
 ## E3.1 — Support & policy content hub
 
 ### S-3.1.1 — FAQs page (P1, M)

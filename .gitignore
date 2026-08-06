@@ -23,6 +23,12 @@
 # developer needs it. The blanket .sharc/evolution/* rule above would swallow
 # it, leaving everyone with a PRIVATE backlog, so re-include it explicitly.
 !.sharc/evolution/events.jsonl
+# ...and the SHARD DIRECTORY. The log is one file per (actor, branch) so two
+# branches never write the same file -- that, not a merge driver, is what makes
+# concurrent PRs conflict-free. A negation cannot re-include a file whose parent
+# directory is excluded, so the directory is re-included first.
+!.sharc/evolution/events/
+!.sharc/evolution/events/*.jsonl
 # LEGACY: manifest.toml was the old committed intent store (retired 2026-08-03).
 # Two developers patching one TOML file conflicted on every concurrent edit.
 # Nothing reads it now; kept locally as history, no longer tracked.

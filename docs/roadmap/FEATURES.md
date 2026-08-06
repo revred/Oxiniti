@@ -42,6 +42,20 @@ stories in [STORIES.md](STORIES.md).
   order summary instead of a static message.
 - **F2.2.2 — Add "View your orders" / "Continue shopping" CTAs** to the
   return page, linking to `/orders` and `/products`.
+- **F2.2.3 — Distinct treatment for terminal/exception order states**:
+  `Orders.razor`'s status tracker (`Ordered → Processing → Shipped → Out For
+  Delivery → Delivered`) has no step for `Cancelled`/`Refunded`/`Failed` —
+  today any status outside the five known ones silently renders as step 0
+  ("Ordered"), which misrepresents a cancelled or failed order as freshly
+  placed.
+- **F2.2.4 — Shareable single-order status view**: a direct route (e.g.
+  `/orders/{orderBarId}`) showing one order's tracker and items, so
+  `checkout/return` (F2.2.1/F2.2.2) and order-notification emails can deep
+  link straight to "your" order instead of only ever landing on the full
+  `/orders` list.
+- **F2.2.5 — Filter the orders list by status**: `/orders` paginates but has
+  no way to narrow to e.g. just "Shipped" or "Processing" orders, which
+  matters once a customer has more than a page or two of order history.
 
 ## Under E2.3 — Password recovery flow
 

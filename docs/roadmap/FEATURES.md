@@ -56,6 +56,12 @@ stories in [STORIES.md](STORIES.md).
 - **F2.2.5 — Filter the orders list by status**: `/orders` paginates but has
   no way to narrow to e.g. just "Shipped" or "Processing" orders, which
   matters once a customer has more than a page or two of order history.
+- **F2.2.6 — Order tracking detail** (carrier, tracking number, ETA):
+  `Orders.razor` already renders a status stepper (Ordered / Processing /
+  Shipped / Out For Delivery / Delivered) driven by `order.Status`, but shows
+  no carrier, tracking number, or estimated delivery date — no such field
+  exists on `OrderDetail`/`IMakerClient` today, so scope starts with a
+  backend-shape check.
 
 ## Under E2.3 — Password recovery flow
 

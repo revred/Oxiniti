@@ -173,6 +173,23 @@ not stuck scanning the whole order history to find it.
   - [ ] "All" clears the filter back to the current unfiltered behavior.
   - [ ] Filter selection persists across pagination within the same visit.
 
+### S-2.2.6 — Order tracking detail shows carrier + tracking number or ETA fallback (P1, M — depends on backend)
+**As** a customer waiting on a shipment, **I want** to see the carrier,
+tracking number, and estimated delivery date on my order, **so that** I know
+where my order actually is instead of just a generic status label.
+- Touches: `Pages/Orders.razor` (existing stepper at line ~90-127),
+  `IMakerClient`/`OrderDetail` — no tracking fields exist yet, confirm
+  backend shape before scoping as frontend-only.
+- Acceptance:
+  - [ ] First: confirm whether the RampEdge backend can supply
+        carrier/tracking-number/ETA per order — this story's size depends on
+        that (M if the data exists and just needs surfacing, L if backend
+        work is required first).
+  - [ ] Orders at `Shipped` or later show carrier name + tracking number,
+        linked to the carrier's tracking URL when the carrier is known.
+  - [ ] Orders without tracking data yet show an estimated-delivery-date
+        range instead of a blank/dead field.
+
 ---
 
 ## E2.3 — Password recovery

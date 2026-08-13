@@ -1,0 +1,46 @@
+.marquee-ticker {
+    background: linear-gradient(90deg, #2de0e5, #3D8FB5);
+    padding: 14px 0;
+    overflow: hidden;
+
+    /* Pulls the ticker up into the hero's own margin-bottom (2rem) so it
+       sits flush against the hero card instead of leaving a visible gap. */
+    margin-top: -2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.marquee-track {
+    display: flex;
+    gap: 48px;
+    width: max-content;
+
+    /* Duplicated content (two identical spans) + translateX(-50%) is what
+       makes the loop seamless — the moment the first copy scrolls fully
+       out of view, the second one is exactly where the first started. */
+    animation: marquee-scroll 26s linear infinite;
+}
+
+.marquee-text {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #0B1F33;
+    white-space: nowrap;
+
+    /* Extra breathing room after each word/bullet — plain spaces in the
+       source string collapse to one under nowrap, so word-spacing is what
+       actually controls the gap here. */
+    word-spacing: 0.35em;
+}
+
+@keyframes marquee-scroll {
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        animation: none;
+    }
+}

@@ -1,0 +1,111 @@
+@using System.ComponentModel.DataAnnotations
+@inject LocalizationService Loc
+
+<div class="free-demo-section" id="free-demo">
+    <div class="demo-grid">
+        <div class="demo-info">
+            <span class="kicker">@Loc.T("con.kicker", "Book your free demo")</span>
+            <h2 class="section-title">@((MarkupString)Loc.T("con.h2", "We bring the unit.<br />You bring the pond.<br />The DO meter decides."))</h2>
+            <p class="section-lead">
+                @Loc.T("con.p", "Our team installs an Oxyniti unit on your pond, measures dissolved oxygen before and after with a calibrated meter, and shows you the difference the same day. No obligation.")
+            </p>
+
+            <div class="contact-rails">
+                <div class="rail">
+                    <span class="ico">&#128222;</span>
+                    <span>
+                        <b>@Loc.T("con.r1b", "Call us")</b>
+                        <span class="placeholder-note">@Loc.T("con.r1s", "Phone number not yet configured")</span>
+                    </span>
+                </div>
+                <a class="rail rail-link" href="@SiteContact.WhatsAppLink("Hi, I'd like to book a free pond demo for Oxyniti.")"
+                   target="_blank" rel="noopener">
+                    <span class="ico wa-ico"><i class="bi bi-whatsapp"></i></span>
+                    <span>
+                        <b>@Loc.T("con.r2b", "Chat on WhatsApp")</b>
+                        <span class="rail-sub">@Loc.T("con.r2s", "Fastest way to reach us — usually a reply in minutes")</span>
+                    </span>
+                </a>
+                <div class="rail">
+                    <span class="ico">&#128205;</span>
+                    <span>
+                        <b>@Loc.T("con.r3b", "Serving Tamil Nadu & South India")</b>
+                        <span class="placeholder-note">@Loc.T("con.r3s", "Pilot territory not yet confirmed")</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-form">
+        <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-grid">
+                <div class="field">
+                    <label>@Loc.T("f.name", "Your name")</label>
+                    <InputText @bind-Value="model.Name" placeholder="@Loc.T("f.name.ph", "e.g. Murugan")" />
+                </div>
+                <div class="field">
+                    <label>@Loc.T("f.phone", "Phone / WhatsApp")</label>
+                    <InputText @bind-Value="model.Phone" placeholder="+91 ..." />
+                </div>
+                <div class="field">
+                    <label>@Loc.T("f.place", "Village / Town")</label>
+                    <InputText @bind-Value="model.Place" placeholder="@Loc.T("f.place.ph", "e.g. Lalgudi, Trichy")" />
+                </div>
+                <div class="field">
+                    <label>@Loc.T("f.size", "Pond size")</label>
+                    <InputSelect @bind-Value="model.Size">
+                        <option>@Loc.T("o.size1", "Under ½ acre")</option>
+                        <option selected>@Loc.T("o.size2", "½ – 1 acre")</option>
+                        <option>@Loc.T("o.size3", "1 – 3 acres")</option>
+                        <option>@Loc.T("o.size4", "3+ acres / multiple ponds")</option>
+                    </InputSelect>
+                </div>
+                <div class="field full">
+                    <label>@Loc.T("f.species", "What do you farm?")</label>
+                    <InputSelect @bind-Value="model.Species">
+                        <option selected>@Loc.T("o.sp1", "Tilapia / GIFT")</option>
+                        <option>@Loc.T("o.sp2", "Murrel (Viral meen)")</option>
+                        <option>@Loc.T("o.sp3", "Pangasius")</option>
+                        <option>@Loc.T("o.sp4", "Freshwater prawn")</option>
+                        <option>@Loc.T("o.sp5", "Carp polyculture")</option>
+                        <option>@Loc.T("o.sp6", "Biofloc / RAS")</option>
+                        <option>@Loc.T("o.sp7", "Other")</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <button class="btn btn-warm" type="submit">@Loc.T("f.btn", "Request Free Pond Demo →")</button>
+            @if (!string.IsNullOrEmpty(statusMessage))
+            {
+                <p class="form-status">@statusMessage</p>
+            }
+            <p class="form-note">@Loc.T("f.note", "No spam, ever.")</p>
+        </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private readonly DemoRequest model = new();
+    private string? statusMessage;
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
+    private void HandleValidSubmit()
+    {
+        // TODO: wire up to a real lead-capture endpoint / WhatsApp / email once contact details are configured.
+        statusMessage = "Demo request captured — we'll be in touch once contact details are configured.";
+    }
+
+    private class DemoRequest
+    {
+        [Required] public string Name { get; set; } = string.Empty;
+        [Required] public string Phone { get; set; } = string.Empty;
+        [Required] public string Place { get; set; } = string.Empty;
+        public string Size { get; set; } = "½ – 1 acre";
+        public string Species { get; set; } = "Tilapia / GIFT";
+    }
+}

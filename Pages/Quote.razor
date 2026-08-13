@@ -1,5 +1,13 @@
 @page "/quote"
+@inject LocalizationService Loc
 
-<PageTitle>Request a Custom Quote - Oxyniti</PageTitle>
+<PageTitle>@Loc.T("quote.title", "Request a Custom Quote - Oxyniti")</PageTitle>
 
 <ComingSoon />
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

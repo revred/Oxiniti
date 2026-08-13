@@ -1,0 +1,38 @@
+.farming-types-section {
+    padding: 1.5rem 0 3rem;
+}
+
+.species-band {
+    background: linear-gradient(90deg, #3D8FB5 0%, #0B1F33 100%);
+    border-radius: 0.75rem;
+    padding: 1.75rem 2rem;
+    color: #fff;
+}
+
+.species-band h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.chip {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 2rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .chip:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.22);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }

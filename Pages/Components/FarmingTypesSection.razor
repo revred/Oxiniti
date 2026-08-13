@@ -1,0 +1,23 @@
+@inject LocalizationService Loc
+
+<div class="farming-types-section" id="farming-types">
+    <div class="species-band">
+        <h3>@Loc.T("sp.h", "Built for every South Indian farm.")</h3>
+        <div class="chips">
+            <span class="chip">@Loc.T("sp.c1", "🐟 Tilapia / GIFT")</span>
+            <span class="chip">@Loc.T("sp.c2", "🐍 Murrel (Viral)")</span>
+            <span class="chip">@Loc.T("sp.c3", "🐋 Pangasius")</span>
+            <span class="chip">@Loc.T("sp.c4", "🦐 Freshwater Prawn")</span>
+            <span class="chip">@Loc.T("sp.c5", "🎏 Carp Polyculture")</span>
+            <span class="chip">@Loc.T("sp.c6", "🧪 Biofloc & RAS")</span>
+            <span class="chip">@Loc.T("sp.c7", "🌊 Any pond, 1-day install")</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

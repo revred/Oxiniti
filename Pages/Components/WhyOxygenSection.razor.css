@@ -1,0 +1,179 @@
+.why-oxygen-section {
+    padding: 3rem 0;
+}
+
+.kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3D8FB5;
+    margin-bottom: 0.75rem;
+}
+
+.section-title {
+    color: #1A2C54;
+    font-size: 2.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.section-lead {
+    max-width: 760px;
+    color: #3a3a3a;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+}
+
+.problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.problem-card {
+    position: relative;
+    background: linear-gradient(160deg, #ffffff 0%, #eaf4fa 100%);
+    border: 1px solid rgba(61, 143, 181, 0.16);
+    border-radius: 0.75rem;
+    padding: 1.85rem 1.75rem 1.75rem;
+    box-shadow: 0 4px 20px rgba(11, 31, 51, 0.08);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .problem-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3D8FB5, #0B1F33);
+    }
+
+    .problem-card:nth-child(2)::before {
+        background: linear-gradient(90deg, #0fbfae, #1C4E6E);
+    }
+
+    .problem-card:nth-child(3)::before {
+        background: linear-gradient(90deg, #e2452c, #7a2317);
+    }
+
+    .problem-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(11, 31, 51, 0.14);
+    }
+
+.problem-card .ico {
+    width: 3.25rem;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(61, 143, 181, 0.2), rgba(11, 31, 51, 0.06));
+    box-shadow: inset 0 0 0 1px rgba(61, 143, 181, 0.18);
+    font-size: 1.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.problem-card:nth-child(2) .ico {
+    background: linear-gradient(135deg, rgba(15, 191, 174, 0.2), rgba(28, 78, 110, 0.06));
+    box-shadow: inset 0 0 0 1px rgba(15, 191, 174, 0.2);
+}
+
+.problem-card:nth-child(3) .ico {
+    background: linear-gradient(135deg, rgba(226, 69, 44, 0.18), rgba(122, 35, 23, 0.06));
+    box-shadow: inset 0 0 0 1px rgba(226, 69, 44, 0.2);
+}
+
+.problem-card h3 {
+    color: #1A2C54;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.problem-card p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .problem-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.do-curve-wrap {
+    margin-top: 2.5rem;
+    background: linear-gradient(160deg, #ffffff 0%, #eaf4fa 100%);
+    border: 1px solid rgba(61, 143, 181, 0.16);
+    border-radius: 0.75rem;
+    padding: 1.75rem;
+    box-shadow: 0 4px 20px rgba(11, 31, 51, 0.08);
+}
+
+.do-curve-wrap h3 {
+    color: #1A2C54;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.do-curve-wrap .sub {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.do-svg {
+    width: 100%;
+    height: auto;
+    max-height: 260px;
+}
+
+.do-path.typical {
+    stroke: #e2452c;
+}
+
+.do-path.oxy {
+    stroke: #0fbfae;
+}
+
+.danger-lbl {
+    font-size: 12px;
+    fill: #e2452c;
+}
+
+.oxy-lbl {
+    font-size: 12px;
+    fill: #0fbfae;
+    font-weight: 700;
+}
+
+.axis-lbl {
+    font-size: 11px;
+    fill: #7a8a90;
+}
+
+.legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.legend i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.4rem;
+}

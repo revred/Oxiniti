@@ -1,56 +1,161 @@
-﻿@inject NavigationManager NavigationManager
+@implements IDisposable
+@inject NavigationManager NavigationManager
 @inject BusinessInfoService InfoService
+@inject IJSRuntime JSRuntime
+@inject LocalizationService Loc
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid" style="justify-content:center;">
-        <a class="navbar-brand" href="">
-            @if (InfoService.Asset != null)
-            {
-                <img src="@InfoService.Asset.Url"
-                     class="logo"
-                     style="width:100px;" />
-            }
-            <div class="brand-text">
-                <span>@InfoService.ApplicationName</span>
-            </div>
-        </a>
-    </div>
-</div>
-<div class="brand-tagline">
-    @InfoService.TagLine
-</div>
+<div class="nav-bar">
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="products">
-                Products
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="about">
-                About
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="contact">
-                Contact
-            </NavLink>
-        </div>
-        @foreach (var item in @InfoService.Contents)
+    <!-- BRAND -->
+    <a class="navbar-brand" href="">
+        @if (InfoService.Asset != null)
         {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="@($"/services/{item.Key}")">
-                    @item.Key
-                </NavLink>
-            </div>
+            <img src="@InfoService.Asset.Url"
+                 class="logo"
+                 alt="@InfoService.ApplicationName logo" />
         }
+
+        <span>
+            <span class="brand-name">
+                @InfoService.ApplicationName
+            </span>
+
+            <span class="brand-tag">
+                Nano-bubble aeration
+            </span>
+        </span>
+    </a>
+
+    <!-- MOBILE MENU -->
+    <input type="checkbox"
+           title="Navigation menu"
+           class="navbar-toggler"
+           id="nav-toggle" />
+
+    <label class="navbar-toggler-btn"
+           for="nav-toggle"
+           aria-label="Toggle navigation">
+        <i class="bi bi-list"></i>
+    </label>
+
+    <!-- NAVIGATION LINKS -->
+    <nav class="nav-links"
+         onclick="document.getElementById('nav-toggle').checked = false">
+
+        <!-- 1. HOME -->
+        <a class="nav-link" 
+           href="#" 
+           data-section="hero" 
+           @onclick='() => GoToHomeSection("hero")'
+           @onclick:preventDefault="true">
+            @Loc.T("nav.home", "Home")
+        </a>
+
+        <!-- 2. PRODUCTS -->
+        <!-- No data-section: this is a real route, its highlight is owned
+             entirely by NavLink's own routing-based active state, not the
+             scroll-spy that drives the other (same-page anchor) links. -->
+        <NavLink class="nav-link"
+                 href="products">
+            @Loc.T("nav.products", "Products")
+        </NavLink>
+
+        <!-- 3. TECHNOLOGY -->
+        <a class="nav-link"
+           href="#"
+           data-section="technology"
+           @onclick='() => GoToHomeSection("technology")'
+           @onclick:preventDefault="true">
+            @Loc.T("nav.tech", "Technology")
+        </a>
+
+        <!-- 4. RESULTS -->
+        <a class="nav-link"
+           href="#"
+           data-section="results"
+           @onclick='() => GoToHomeSection("results")'
+           @onclick:preventDefault="true">
+            @Loc.T("nav.results", "Results")
+        </a>
+
+        <!-- 5. FIELD FOOTAGE -->
+        <a class="nav-link"
+           href="#"
+           data-section="field-footage"
+           @onclick='() => GoToHomeSection("field-footage")'
+           @onclick:preventDefault="true">
+            @Loc.T("nav.footage", "Field Footage")
+        </a>
+
+        <!-- 6. CONTACT -->
+        <a class="nav-link"
+           href="#"
+           data-section="free-demo"
+           @onclick='() => GoToHomeSection("free-demo")'
+           @onclick:preventDefault="true">
+            @Loc.T("nav.contact", "Contact")
+        </a>
     </nav>
+
 </div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        Loc.OnChange += StateHasChanged;
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        var relative = NavigationManager.ToBaseRelativePath(e.Location).Split('?')[0];
+        var isHome = string.IsNullOrEmpty(relative);
+
+        if (isHome)
+        {
+            return;
+        }
+
+        // The Home page's scroll-spy sets "active" on whichever section link
+        // (Home/Technology/Results/Field Footage/Contact) was last in view.
+        // That highlight has no meaning once we've navigated to another page,
+        // so clear it — otherwise it stays stuck on the last section visited.
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("oxynitiScroll.clearActive");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[NavMenu] Error clearing scroll-spy active state: {ex}");
+        }
+    }
+
+    private async Task GoToHomeSection(string sectionId)
+    {
+        var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var isHome = string.IsNullOrEmpty(relative) || relative.StartsWith("?");
+
+        if (isHome)
+        {
+            // Keep the address bar in sync with whatever section we're
+            // scrolling to, without going through NavigationManager —
+            // NavigateTo() resets scroll to the top on every call (even
+            // with replace:true), which fights the smooth-scroll below and
+            // causes a jump-to-top-then-back-down flash.
+            await JSRuntime.InvokeVoidAsync("oxynitiScroll.setUrlQuietly", $"/?scrollTo={sectionId}");
+
+            await JSRuntime.InvokeVoidAsync("oxynitiScroll.toId", sectionId);
+        }
+        else
+        {
+            NavigationManager.NavigateTo($"/?scrollTo={sectionId}");
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+}

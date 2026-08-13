@@ -1,0 +1,10 @@
+@inject LocalizationService Loc
+
+<a href="#free-demo" class="mobile-cta-bar">@Loc.T("mobile.bookDemo", "Book a Free Demo")</a>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

@@ -1,68 +1,73 @@
 ﻿@inject BusinessInfoService InfoService
+@inject LocalizationService Loc
 <div class="why-choose-section">
-    <h2 class="section-title">Why Choose @InfoService.ApplicationName</h2>
+    <h2 class="section-title">@Loc.T("benefits.h1", "Why Choose") @InfoService.ApplicationName</h2>
 
     <div class="features-container">
         <div class="features-list">
             <div class="feature-card">
                 <div class="feature-left">
-                    <h3 class="feature-title">Superior Oxygen Transfer Efficiency</h3>
+                    <h3 class="feature-title">@Loc.T("benefits.f1.title", "Superior Oxygen Transfer Efficiency")</h3>
                     <p class="feature-description">
-                        Engineered to deliver stable nanobubbles with high dissolution rates, 
-                        improving water quality faster than conventional aeration.
+                        @Loc.T("benefits.f1.desc", "Engineered to deliver stable nanobubbles with high dissolution rates, improving water quality faster than conventional aeration.")
                     </p>
                 </div>
                 <div class="feature-icon-img">
-                    <img src="/images/efficiency.png?v=1" alt="Fast Setup Icon" />
+                    <img src="/images/efficiency.png?v=1" alt="@Loc.T("benefits.f1.alt", "Fast Setup Icon")" />
                 </div>
             </div>
 
             <div class="feature-card">
                 <div class="feature-left">
-                    <h3 class="feature-title">Robust Stainless-Steel Construction</h3>
+                    <h3 class="feature-title">@Loc.T("benefits.f2.title", "Robust Stainless-Steel Construction")</h3>
                     <p class="feature-description">
-                        Durable, corrosion-resistant design built for harsh aquaculture and wastewater environments, 
-                        ensuring long service life.
+                        @Loc.T("benefits.f2.desc", "Durable, corrosion-resistant design built for harsh aquaculture and wastewater environments, ensuring long service life.")
                     </p>
                 </div>
                 <div class="feature-icon-img">
-                    <img src="/images/precision.png?v=1" alt="Precision Icon" />
+                    <img src="/images/precision.png?v=1" alt="@Loc.T("benefits.f2.alt", "Precision Icon")" />
                 </div>
             </div>
 
             <div class="feature-card">
                 <div class="feature-left">
-                    <h3 class="feature-title">Proven Field Performance</h3>
+                    <h3 class="feature-title">@Loc.T("benefits.f3.title", "Proven Field Performance")</h3>
                     <p class="feature-description">
-                        100+ systems deployed across Andhra Pradesh and Karnataka with consistent results in farms, 
-                        treatment plants, and research setups.
+                        @Loc.T("benefits.f3.desc", "100+ systems deployed across Andhra Pradesh and Karnataka with consistent results in farms, treatment plants, and research setups.")
                     </p>
                 </div>
                 <div class="feature-icon-img">
-                    <img src="/images/performance.png?v=1" alt="Rugged Design Icon" />
+                    <img src="/images/performance.png?v=1" alt="@Loc.T("benefits.f3.alt", "Rugged Design Icon")" />
                 </div>
             </div>
 
             <div class="feature-card">
                 <div class="feature-left">
-                    <h3 class="feature-title">Low Maintenance, High Reliability</h3>
+                    <h3 class="feature-title">@Loc.T("benefits.f4.title", "Low Maintenance, High Reliability")</h3>
                     <p class="feature-description">
-                        Efficient pump design, minimal clogging, and simplified servicing reduce downtime and operational costs.
+                        @Loc.T("benefits.f4.desc", "Efficient pump design, minimal clogging, and simplified servicing reduce downtime and operational costs.")
                     </p>
                 </div>
                 <div class="feature-icon-img">
-                    <img src="/images/maintenance.png?v=1" alt="Custom Icon" />
+                    <img src="/images/maintenance.png?v=1" alt="@Loc.T("benefits.f4.alt", "Custom Icon")" />
                 </div>
             </div>
         </div>
 
         <div class="product-showcase">
-            <img src="/images/nanobubble.png?v=1" alt="Nano bubble" />
+            <img src="/images/nanobubble.png?v=1" alt="@Loc.T("benefits.showcaseAlt", "Nano bubble")" />
         </div>
     </div>
 
     <div class="actions">
-        <a href="products" class="btn btn-primary">Explore Our Products</a>
-        <a href="contact" class="btn btn-secondary">Request a Custom Solution</a>
+        <a href="products" class="btn btn-primary">@Loc.T("benefits.cta1", "Explore Our Products")</a>
+        <a href="contact" class="btn btn-secondary">@Loc.T("benefits.cta2", "Request a Custom Solution")</a>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

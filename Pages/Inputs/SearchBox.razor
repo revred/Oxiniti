@@ -1,9 +1,10 @@
 ﻿@inject NavigationManager NavigationManager
+@inject LocalizationService Loc
 
 <div class="search-container">
     <div class="search-box">
         <i class="bi bi-search search-icon"></i>
-        <input type="text" placeholder="Search" class="search-input" @bind="SearchTerm" @bind:event="oninput"/>
+        <input type="text" placeholder="@Loc.T("nav.search", "Search")" class="search-input" @bind="SearchTerm" @bind:event="oninput"/>
     </div>
 </div>
 
@@ -16,6 +17,11 @@
 
     [Parameter]
     public EventCallback<string> OnSearch { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
 
     private async Task SearchKeyPress(KeyboardEventArgs e)
     {

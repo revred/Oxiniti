@@ -1,0 +1,54 @@
+@inject LocalizationService Loc
+
+<div class="faq-section" id="faq">
+    <span class="kicker">@Loc.T("faq.kicker", "Frequently asked questions")</span>
+    <h2 class="section-title">@Loc.T("faq.title", "Still have questions?")</h2>
+    <p class="section-lead">@Loc.T("faq.lead", "Everything farmers usually ask us before their first demo.")</p>
+
+    <div class="faq-list">
+        @for (var i = 0; i < Faqs.Count; i++)
+        {
+            var index = i;
+            var faq = Faqs[index];
+            <div class="faq-item @(OpenIndex == index ? "open" : "")">
+                <button class="faq-question" @onclick="() => Toggle(index)"
+                        aria-expanded="@(OpenIndex == index ? "true" : "false")">
+                    <span>@Loc.T($"faq.q{index + 1}", faq.Question)</span>
+                    <i class="bi @(OpenIndex == index ? "bi-dash-lg" : "bi-plus-lg")"></i>
+                </button>
+                @if (OpenIndex == index)
+                {
+                    <div class="faq-answer">
+                        <p>@Loc.T($"faq.a{index + 1}", faq.Answer)</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private int? OpenIndex = 0;
+
+    private void Toggle(int index) => OpenIndex = OpenIndex == index ? null : index;
+
+    private record Faq(string Question, string Answer);
+
+    private static readonly List<Faq> Faqs = new()
+    {
+        new("How does Oxyniti actually raise dissolved oxygen?",
+            "Oxyniti dissolves oxygen into the pond as a fine nano-bubble plume instead of just churning the surface like a paddle wheel. The bubbles are small enough to stay suspended and dissolve into the water column, so oxygen reaches the fish even overnight, when algae stop producing oxygen and DO crashes."),
+        new("How is this different from a paddle wheel aerator?",
+            "Paddle wheels mix the surface, but a lot of that oxygen escapes back into the air as fast as it goes in. Oxyniti's nano-bubbles have far more surface area and stay in the water longer, so more of the oxygen you're paying to add actually ends up dissolved."),
+        new("What results can I expect?",
+            "Typical ranges reported in published nano-bubble aquaculture studies and field trials: around 2× higher dissolved oxygen, +15% survival rate, and -15% feed conversion ratio, which opens up roughly +30% stocking density. Actual results vary with species, pond condition and management."),
+        new("Which species and pond types does it work for?",
+            "Tilapia/GIFT, Murrel, Pangasius, freshwater prawn, carp polyculture, and biofloc/RAS systems — on almost any pond, with install completed in about a day."),
+        new("Can I see it working on my own pond before I commit?",
+            "Yes. Our team installs a unit on your pond, measures dissolved oxygen before and after with a calibrated DO meter, and shows you the difference the same day — no obligation."),
+        new("How do I estimate the profit impact for my pond?",
+            "Use the profit calculator further up this page, or the Profit Calc button in the top bar — enter your pond size and species to see an estimate of the extra yield and margin."),
+        new("Where do you currently install?",
+            "We're currently serving Tamil Nadu and South India."),
+    };
+}

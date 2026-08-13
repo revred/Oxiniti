@@ -1,46 +1,54 @@
 @page "/sitemap"
+@inject LocalizationService Loc
 
-<PageTitle>Sitemap - Oxyniti</PageTitle>
+<PageTitle>@Loc.T("sitemap.pagetitle", "Sitemap - Oxyniti")</PageTitle>
 
-<h2 class="section-title">Sitemap</h2>
+<h2 class="section-title">@Loc.T("sitemap.title", "Sitemap")</h2>
 
 <div class="content-section">
-    <h5>Shop</h5>
+    <h5>@Loc.T("sitemap.shop", "Shop")</h5>
     <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/products">Products</a></li>
-        <li><a href="/cart">Cart</a></li>
-        <li><a href="/orders">Your Orders</a></li>
-        <li><a href="/account">Account</a></li>
+        <li><a href="/">@Loc.T("sitemap.home", "Home")</a></li>
+        <li><a href="/products">@Loc.T("sitemap.products", "Products")</a></li>
+        <li><a href="/cart">@Loc.T("sitemap.cart", "Cart")</a></li>
+        <li><a href="/orders">@Loc.T("sitemap.orders", "Your Orders")</a></li>
+        <li><a href="/account">@Loc.T("sitemap.account", "Account")</a></li>
     </ul>
 
-    <h5>Company</h5>
+    <h5>@Loc.T("sitemap.company", "Company")</h5>
     <ul>
-        <li><a href="/about">About</a></li>
-        <li><a href="/contact">Contact</a></li>
-        <li><a href="/blogs">Blog</a></li>
-        <li><a href="/documentation">Documentation</a></li>
+        <li><a href="/about">@Loc.T("sitemap.about", "About")</a></li>
+        <li><a href="/contact">@Loc.T("sitemap.contact", "Contact")</a></li>
+        <li><a href="/blogs">@Loc.T("sitemap.blog", "Blog")</a></li>
+        <li><a href="/documentation">@Loc.T("sitemap.documentation", "Documentation")</a></li>
     </ul>
 
-    <h5>Support</h5>
+    <h5>@Loc.T("sitemap.support", "Support")</h5>
     <ul>
-        <li><a href="/faqs">FAQs</a></li>
-        <li><a href="/installation-guides">Installation Guides</a></li>
-        <li><a href="/warranty">Warranty &amp; Returns</a></li>
-        <li><a href="/shipping">Shipping Info</a></li>
-        <li><a href="/quote">Request a Custom Quote</a></li>
+        <li><a href="/faqs">@Loc.T("sitemap.faqs", "FAQs")</a></li>
+        <li><a href="/installation-guides">@Loc.T("sitemap.installguides", "Installation Guides")</a></li>
+        <li><a href="/warranty">@Loc.T("sitemap.warranty", "Warranty & Returns")</a></li>
+        <li><a href="/shipping">@Loc.T("sitemap.shipping", "Shipping Info")</a></li>
+        <li><a href="/quote">@Loc.T("sitemap.quote", "Request a Custom Quote")</a></li>
     </ul>
 
-    <h5>Account</h5>
+    <h5>@Loc.T("sitemap.accountsection", "Account")</h5>
     <ul>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/register">Register</a></li>
+        <li><a href="/login">@Loc.T("sitemap.login", "Login")</a></li>
+        <li><a href="/register">@Loc.T("sitemap.register", "Register")</a></li>
     </ul>
 
-    <h5>Legal</h5>
+    <h5>@Loc.T("sitemap.legal", "Legal")</h5>
     <ul>
-        <li><a href="/terms">Terms &amp; Conditions</a></li>
-        <li><a href="/privacy">Privacy Policy</a></li>
-        <li><a href="/sitemap">Sitemap</a></li>
+        <li><a href="/terms">@Loc.T("sitemap.terms", "Terms & Conditions")</a></li>
+        <li><a href="/privacy">@Loc.T("sitemap.privacy", "Privacy Policy")</a></li>
+        <li><a href="/sitemap">@Loc.T("sitemap.title", "Sitemap")</a></li>
     </ul>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

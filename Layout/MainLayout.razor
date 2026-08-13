@@ -5,102 +5,238 @@
 @inject IOptions<RampEdgeSettings> MakerSettings
 @inject IJSRuntime JSRuntime
 @inject IMakerClient MakerClient
+@inject LocalizationService Loc
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <div class="nav-search-wrapper">
+    <header class="site-header">
+
+        <!-- LEFT : LOGO + NAVIGATION -->
+        <NavMenu />
+
+        <!-- RIGHT : ACTIONS -->
+        <div class="header-actions">
+
+            <!-- Search -->
+            <div class="header-search">
                 <Oxyniti.Pages.Inputs.SearchBox />
             </div>
 
-            <div class="top-nav-actions">
-                @if (!AuthenticationService.IsAuthenticated)
-                {
-                    <div class="nav-item-wrapper">
-                        <a href="login" class="top-nav-link">
-                            <i class="bi bi-box-arrow-in-right"></i>
-                            Login
-                        </a>
-                    </div>
-                }
 
-                <!-- Moved Cart to the beginning -->
-                <div class="nav-item-wrapper">
-                    <a href="cart" class="top-nav-link @(HighlightCart ? "cart-highlight" : "")">
-                        <i class="bi bi-cart"></i>
-                        Cart
-                        @if (CartCount > 0)
-                        {
-                            <span class="cart-badge">@CartCount</span>
-                        }
-                    </a>
-                </div>
+            <!-- Profit Calculator — scrolls to the ROI section on this page -->
+            <button class="header-icon-btn profit-btn"
+                    @onclick="GoToProfitCalculator"
+                    title="@Loc.T("roi.kicker", "Profit Calc")"
+                    aria-label="@Loc.T("roi.kicker", "Profit Calc")">
 
-                <!-- Moved User Icon to the end -->
-                @if (AuthenticationService.IsAuthenticated)
-                {
-                    <div class="nav-item-wrapper user-dropdown">
-                        <div class="user-icon" @onclick="HandleUserIconClick">
-                            @UserInitial
-                        </div>
-                        @if (IsUserMenuOpen)
-                        {
-                            <div id="user-menu" class="user-menu">
-                                <a href="account" class="user-menu-item">
-                                    <i class="bi bi-person-circle"></i> Account
-                                </a>
-                                @if (AuthenticationService.IsMakerAIUser == true)
-                                {
-                                    <a @onclick="GoToMakerAIAsync" target="_blank" class="user-menu-item">
-                                        <i class="bi bi-robot"></i> Go To Maker AI
-                                    </a>
-                                }
-                                <a href="/orders" class="user-menu-item">
-                                    <i class="bi bi-receipt"></i> My Orders
-                                </a>
-                                <a href="#" @onclick="Logout" class="user-menu-item">
-                                    <i class="bi bi-box-arrow-left"></i> Logout
-                                </a>
-                            </div>
-                        }
-                    </div>
-                }
+                <i class="bi bi-graph-up-arrow"></i>
+
+            </button>
+
+
+            <!-- WhatsApp — opens an external chat; unrelated to Profit Calculator -->
+            <a class="header-icon-btn whatsapp-btn"
+               href="@SiteContact.WhatsAppLink()"
+               target="_blank"
+               rel="noopener"
+               title="@Loc.T("nav.whatsapp", "Chat with us on WhatsApp")"
+               aria-label="@Loc.T("nav.whatsapp", "Chat with us on WhatsApp")">
+
+                <i class="bi bi-whatsapp"></i>
+
+            </a>
+
+
+            <!-- Language -->
+            <div class="language-control">
+
+                <span class="language-icon">
+                    <i class="bi bi-globe2"></i>
+                </span>
+
+                <select class="language-select"
+                        value="@Loc.CurrentLanguage"
+                        @onchange="OnLanguageChanged"
+                        aria-label="@Loc.T("nav.langSelect", "Website language")">
+
+                    @foreach (var lang in LocalizationService.Languages)
+                    {
+                        <option value="@lang.Code">
+                            @lang.Native
+                        </option>
+                    }
+
+                </select>
+
+                <i class="bi bi-chevron-down language-arrow"></i>
+
             </div>
+
+
+            <!-- Cart -->
+            <a href="cart"
+               class="cart-control @(HighlightCart ? "cart-highlight" : "")">
+
+                <i class="bi bi-cart3"></i>
+
+                <span class="cart-label">
+                    @Loc.T("nav.cart", "Cart")
+                </span>
+
+                @if (CartCount > 0)
+                {
+                    <span class="cart-badge">
+                        @CartCount
+                    </span>
+                }
+
+            </a>
+
+
+            <!-- User -->
+            @if (AuthenticationService.IsAuthenticated)
+            {
+                <div class="user-dropdown">
+
+                    <button class="user-avatar"
+                            @onclick="HandleUserIconClick"
+                            aria-label="User menu"
+                            title="@AuthenticationService.UserName">
+
+                        @UserInitial
+
+                    </button>
+
+
+                    @if (IsUserMenuOpen)
+                    {
+                        <div id="user-menu" class="user-menu">
+
+                            <a href="account"
+                               class="user-menu-item">
+
+                                <i class="bi bi-person-circle"></i>
+
+                                <span>
+                                    @Loc.T("menu.account", "Account")
+                                </span>
+
+                            </a>
+
+
+                            @if (AuthenticationService.IsMakerAIUser == true)
+                            {
+                                <a @onclick="GoToMakerAIAsync"
+                                   class="user-menu-item"
+                                   href="#">
+
+                                    <i class="bi bi-robot"></i>
+
+                                    <span>
+                                        @Loc.T("menu.makerai", "Go To Maker AI")
+                                    </span>
+
+                                </a>
+                            }
+
+
+                            <a href="/orders"
+                               class="user-menu-item">
+
+                                <i class="bi bi-receipt"></i>
+
+                                <span>
+                                    @Loc.T("menu.orders", "My Orders")
+                                </span>
+
+                            </a>
+
+
+                            <a href="#"
+                               @onclick="Logout"
+                               class="user-menu-item">
+
+                                <i class="bi bi-box-arrow-left"></i>
+
+                                <span>
+                                    @Loc.T("menu.logout", "Logout")
+                                </span>
+
+                            </a>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <!-- Login -->
+                <a href="login"
+                   class="login-avatar"
+                   title="@Loc.T("nav.login", "Login")"
+                   aria-label="@Loc.T("nav.login", "Login")">
+
+                    <i class="bi bi-person"></i>
+
+                </a>
+            }
 
         </div>
 
-        <article class="content px-4">
+    </header>
+
+
+    <!-- PAGE CONTENT -->
+    <main>
+        <article class="content">
             @Body
         </article>
     </main>
+
 </div>
+
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+
+    @Loc.T("err.unhandled", "An unhandled error has occurred.")
+
+    <a href="." class="reload">
+        @Loc.T("err.reload", "Reload")
+    </a>
+
+    <span class="dismiss">
+        🗙
+    </span>
+
 </div>
 
+
 @code {
+
     private int CartCount;
+
     private bool HighlightCart;
+
     private bool IsUserMenuOpen = false;
 
     private DotNetObjectReference<MainLayout>? _dotNetRef;
 
+
     private string UserInitial =>
         !string.IsNullOrWhiteSpace(AuthenticationService?.UserName)
             ? AuthenticationService.UserName[0].ToString().ToUpper()
-            : "G";
+            : "O";
+
 
     protected override async Task OnInitializedAsync()
     {
         AuthenticationService.OnChange += StateHasChanged;
+
         CartService.OnChange += UpdateCartCount;
+
+        Loc.OnChange += StateHasChanged;
+
 
         try
         {
@@ -108,8 +244,10 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MainLayout] Error initializing authentication: {ex}");
+            Console.WriteLine(
+                $"[MainLayout] Error initializing authentication: {ex}");
         }
+
 
         try
         {
@@ -117,11 +255,36 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MainLayout] Error syncing local cart: {ex}");
+            Console.WriteLine(
+                $"[MainLayout] Error syncing local cart: {ex}");
         }
+
+
+        try
+        {
+            await Loc.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"[MainLayout] Error initializing localization: {ex}");
+        }
+
 
         await UpdateCartCountAsync();
     }
+
+
+    private async Task OnLanguageChanged(ChangeEventArgs e)
+    {
+        var code = e.Value?.ToString();
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            await Loc.SetLanguageAsync(code);
+        }
+    }
+
 
     [JSInvokable]
     public async void CloseUserMenu()
@@ -129,39 +292,55 @@
         if (IsUserMenuOpen)
         {
             IsUserMenuOpen = false;
+
             StateHasChanged();
         }
-        await JSRuntime.InvokeVoidAsync("unregisterClickOutside", "user-menu");
+
+        await JSRuntime.InvokeVoidAsync(
+            "unregisterClickOutside",
+            "user-menu");
     }
+
 
     private async void HandleUserIconClick()
     {
         if (!AuthenticationService.IsAuthenticated)
             return;
 
+
         if (!IsUserMenuOpen)
         {
             IsUserMenuOpen = true;
+
             StateHasChanged();
 
-            // Ensure DOM is ready
             await Task.Yield();
 
-            _dotNetRef ??= DotNetObjectReference.Create(this);
+
+            _dotNetRef ??=
+                DotNetObjectReference.Create(this);
+
+
             await JSRuntime.InvokeVoidAsync(
                 "registerClickOutside",
                 "user-menu",
                 _dotNetRef,
-                "CloseUserMenu"
-            );
+                "CloseUserMenu");
         }
         else
         {
             IsUserMenuOpen = false;
-            await JSRuntime.InvokeVoidAsync("unregisterClickOutside", "user-menu");
+
+
+            await JSRuntime.InvokeVoidAsync(
+                "unregisterClickOutside",
+                "user-menu");
+
+
             StateHasChanged();
         }
     }
+
 
     private async Task Logout()
     {
@@ -171,8 +350,10 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MainLayout] Error during logout: {ex}");
+            Console.WriteLine(
+                $"[MainLayout] Error during logout: {ex}");
         }
+
 
         try
         {
@@ -180,62 +361,129 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MainLayout] Error clearing cart: {ex}");
+            Console.WriteLine(
+                $"[MainLayout] Error clearing cart: {ex}");
         }
+
 
         Nav.NavigateTo("/");
     }
 
-    private void UpdateCartCount() => _ = UpdateCartCountAsync();
+
+    private async Task GoToProfitCalculator()
+    {
+        var relative =
+            Nav.ToBaseRelativePath(Nav.Uri);
+
+        var isHome =
+            string.IsNullOrEmpty(relative)
+            || relative.StartsWith("?");
+
+
+        if (isHome)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync(
+                    "oxynitiScroll.toId",
+                    "profit-calculator");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"[MainLayout] Error scrolling to profit calculator: {ex}");
+            }
+        }
+        else
+        {
+            Nav.NavigateTo(
+                "/?scrollTo=profit-calculator");
+        }
+    }
+
+
+    private void UpdateCartCount()
+        => _ = UpdateCartCountAsync();
+
 
     private async Task UpdateCartCountAsync()
     {
         try
         {
-            var items = await CartService.GetCartItems();
-            CartCount = items.Count;
+            var items =
+                await CartService.GetCartItems();
+
+            CartCount =
+                items.Count;
+
 
             HighlightCart = true;
+
             StateHasChanged();
 
+
             await Task.Delay(1000);
+
+
             HighlightCart = false;
+
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MainLayout] Error updating cart count: {ex}");
+            Console.WriteLine(
+                $"[MainLayout] Error updating cart count: {ex}");
         }
     }
 
+
     bool IsGoToMakerAIRunning = false;
+
 
     private async Task GoToMakerAIAsync()
     {
-        if (IsGoToMakerAIRunning) return;
+        if (IsGoToMakerAIRunning)
+            return;
+
+
         IsGoToMakerAIRunning = true;
+
 
         try
         {
-            var result = await MakerClient.RequestSsoCodeAsync(body : new RequestSsoCodeRequest
-            {
-                AccessToken = AuthenticationService.AccessToken,
-                RefreshToken = AuthenticationService.RefreshToken
-            });
+            var result =
+                await MakerClient.RequestSsoCodeAsync(
+                    body: new RequestSsoCodeRequest
+                    {
+                        AccessToken =
+                            AuthenticationService.AccessToken,
+
+                        RefreshToken =
+                            AuthenticationService.RefreshToken
+                    });
+
 
             if (!string.IsNullOrWhiteSpace(result.Code))
             {
-                string makerAiUrl = $"{MakerSettings.Value.MakerProductBaseUrl}?code={result.Code}";
-                await JSRuntime.InvokeVoidAsync("window.open", makerAiUrl, "_blank");
+                string makerAiUrl =
+                    $"{MakerSettings.Value.MakerProductBaseUrl}?code={result.Code}";
+
+
+                await JSRuntime.InvokeVoidAsync(
+                    "window.open",
+                    makerAiUrl,
+                    "_blank");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MainLayout] Error generating SSO code: {ex}");
+            Console.WriteLine(
+                $"[MainLayout] Error generating SSO code: {ex}");
         }
         finally
         {
             IsGoToMakerAIRunning = false;
         }
     }
+
 }

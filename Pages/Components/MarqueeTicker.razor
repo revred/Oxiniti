@@ -1,0 +1,18 @@
+@inject LocalizationService Loc
+
+<div class="marquee-ticker" aria-hidden="true">
+    <div class="marquee-track">
+        <span class="marquee-text">@MarqueeText</span>
+        <span class="marquee-text">@MarqueeText</span>
+    </div>
+</div>
+
+@code {
+    private string MarqueeText =>
+        Loc.T("marquee", "More Oxygen ◦ Faster Growth ◦ Higher Profit ◦ Better FCR ◦ Healthier Fish ◦ Higher Survival ◦ Lower Feed Cost ◦ More Profit ◦ ");
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

@@ -1,8 +1,9 @@
 ﻿@page "/orders"
 @inject IMakerClient MakerClient
 @inject NavigationManager Nav
+@inject LocalizationService Loc
 
-<h2 class="mb-4">Your Orders</h2>
+<h2 class="mb-4">@Loc.T("orders.title", "Your Orders")</h2>
 
 @if (UserOrders is null)
 {
@@ -60,12 +61,12 @@
                 </div>
             </div>
         }
-        <span class="visually-hidden" role="status">Loading your orders…</span>
+        <span class="visually-hidden" role="status">@Loc.T("orders.loading", "Loading your orders…")</span>
     </div>
 }
 else if (!UserOrders.Any())
 {
-    <p>You have no orders yet.</p>
+    <p>@Loc.T("orders.empty", "You have no orders yet.")</p>
 }
 else
 {
@@ -102,38 +103,38 @@ else
 
                                 <div class="order-steps-inline">
                                     <span class="step @(currentStep >= 0 ? "done" : "pending")">
-                                        <i class="bi bi-bag-check"></i> Ordered
+                                        <i class="bi bi-bag-check"></i> @Loc.T("orders.step.ordered", "Ordered")
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep > 1 ? "done" : currentStep == 1 ? "current" : "pending")">
-                                        <i class="bi bi-gear"></i> Processing
+                                        <i class="bi bi-gear"></i> @Loc.T("orders.step.processing", "Processing")
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep > 2 ? "done" : currentStep == 2 ? "current" : "pending")">
-                                        <i class="bi bi-truck"></i> Shipped
+                                        <i class="bi bi-truck"></i> @Loc.T("orders.step.shipped", "Shipped")
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep > 3 ? "done" : currentStep == 3 ? "current" : "pending")">
-                                        <i class="bi bi-truck-front"></i> Out For Delivery
+                                        <i class="bi bi-truck-front"></i> @Loc.T("orders.step.outfordelivery", "Out For Delivery")
                                     </span>
                                     <span class="sep">—</span>
 
                                     <span class="step @(currentStep == 4 ? "current" : "pending")">
-                                        <i class="bi bi-check-circle"></i> Delivered
+                                        <i class="bi bi-check-circle"></i> @Loc.T("orders.step.delivered", "Delivered")
                                     </span>
                                 </div>
                             </div>
                             @* ---------- SECOND LINE---------- *@
                             <div class="text-muted small mt-1" title="@FormatIso(order.CreatedDate)">
-                                Placed: @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
+                                @Loc.T("orders.placed", "Placed:") @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
                             </div>
                         </div>
                         <div class="text-end ms-auto">
                             <div class="fw-bold">@FormatMoney(order.Price)</div>
-                            <div class="text-muted small">Order total</div>
+                            <div class="text-muted small">@Loc.T("orders.total", "Order total")</div>
                         </div>
                     </button>
                 </h2>
@@ -159,14 +160,14 @@ else
                                                 @item.Name
                                                 @if (canNavigate)
                                                 {
-                                                    <span class="text-primary small ms-2">View</span>
+                                                    <span class="text-primary small ms-2">@Loc.T("orders.item.view", "View")</span>
                                                 }
                                             </div>
                                             <div class="text-muted small">
-                                                Product ID: @item.BarID
-                                                &middot; Qty: @item.Quantity
-                                                &middot; Unit: @FormatMoney(item.Price)
-                                                &middot; Subtotal: @FormatMoney(item.Price * item.Quantity)
+                                                @Loc.T("orders.item.productid", "Product ID:") @item.BarID
+                                                &middot; @Loc.T("orders.item.qty", "Qty:") @item.Quantity
+                                                &middot; @Loc.T("orders.item.unit", "Unit:") @FormatMoney(item.Price)
+                                                &middot; @Loc.T("orders.item.subtotal", "Subtotal:") @FormatMoney(item.Price * item.Quantity)
                                             </div>
                                         </div>
                                     </li>
@@ -175,7 +176,7 @@ else
                         }
                         else
                         {
-                            <div class="text-muted">No items in this order</div>
+                            <div class="text-muted">@Loc.T("orders.noitems", "No items in this order")</div>
                         }
                     </div>
                 </div>
@@ -186,7 +187,7 @@ else
     <!-- Orders Pager -->
     @if (TotalPages > 1)
     {
-        <nav class="mt-4 text-center" aria-label="Orders page navigation">
+        <nav class="mt-4 text-center" aria-label="@Loc.T("orders.pagination.label", "Orders page navigation")">
             <ul class="pagination justify-content-center mb-0">
                 @for (int i = 1; i <= TotalPages; i++)
                 {
@@ -221,6 +222,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        Loc.OnChange += StateHasChanged;
         await LoadOrders();
     }
 
@@ -292,7 +294,7 @@ else
             }
         }
         catch { }
-        return "Unknown";
+        return Loc.T("orders.date.unknown", "Unknown");
     }
 
     private string FormatMoney(int cents) => (cents / 100.0m).ToString("C");
@@ -333,10 +335,10 @@ else
             var dt = DateTimeOffset.FromUnixTimeMilliseconds(ms).ToLocalTime();
             var delta = DateTimeOffset.Now - dt;
 
-            if (delta.TotalSeconds < 60) return "just now";
-            if (delta.TotalMinutes < 60) return $"{(int)delta.TotalMinutes} min ago";
-            if (delta.TotalHours < 24) return $"{(int)delta.TotalHours} h ago";
-            if (delta.TotalDays < 7) return $"{(int)delta.TotalDays} d ago";
+            if (delta.TotalSeconds < 60) return Loc.T("orders.time.justnow", "just now");
+            if (delta.TotalMinutes < 60) return $"{(int)delta.TotalMinutes} {Loc.T("orders.time.minago", "min ago")}";
+            if (delta.TotalHours < 24) return $"{(int)delta.TotalHours} {Loc.T("orders.time.hago", "h ago")}";
+            if (delta.TotalDays < 7) return $"{(int)delta.TotalDays} {Loc.T("orders.time.dago", "d ago")}";
             return dt.ToString("dd/MM/yyyy");
         }
         catch { return ""; }

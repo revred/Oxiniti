@@ -1,7 +1,7 @@
-﻿.site-footer {
-    background-color: #f5f5f5;
+.site-footer {
+    background: linear-gradient(180deg, #0B1F33 0%, #1C4E6E 100%);
     padding: 3rem 0 1.5rem;
-    color: #333;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .container {
@@ -32,12 +32,21 @@
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
+    color: #fff;
 }
 
 .tagline {
     margin-top: 0.25rem;
     font-size: 0.875rem;
-    color: #666;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.foot-desc {
+    margin-top: 0.85rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 320px;
 }
 
 .social-icons {
@@ -53,14 +62,14 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background-color: #ddd;
-        color: #555;
+        background-color: rgba(255, 255, 255, 0.12);
+        color: #fff;
         transition: all 0.2s ease;
     }
 
         .social-icons a:hover {
-            background-color: #7D00DF;
-            color: white;
+            background-color: #8DDCEE;
+            color: #0B1F33;
         }
 
 .footer-links {
@@ -80,6 +89,7 @@
         margin-top: 0;
         margin-bottom: 1rem;
         font-weight: 600;
+        color: #fff;
     }
 
     .footer-section ul {
@@ -93,25 +103,32 @@
     }
 
     .footer-section a {
-        color: #555;
+        color: rgba(255, 255, 255, 0.75);
         text-decoration: none;
         transition: color 0.2s ease;
     }
 
         .footer-section a:hover {
-            color: #7D00DF;
+            color: #8DDCEE;
         }
 
 .footer-bottom {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     padding-top: 1.5rem;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
 }
 
 .copyright {
     font-size: 0.875rem;
-    color: #777;
-    margin: 0;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.foot-made {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 @media (max-width: 768px) {
@@ -124,5 +141,8 @@
         flex-direction: column;
         gap: 1.5rem;
     }
-}
 
+    .footer-bottom {
+        justify-content: flex-start;
+    }
+}

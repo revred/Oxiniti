@@ -1,0 +1,26 @@
+.mobile-cta-bar {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-cta-bar {
+        display: block;
+        position: fixed;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 0.75rem;
+        z-index: 90;
+        text-align: center;
+        padding: 0.9rem 1.5rem;
+        border-radius: 0.5rem;
+        background-color: #1A2C54;
+        color: #ffffff;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .mobile-cta-bar:active {
+        background-color: #489FB5;
+    }
+}

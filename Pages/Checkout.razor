@@ -4,33 +4,34 @@
 @inject IMakerClient MakerClient
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager Nav
+@inject LocalizationService Loc
 
-<h2 class="mb-4">Checkout</h2>
+<h2 class="mb-4">@Loc.T("checkout.title", "Checkout")</h2>
 
 @if (!isReady)
 {
     <div class="d-flex align-items-center gap-2">
         <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-        <span>Loading checkout…</span>
+        <span>@Loc.T("checkout.loading", "Loading checkout…")</span>
     </div>
 }
 else if (addresses.Count == 0)
 {
     <div class="alert alert-info d-flex align-items-center justify-content-between">
         <div>
-            You don’t have any saved addresses yet. Add one to continue.
+            @Loc.T("checkout.noaddresses", "You don’t have any saved addresses yet. Add one to continue.")
         </div>
         <button class="btn btn-primary" @onclick="() => OpenEditor(new AddressDetails())">
-            <i class="bi bi-plus-lg"></i> Add Address
+            <i class="bi bi-plus-lg"></i> @Loc.T("checkout.addaddress", "Add Address")
         </button>
     </div>
 }
 else
 {
     <div class="mb-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Your Addresses</h5>
+        <h5 class="mb-0">@Loc.T("checkout.youraddresses", "Your Addresses")</h5>
         <button class="btn btn-primary" @onclick="() => OpenEditor(new AddressDetails())">
-            <i class="bi bi-plus-lg"></i> Add Address
+            <i class="bi bi-plus-lg"></i> @Loc.T("checkout.addaddress", "Add Address")
         </button>
     </div>
 
@@ -50,14 +51,14 @@ else
                                        checked="@isSelected"
                                        @onchange="@(_ => Select(addr.BarID))" />
                                 <label class="form-check-label fw-semibold" for="addr-@addr.BarID">
-                                    @(!string.IsNullOrWhiteSpace(addr.Site) ? addr.Site : "Unnamed")
+                                    @(!string.IsNullOrWhiteSpace(addr.Site) ? addr.Site : Loc.T("checkout.unnamed", "Unnamed"))
                                 </label>
                             </div>
                             <button type="button"
                                     class="btn btn-sm btn-outline-secondary"
-                                    title="Edit"
+                                    title="@Loc.T("checkout.edit", "Edit")"
                                     @onclick="() => OpenEditor(Clone(addr))">
-                                <i class="bi bi-pencil"></i> Edit
+                                <i class="bi bi-pencil"></i> @Loc.T("checkout.edit", "Edit")
                             </button>
                         </div>
 
@@ -86,7 +87,7 @@ else
                     {
                         <div class="card-footer bg-transparent border-0">
                             <button class="btn btn-success w-100" @onclick="ProceedWithSelected">
-                                Proceed to Payment
+                                @Loc.T("checkout.proceedtopayment", "Proceed to Payment")
                             </button>
                         </div>
                     }
@@ -98,9 +99,9 @@ else
     @if (selectedBarId == 0)
     {
         <div class="alert alert-warning mt-3">
-            Please select an address to continue.
+            @Loc.T("checkout.selectaddress", "Please select an address to continue.")
         </div>
-        <button class="btn btn-success mt-2" disabled>Proceed to Payment</button>
+        <button class="btn btn-success mt-2" disabled>@Loc.T("checkout.proceedtopayment", "Proceed to Payment")</button>
     }
 }
 
@@ -111,7 +112,7 @@ else
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@((editing.BarID > 0) ? "Edit Address" : "Add Address")</h5>
+                    <h5 class="modal-title">@((editing.BarID > 0) ? Loc.T("checkout.editaddress", "Edit Address") : Loc.T("checkout.addaddress", "Add Address"))</h5>
                     <button type="button" class="btn-close" aria-label="Close" @onclick="CloseEditor"></button>
                 </div>
                 <EditForm Model="editorVm" OnValidSubmit="SaveAsync">
@@ -121,34 +122,34 @@ else
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Site</label>
+                                <label class="form-label">@Loc.T("checkout.field.site", "Site")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Site" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email</label>
+                                <label class="form-label">@Loc.T("checkout.field.email", "Email")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Email" />
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Phone Number</label>
+                                <label class="form-label">@Loc.T("checkout.field.phone", "Phone Number")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.PhoneNumber" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">State/City</label>
+                                <label class="form-label">@Loc.T("checkout.field.state", "State/City")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.State" />
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">ZIP / Pincode</label>
+                                <label class="form-label">@Loc.T("checkout.field.pincode", "ZIP / Pincode")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Pincode" />
                             </div>
                             <div class="col-md-8">
-                                <label class="form-label">Country</label>
+                                <label class="form-label">@Loc.T("checkout.field.country", "Country")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Country" />
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Street Address</label>
+                                <label class="form-label">@Loc.T("checkout.field.address", "Street Address")</label>
                                 <InputTextArea class="form-control" rows="3" @bind-Value="editorVm.Address" />
                             </div>
                         </div>
@@ -159,14 +160,14 @@ else
                                 class="btn btn-outline-secondary"
                                 @onclick="CloseEditor"
                                 disabled="@saving">
-                            Cancel
+                            @Loc.T("checkout.cancel", "Cancel")
                         </button>
                         <button type="submit" class="btn btn-primary" disabled="@saving">
                             @if (saving)
                             {
                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                             }
-                            Save
+                            @Loc.T("checkout.save", "Save")
                         </button>
                     </div>
                 </EditForm>
@@ -186,6 +187,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        Loc.OnChange += StateHasChanged;
         await LoadAddressesAsync();
         isReady = true;
     }

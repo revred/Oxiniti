@@ -1,5 +1,6 @@
 ﻿@page "/services/{Key}"
 @inject BusinessInfoService InfoService
+@inject LocalizationService Loc
 
 <h3>@Key</h3>
 
@@ -11,13 +12,18 @@
 }
 else
 {
-    <p>Service not found.</p>
+    <p>@Loc.T("services.notfound", "Service not found.")</p>
 }
 
 @code {
     [Parameter] public string Key { get; set; } = string.Empty;
 
     public string? Value { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
 
     protected override void OnParametersSet()
     {

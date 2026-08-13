@@ -1,0 +1,36 @@
+@inject LocalizationService Loc
+
+<div class="results-section" id="results">
+    <span class="kicker">@Loc.T("res.kicker", "What it means for your harvest")</span>
+    <h2 class="section-title">@Loc.T("res.h2", "Oxygen is the cheapest growth promoter ever made.")</h2>
+
+    <div class="results-grid">
+        <div class="result-card">
+            <div class="big">2&times;</div>
+            <div class="cap">@Loc.T("r1.c", "Dissolved oxygen uplift")</div>
+        </div>
+        <div class="result-card">
+            <div class="big">+15%</div>
+            <div class="cap">@Loc.T("r2.c", "Higher survival rate")</div>
+        </div>
+        <div class="result-card">
+            <div class="big">&minus;15%</div>
+            <div class="cap">@Loc.T("r3.c", "Feed conversion ratio")</div>
+        </div>
+        <div class="result-card">
+            <div class="big">+30%</div>
+            <div class="cap">@Loc.T("r4.c", "Stocking density potential")</div>
+        </div>
+    </div>
+
+    <p class="fineprint">
+        @((MarkupString)Loc.T("res.fine", "*Figures are typical ranges reported in published nano-bubble aquaculture studies and field trials; results vary with species, pond condition and management. We prove it on <b>your</b> pond with a free DO-meter demo before you pay anything."))
+    </p>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

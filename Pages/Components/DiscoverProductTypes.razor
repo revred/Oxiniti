@@ -1,9 +1,10 @@
 ﻿@inject NavigationManager Nav
 @inject IJSRuntime JSRuntime
 @inject IMakerClient MakerClient
+@inject LocalizationService Loc
 
 <section class="types-section p-4 rounded-3 mb-5">
-    <h3 class="types-title mb-4">Discover Our Product Types</h3>
+    <h3 class="types-title mb-4">@Loc.T("discover.h1", "Discover Our Product Types")</h3>
     <div class="row g-4" >
         @if(ProductTypes is null)
         {
@@ -30,12 +31,12 @@
                     </div>
                 </div>
             }
-            <span class="visually-hidden" role="status">Loading product types…</span>
+            <span class="visually-hidden" role="status">@Loc.T("discover.loading", "Loading product types…")</span>
         }
         else if (ProductTypes.Count == 0)
         {
             <div class="col-12 text-center">
-                <p class="text-muted">No product types available.</p>
+                <p class="text-muted">@Loc.T("discover.empty", "No product types available.")</p>
             </div>
         }
         else
@@ -60,6 +61,11 @@
 
 @code {
     [Parameter] public ICollection<ProductData>? ProductTypes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
 
     protected override async Task OnInitializedAsync()
     {

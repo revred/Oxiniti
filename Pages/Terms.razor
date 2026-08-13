@@ -1,44 +1,45 @@
 @page "/terms"
 @inject BusinessInfoService InfoService
+@inject LocalizationService Loc
 
 <PageTitle>Terms &amp; Conditions - Oxyniti</PageTitle>
 
-<h2 class="section-title">Terms &amp; Conditions</h2>
+<h2 class="section-title">@Loc.T("terms.title", "Terms & Conditions")</h2>
 
 <div class="content-section">
     <p class="text-muted">
-        <em>Draft placeholder &mdash; pending final legal review and sign-off by @InfoService.ApplicationName before this page is treated as binding.</em>
+        <em>@string.Format(Loc.T("terms.disclaimer", "Draft placeholder — pending final legal review and sign-off by {0} before this page is treated as binding."), InfoService.ApplicationName)</em>
     </p>
 
-    <h5>Use of this site</h5>
+    <h5>@Loc.T("terms.use_title", "Use of this site")</h5>
     <p>
-        By browsing or purchasing through this site you agree to use it only for
-        lawful purposes and in accordance with these terms.
+        @Loc.T("terms.use_body", "By browsing or purchasing through this site you agree to use it only for lawful purposes and in accordance with these terms.")
     </p>
 
-    <h5>Orders and pricing</h5>
+    <h5>@Loc.T("terms.orders_title", "Orders and pricing")</h5>
     <p>
-        Product prices and availability are subject to change without notice.
-        We reserve the right to refuse or cancel any order for any reason,
-        including pricing errors or suspected fraud.
+        @Loc.T("terms.orders_body", "Product prices and availability are subject to change without notice. We reserve the right to refuse or cancel any order for any reason, including pricing errors or suspected fraud.")
     </p>
 
-    <h5>Intellectual property</h5>
+    <h5>@Loc.T("terms.ip_title", "Intellectual property")</h5>
     <p>
-        All content on this site, including product designs, images, and text,
-        is the property of @InfoService.ApplicationName and may not be reproduced
-        without permission.
+        @string.Format(Loc.T("terms.ip_body", "All content on this site, including product designs, images, and text, is the property of {0} and may not be reproduced without permission."), InfoService.ApplicationName)
     </p>
 
-    <h5>Limitation of liability</h5>
+    <h5>@Loc.T("terms.liability_title", "Limitation of liability")</h5>
     <p>
-        @InfoService.ApplicationName is not liable for indirect, incidental, or
-        consequential damages arising from the use of this site or its products,
-        to the extent permitted by applicable law.
+        @string.Format(Loc.T("terms.liability_body", "{0} is not liable for indirect, incidental, or consequential damages arising from the use of this site or its products, to the extent permitted by applicable law."), InfoService.ApplicationName)
     </p>
 
-    <h5>Contact</h5>
+    <h5>@Loc.T("terms.contact_title", "Contact")</h5>
     <p>
-        Questions about these terms can be sent through our <a href="/contact">Contact page</a>.
+        @((MarkupString)Loc.T("terms.contact_body", "Questions about these terms can be sent through our <a href=\"/contact\">Contact page</a>."))
     </p>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

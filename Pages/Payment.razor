@@ -8,6 +8,7 @@
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager Nav
 @inject IMakerClient MakerClient
+@inject LocalizationService Loc
 
 <div id="checkout-container" style="min-height:600px"></div>
 
@@ -17,6 +18,11 @@
     public string? Address { get; set; }
 
     private bool _mounted;
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

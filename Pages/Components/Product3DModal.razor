@@ -1,9 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Components
 @inject IJSRuntime JS
+@inject LocalizationService Loc
 
 <div>
     <button class="btn btn-primary" @onclick="() => ShowModal = true">
-        🔍 View 3D Model
+        🔍 @Loc.T("p3d.viewbutton", "View 3D Model")
     </button>
 </div>
 
@@ -13,7 +14,7 @@
         <div class="modal-dialog modal-xl" style="max-width:90vw;">
             <div class="modal-content" style="height:80vh;">
                 <div class="modal-header">
-                    <h5 class="modal-title">3D Viewer</h5>
+                    <h5 class="modal-title">@Loc.T("p3d.title", "3D Viewer")</h5>
                     <button type="button" class="btn-close" @onclick="Close"></button>
                 </div>
                 <div class="modal-body p-0" style="height:calc(80vh - 56px);">
@@ -49,5 +50,10 @@
     private void Close()
     {
         ShowModal = false;
+    }
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
     }
 }

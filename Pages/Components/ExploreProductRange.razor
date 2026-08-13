@@ -1,7 +1,9 @@
-﻿<div class="range-section mb-5">
-    <h2 class="display-5 fw-bold">Explore Our Product Range</h2>
+﻿@inject LocalizationService Loc
+
+<div class="range-section mb-5">
+    <h2 class="display-5 fw-bold">@Loc.T("explore.h1", "Explore Our Product Range")</h2>
     <p class="lead">
-        Discover Oxyniti's comprehensive range of high-precision
+        @Loc.T("explore.lead", "Discover Oxyniti's comprehensive range of high-precision")
     </p>
 
     <div class="search-wrapper">
@@ -9,7 +11,7 @@
         <input @bind-Value="SearchTerm"
                @bind-Value:event="oninput"
                class="form-control search-input"
-               placeholder="Search for products by name, type, or application" />
+               placeholder="@Loc.T("explore.searchPlaceholder", "Search for products by name, type, or application")" />
     </div>
 </div>
 
@@ -25,5 +27,10 @@
             if (value == SearchTerm) return;
             SearchTermChanged.InvokeAsync(value);
         }
+    }
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
     }
 }

@@ -3,11 +3,17 @@
 @inject CartService CartService
 @inject IJSRuntime JSRuntime
 @inject IAuthenticationService AuthenticationService
+@inject LocalizationService Loc
 
-<h2>Email Verified ✅</h2>
-<p>We're verifying your account. Please wait a moment...</p>
+<h2>@Loc.T("verify.title", "Email Verified ✅")</h2>
+<p>@Loc.T("verify.subtitle", "We're verifying your account. Please wait a moment...")</p>
 
 @code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
@@ -33,7 +39,7 @@
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Verification login failed: {ex.Message}");
-                    await JSRuntime.InvokeVoidAsync("alert", "Verification failed. Please try logging in manually.");
+                    await JSRuntime.InvokeVoidAsync("alert", Loc.T("verify.error.failed", "Verification failed. Please try logging in manually."));
                 }
             }
         }

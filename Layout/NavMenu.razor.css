@@ -67,8 +67,8 @@
     height: 100%;
     display: flex;
     align-items: center;
-    gap: 32px;
-    margin-right: 32px;
+    gap: 6px;
+    margin-right: 20px;
     flex-shrink: 1; /* Allow container to scale smoothly */
     min-width: 0; /* Required for a flex item to actually shrink below content size */
 
@@ -100,15 +100,25 @@
     justify-content: center;
     padding: 0;
     color: #e5ebf0;
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 500;
     text-decoration: none;
 
-    /* Enabled multi-line text wrapping */
+    /* Enabled multi-line text wrapping. overflow-wrap is needed in addition
+       to white-space: normal because translated labels (e.g. Tamil
+       "தயாரிப்புகள்", Malayalam "ഉൽപ്പന്നങ്ങൾ") are single unbroken words
+       with no space for the browser to wrap on — without it, such words
+       overflow their box horizontally instead of wrapping, which then gets
+       silently clipped by .nav-links' overflow-x: auto. Left flex-shrink at
+       its default (1) so the row negotiates down to what actually fits —
+       with wrapping enabled, a wrapped item's minimum content width is much
+       smaller than its unwrapped width, so shrinking mostly costs height
+       (an extra line), not legibility. */
     white-space: normal;
+    overflow-wrap: break-word;
     text-align: center;
-    line-height: 1.2;
-    max-width: 95px;
+    line-height: 1.25;
+    max-width: 140px;
 
     transition: color 0.2s ease, transform 0.2s ease;
 }
@@ -184,12 +194,13 @@
     }
 
     .nav-links {
-        gap: 26px;
-        margin-right: 24px;
+        gap: 8px;
+        margin-right: 18px;
     }
 
     ::deep .nav-link {
-        font-size: 16px;
+        font-size: 14px;
+        max-width: 108px;
     }
 }
 
@@ -213,13 +224,13 @@
     }
 
     .nav-links {
-        gap: 22px;
-        margin-right: 20px;
+        gap: 6px;
+        margin-right: 16px;
     }
 
     ::deep .nav-link {
-        font-size: 15px;
-        max-width: 85px; /* Adjust max-width on tighter screens */
+        font-size: 13px;
+        max-width: 92px; /* Adjust max-width on tighter screens */
     }
 }
 

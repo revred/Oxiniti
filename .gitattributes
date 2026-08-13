@@ -1,0 +1,13 @@
+# Sharc Maker Evolution backlog (Goal/Epic/Feature/Story/Task) -- append-only
+# event log. Two branches each appending independently must NEVER conflict:
+# git's built-in `union` merge driver concatenates+dedups lines from both
+# sides, and GoalsEngine (Sharc.Labs) dedups by `ev` + folds in Lamport-clock
+# order (Lclock/Actor/Ev), NOT file order -- so a union-merged interleaving
+# folds identically regardless of how the lines landed. See evolution.append
+# and goals.fold in Sharc.Labs/Sharc.Atomics.
+.sharc/evolution/events.jsonl merge=union
+.sharc/evolution/events/*.jsonl merge=union
+# NOTE: `union` is belt-and-braces for the same-shard case ONLY. It is applied by
+# git and NOT by GitHub, which ignores .gitattributes merge drivers -- that is why
+# PRs 5 and 6 conflicted on a shared events.jsonl while the local merge was clean.
+# Safety comes from the shards being disjoint, not from this line.

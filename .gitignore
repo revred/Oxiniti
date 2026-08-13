@@ -9,3 +9,27 @@
 /.vs/oxyniti
 /.vs/Oxyniti
 /.vs
+# Blue Sharc: .sharc/ is a mix of machine-local runtime caches (cracked
+# substrate .rac files, peer/provider configs with this machine's absolute
+# install path, session logs) and derived files (state.json/tree.json/
+# governance.json, 100% rebuilt from evolution/manifest.toml by tree.build on
+# every pull/merge/checkout via the post-merge/post-checkout hook). None of
+# that is shareable or should ever be hand-edited or committed -- only the
+# Goal/Epic/Feature/Story source of truth is.
+.sharc/*
+!.sharc/evolution
+.sharc/evolution/*
+# The event log IS the shared artifact: authoring appends here and every
+# developer needs it. The blanket .sharc/evolution/* rule above would swallow
+# it, leaving everyone with a PRIVATE backlog, so re-include it explicitly.
+!.sharc/evolution/events.jsonl
+# ...and the SHARD DIRECTORY. The log is one file per (actor, branch) so two
+# branches never write the same file -- that, not a merge driver, is what makes
+# concurrent PRs conflict-free. A negation cannot re-include a file whose parent
+# directory is excluded, so the directory is re-included first.
+!.sharc/evolution/events/
+!.sharc/evolution/events/*.jsonl
+# LEGACY: manifest.toml was the old committed intent store (retired 2026-08-03).
+# Two developers patching one TOML file conflicted on every concurrent edit.
+# Nothing reads it now; kept locally as history, no longer tracked.
+.sharc/evolution/manifest.toml

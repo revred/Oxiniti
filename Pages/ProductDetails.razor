@@ -4,6 +4,7 @@
 @inject CartService CartService
 @inject IAuthenticationService AuthenticationService
 @inject IMakerClient MakerClient
+@inject LocalizationService Loc
 
 <PageTitle>@(Detail?.Name ?? "Loading...")</PageTitle>
 
@@ -152,7 +153,7 @@ else
                                     <!-- Bottom-right expand button -->
                                     <button class="btn btn-light expand-3d-btn position-absolute bottom-0 end-0 m-2 z-3"
                                             type="button"
-                                            title="Expand 3D View"
+                                            title="@Loc.T("pd.threed.expand", "Expand 3D View")"
                                             @onclick="() => Open3DModal(asset.Url)">
                                         <i class="bi bi-arrows-fullscreen"></i>
                                     </button>
@@ -166,11 +167,11 @@ else
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
+                        <span class="visually-hidden">@Loc.T("pd.carousel.previous", "Previous")</span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
+                        <span class="visually-hidden">@Loc.T("pd.carousel.next", "Next")</span>
                     </button>
                 </div>
                 <div class="carousel-thumbs-container mt-3">
@@ -183,11 +184,11 @@ else
                                 @onclick="() => OnThumbnailClick(idx)">
                                 @if (asset.Is3DFile)
                                 {
-                                    <div class="thumb-3d-text">3D</div>
+                                    <div class="thumb-3d-text">@Loc.T("pd.thumb.3d", "3D")</div>
                                 }
                                 else
                                 {
-                                    <img src="@asset.Url" alt="Thumbnail" />
+                                    <img src="@asset.Url" alt="@Loc.T("pd.thumb.alt", "Thumbnail")" />
                                 }
                             </div>
                         }
@@ -203,10 +204,10 @@ else
                     @if (AuthenticationService.IsMakerAIUser == true)
                     {
                         <div class="d-inline-flex align-items-center gap-1 small bg-white rounded px-2 py-1 border mb-2">
-                            <span class="text-muted">FID:</span>
+                            <span class="text-muted">@Loc.T("pd.fid.label", "FID:")</span>
                             <code class="me-1">@Detail.FriendlyID</code>
                             <button class="btn btn-sm btn-outline-secondary"
-                                    title="Copy FriendlyID"
+                                    title="@Loc.T("pd.fid.copy", "Copy FriendlyID")"
                                     @onclick:stopPropagation
                                     @onclick="@(() => CopyDetailFIDAsync(Detail.FriendlyID))">
                                 @if (DetailCopyState == "copied")
@@ -224,11 +225,11 @@ else
                     <h2>@Detail.Name</h2>
                     <p class="fs-4 fw-bold text-purple">$@Detail.Price</p>
                     <div class="mb-3">
-                        <label class="form-label">Quantity</label>
+                        <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
                         <div class="d-inline-flex align-items-center">
-                            <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(-1)">–</button>
+                            <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.decrease", "Decrease quantity")" @onclick="() => ChangeQuantity(-1)">–</button>
                             <span class="px-3">@Quantity</span>
-                            <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(+1)">+</button>
+                            <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" @onclick="() => ChangeQuantity(+1)">+</button>
                         </div>
                     </div>
 
@@ -239,12 +240,12 @@ else
                         }
                         else
                         {
-                            <text>Add to cart</text>
+                            <text>@Loc.T("pd.cart.add", "Add to cart")</text>
                         }
                     </button>
                     @if(!AuthenticationService.IsAuthenticated){
                         <button class="btn btn-gradient w-100 mb-4">
-                            Login/Register to Buy
+                            @Loc.T("pd.auth.loginToBuy", "Login/Register to Buy")
                         </button>
                     }
 
@@ -264,7 +265,7 @@ else
         <!-- You May Also Like -->
         @if (AlsoLike?.Any() ?? false)
         {
-            <h4 class="mt-5 mb-3">You may also like</h4>
+            <h4 class="mt-5 mb-3">@Loc.T("pd.related.title", "You may also like")</h4>
             <div class="row g-4">
                 @foreach (var p in AlsoLike)
                 {
@@ -284,7 +285,6 @@ else
             </div>
         }
 
-        <ShopInsightsBanner/>
         <!-- Footer -->
         <Footer />
     </div>
@@ -294,7 +294,7 @@ else
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content bg-dark">
                 <div class="modal-header border-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@Loc.T("pd.modal.close", "Close")"></button>
                 </div>
                 <div class="modal-body p-0">
                     <iframe id="viewer3dFrame"
@@ -360,6 +360,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        Loc.OnChange += StateHasChanged;
+
         try
         {
             Detail = await MakerClient.ProductDetailsAsync(new ProductRequest
@@ -415,7 +417,10 @@ else
         {
             await CartService.AddToCart(Detail, Quantity);
 
-            AddedMessage = $"{Quantity} item{(Quantity > 1 ? "s" : "")} added!";
+            var itemWord = Quantity > 1
+                ? Loc.T("pd.cart.added.items", "items")
+                : Loc.T("pd.cart.added.item", "item");
+            AddedMessage = string.Format(Loc.T("pd.cart.added", "{0} {1} added!"), Quantity, itemWord);
             StateHasChanged();
 
             await Task.Delay(1000);

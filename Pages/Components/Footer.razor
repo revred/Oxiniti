@@ -1,4 +1,5 @@
-﻿@inject BusinessInfoService Info
+@inject BusinessInfoService Info
+@inject LocalizationService Loc
 
 <footer class="site-footer">
     <div class="container">
@@ -15,6 +16,10 @@
                     <p class="tagline">@Info.TagLine</p>
                 </div>
 
+                <p class="foot-desc">
+                    @Loc.T("foot.desc", "Nano-bubble aeration engineered for South Indian aquaculture. Prove it on your pond before you spend a rupee.")
+                </p>
+
                 <div>
                     @((MarkupString)Info.SocialMediaLinks)
                 </div>
@@ -22,40 +27,36 @@
 
             <div class="footer-links">
                 <div class="footer-section">
-                    <h4>Explore</h4>
+                    <h4>@Loc.T("foot.explore", "Explore")</h4>
                     <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/products">Products</a></li>
-                        <li><a href="/about">About</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                        <li><a href="/blogs">Blog</a></li>
+                        <li><a href="/#technology">@Loc.T("nav.tech", "Technology")</a></li>
+                        <li><a href="/#sky-view">@Loc.T("nav.sky", "Sky View")</a></li>
+                        <li><a href="/#results">@Loc.T("nav.results", "Results")</a></li>
+                        <li><a href="/#field-footage">@Loc.T("nav.footage", "Field Footage")</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>@Loc.T("foot.farmers", "Farmers")</h4>
                     <ul>
-                        <li><a href="/faqs">FAQs</a></li>
-                        <li><a href="/installation-guides">Installation Guides</a></li>
-                        <li><a href="/warranty">Warranty & Returns</a></li>
-                        <li><a href="/shipping">Shipping Info</a></li>
-                        <li><a href="/quote">Request a Custom Quote</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="/terms">Terms & Conditions</a></li>
-                        <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/sitemap">Sitemap</a></li>
+                        <li><a href="/#profit-calculator">@Loc.T("fl.roi", "Profit calculator")</a></li>
+                        <li><a href="/#free-demo">@Loc.T("fl.demo", "Free demo")</a></li>
+                        <li><a href="/#why-oxygen">@Loc.T("nav.why", "Why Oxygen")</a></li>
                     </ul>
                 </div>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <p class="copyright">@Info.CopyRightNotice</p>
+            <span class="copyright">@Info.CopyRightNotice</span>
+            <span class="foot-made">@Loc.T("foot.made", "Made with 💙 for the farmers of South India")</span>
         </div>
     </div>
 </footer>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

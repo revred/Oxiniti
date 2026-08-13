@@ -1,0 +1,76 @@
+@inject LocalizationService Loc
+
+<div class="profit-calculator-section" id="profit-calculator">
+    <span class="kicker">@Loc.T("roi.kicker", "Your profit")</span>
+    <h2 class="section-title">@Loc.T("roi.h2", "Slide to see what more oxygen is worth.")</h2>
+
+    <div class="calc-card">
+        <div class="calc-left">
+            <h3>@Loc.T("roi.h3", "Your pond")</h3>
+            <p class="sub">@Loc.T("roi.sub", "Move the sliders — estimates update instantly.")</p>
+
+            <div class="slider-row">
+                <div class="row-head">
+                    <label>@Loc.T("roi.size", "Pond size")</label>
+                    <output>@AcresLabel</output>
+                </div>
+                <input type="range" min="0.5" max="5" step="0.5" value="@Acres"
+                       @oninput="OnAcresChanged" />
+            </div>
+
+            <div class="slider-row">
+                <div class="row-head">
+                    <label>@Loc.T("roi.price", "Farm-gate price")</label>
+                    <output>@PriceLabel</output>
+                </div>
+                <input type="range" min="80" max="400" step="10" value="@PricePerKg"
+                       @oninput="OnPriceChanged" />
+            </div>
+        </div>
+
+        <div class="calc-right">
+            <span class="lbl">@Loc.T("roi.harv", "Estimated extra harvest")</span>
+            <div class="kg">+@LowKg.ToString("N0") &ndash; @HighKg.ToString("N0") @Loc.T("roi.kgyr", "kg / year")</div>
+            <hr />
+            <span class="lbl">@Loc.T("roi.rev", "Estimated extra revenue")</span>
+            <div class="value">@FmtInr(LowRevenue) &ndash; @FmtInr(HighRevenue)</div>
+            <p class="note">
+                @Loc.T("roi.note", "Illustrative only — assumes a semi-intensive baseline of ~2,500 kg/acre/year and a 20–30% yield uplift from improved DO, survival and FCR (range reported in published nano-bubble aquaculture studies). We validate real numbers on your pond during the free demo.")
+            </p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private const double BaseYieldKgPerAcre = 2500;
+    private const double UpliftLow = 0.20;
+    private const double UpliftHigh = 0.30;
+
+    private double Acres { get; set; } = 1;
+    private int PricePerKg { get; set; } = 120;
+
+    private double LowKg => Acres * BaseYieldKgPerAcre * UpliftLow;
+    private double HighKg => Acres * BaseYieldKgPerAcre * UpliftHigh;
+    private double LowRevenue => LowKg * PricePerKg;
+    private double HighRevenue => HighKg * PricePerKg;
+
+    private string AcresLabel => $"{Acres:0.#} {(Acres == 1 ? Loc.T("roi.acre", "acre") : Loc.T("roi.acres", "acres"))}";
+    private string PriceLabel => $"{FmtInr(PricePerKg)}{Loc.T("roi.perkg", "/kg")}";
+
+    private static string FmtInr(double n) => "₹" + Math.Round(n).ToString("N0");
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
+    private void OnAcresChanged(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out var v)) Acres = v;
+    }
+
+    private void OnPriceChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var v)) PricePerKg = v;
+    }
+}

@@ -1,12 +1,21 @@
-﻿<div class="help-banner text-center py-5 mb-5">
-    <h4 class="help-title">Need help choosing the right setup?</h4>
+﻿@inject LocalizationService Loc
+
+<div class="help-banner text-center py-5 mb-5">
+    <h4 class="help-title">@Loc.T("help.h1", "Need help choosing the right setup?")</h4>
     <p class="help-text mb-4">
-        Our team can guide you in selecting the ideal nanobubble solution for your specific water treatment requirements.
+        @Loc.T("help.p1", "Our team can guide you in selecting the ideal nanobubble solution for your specific water treatment requirements.")
     </p>
     <div class="button-row">
-        <button class="btn btn-primary btn-lg me-3">Request Custom Quote →</button>
+        <button class="btn btn-primary btn-lg me-3">@Loc.T("help.cta1", "Request Custom Quote →")</button>
         <button class="btn btn-outline-secondary btn-lg">
-            <i class="bi bi-question-circle me-2"></i>Help & FAQ
+            <i class="bi bi-question-circle me-2"></i>@Loc.T("help.cta2", "Help & FAQ")
         </button>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

@@ -1,25 +1,26 @@
 ﻿@page "/register"
 @inject NavigationManager Nav
 @inject IMakerClient MakerClient
+@inject LocalizationService Loc
 
 <div class="login-container">
     <div class="login-form">
-        <h2>Create Account ✨</h2>
-        <p class="subtitle">Join us today. It takes only a few steps to get started!</p>
+        <h2>@Loc.T("register.title", "Create Account ✨")</h2>
+        <p class="subtitle">@Loc.T("register.subtitle", "Join us today. It takes only a few steps to get started!")</p>
 
         <div class="form-group">
-            <label>Email</label>
-            <input @bind="email" type="email" placeholder="Example@email.com" />
+            <label>@Loc.T("register.email", "Email")</label>
+            <input @bind="email" type="email" placeholder="@Loc.T("register.email.placeholder", "Example@email.com")" />
         </div>
 
         <div class="form-group">
-            <label>Password</label>
-            <input @bind="password" type="password" placeholder="at least 8 characters" />
+            <label>@Loc.T("register.password", "Password")</label>
+            <input @bind="password" type="password" placeholder="@Loc.T("register.password.placeholder", "at least 8 characters")" />
         </div>
 
         <div class="form-group">
-            <label>Confirm Password</label>
-            <input @bind="confirmPassword" type="password" placeholder="repeat your password" />
+            <label>@Loc.T("register.confirmpassword", "Confirm Password")</label>
+            <input @bind="confirmPassword" type="password" placeholder="@Loc.T("register.confirmpassword.placeholder", "repeat your password")" />
         </div>
 
         @if (!string.IsNullOrEmpty(errorMessage))
@@ -32,14 +33,14 @@
         }
 
         <button class="primary-button" @onclick="OnRegister" disabled="@isBusy">
-            @(isBusy ? "Registering..." : "Sign up")
+            @(isBusy ? Loc.T("register.registering", "Registering...") : Loc.T("register.signup", "Sign up"))
         </button>
 
         <div class="separator">
-            <span>Or</span>
+            <span>@Loc.T("register.or", "Or")</span>
         </div>
         <div class="signup-link">
-            Already have an account? <a href="/login">Sign in</a>
+            @Loc.T("register.hasaccount", "Already have an account?") <a href="/login">@Loc.T("register.signin", "Sign in")</a>
         </div>
     </div>
 
@@ -56,6 +57,11 @@
     private string successMessage = string.Empty;
     private bool isBusy = false;
 
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
     private async Task OnRegister()
     {
         errorMessage = string.Empty;
@@ -63,19 +69,19 @@
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
         {
-            errorMessage = "Please fill in all fields.";
+            errorMessage = Loc.T("register.error.fillfields", "Please fill in all fields.");
             return;
         }
 
         if (password != confirmPassword)
         {
-            errorMessage = "Passwords do not match.";
+            errorMessage = Loc.T("register.error.mismatch", "Passwords do not match.");
             return;
         }
 
         if (!IsPasswordStrong(password))
         {
-            errorMessage = "Password must be at least 8 characters long and contain uppercase, lowercase, digit, and special character.";
+            errorMessage = Loc.T("register.error.weak", "Password must be at least 8 characters long and contain uppercase, lowercase, digit, and special character.");
             return;
         }
 
@@ -94,7 +100,7 @@
             }
             else
             {
-                errorMessage = result?.Message ?? "Registration failed. Please try again.";
+                errorMessage = result?.Message ?? Loc.T("register.error.failed", "Registration failed. Please try again.");
                 Console.WriteLine($"[Register] Failed: {errorMessage}");
             }
         }

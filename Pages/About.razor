@@ -1,15 +1,22 @@
 ﻿@page "/about"
 @inject BusinessInfoService InfoService
+@inject LocalizationService Loc
 
-<h2 class="section-title">About @InfoService.ApplicationName</h2>
+<h2 class="section-title">@Loc.T("about.title", "About") @InfoService.ApplicationName</h2>
 
 <div class="content-section">
     <p>
-        Revaron designs and manufactures high-efficiency nanobubble generators for aquaculture, wastewater treatment, and hydroponics.
-        Built with robust stainless-steel engineering, our systems deliver superior oxygen dissolution, low maintenance, and long-term reliability.
+        @Loc.T("about.p1", "Oxyniti designs and manufactures high-efficiency nanobubble generators for aquaculture, wastewater treatment, and hydroponics. Built with robust stainless-steel engineering, our systems deliver superior oxygen dissolution, low maintenance, and long-term reliability.")
     </p>
     <p>
-        With 100+ installations across India, we provide scalable, energy-efficient oxygenation solutions that enhance water quality and support sustainable operations.
+        @Loc.T("about.p2", "With 100+ installations across India, we provide scalable, energy-efficient oxygenation solutions that enhance water quality and support sustainable operations.")
     </p>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}
 

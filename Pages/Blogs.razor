@@ -1,3 +1,11 @@
 ﻿@page "/blogs"
+@inject LocalizationService Loc
 
 <ComingSoon/>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

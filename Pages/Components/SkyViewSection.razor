@@ -1,0 +1,28 @@
+@inject LocalizationService Loc
+
+<div class="sky-view-section" id="sky-view">
+    <span class="kicker">@Loc.T("sky.kicker", "See it from the sky")</span>
+    <h2 class="section-title">@Loc.T("sky.h2", "Watch a pond come alive — from the sky.")</h2>
+    <p class="section-lead">
+        @Loc.T("sky.p", "Real footage from a live Oxyniti trial. Two units, one working pond — the milky plumes you see are pure oxygen going into solution.")
+    </p>
+
+    <div class="drone-stage">
+        <video autoplay muted loop playsinline poster="/images/drone-poster.jpg">
+            <source src="/videos/drone.mp4" type="video/mp4" />
+        </video>
+        <div class="rec-badge"><i></i><span>@Loc.T("sky.rec", "DRONE · LIVE TRIAL")</span></div>
+        <div class="hud-chips">
+            <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c1", "Unit 1 · nano-plume active")</div>
+            <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c2", "DO rising across pond")</div>
+            <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c3", "Field trial · South India")</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

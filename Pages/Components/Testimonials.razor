@@ -1,7 +1,15 @@
 ﻿@inject BusinessInfoService InfoService
-<section >
-    <h2 class="section-title">Testimonials</h2>
+@inject LocalizationService Loc
+<section class="testimonials-section" id="testimonials">
+    <h2 class="section-title">@Loc.T("testi.h1", "Testimonials")</h2>
     <div>
         @((MarkupString)InfoService.Testimonials)
     </div>
 </section>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

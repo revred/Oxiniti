@@ -17,6 +17,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSingleton<CartService>();
 builder.Services.AddSingleton<BusinessInfoService>();
+builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddOptions<StripeSettings>()
     .BindConfiguration("Stripe");
 builder.Services.AddOptions<RampEdgeSettings>()

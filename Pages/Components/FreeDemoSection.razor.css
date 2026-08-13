@@ -1,0 +1,217 @@
+.free-demo-section {
+    padding: 3rem 0;
+}
+
+.kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3D8FB5;
+    margin-bottom: 0.75rem;
+}
+
+.section-title {
+    color: #1A2C54;
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 1rem;
+}
+
+.grad-text {
+    background: linear-gradient(100deg, #3D8FB5, #8DDCEE);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.section-lead {
+    max-width: 560px;
+    color: #3a3a3a;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 1.75rem;
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 2.5rem;
+}
+
+.contact-rails {
+    display: grid;
+    gap: 1rem;
+}
+
+.rail {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(160deg, #ffffff 0%, #eaf4fa 100%);
+    border: 1px solid rgba(61, 143, 181, 0.16);
+    border-radius: 0.75rem;
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 4px 16px rgba(11, 31, 51, 0.07);
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+    .rail:hover {
+        border-color: #3D8FB5;
+        transform: translateX(6px);
+        box-shadow: 0 6px 20px rgba(11, 31, 51, 0.12);
+    }
+
+    .rail .ico {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        font-size: 1.25rem;
+        background: rgba(61, 143, 181, 0.12);
+    }
+
+    .rail b {
+        display: block;
+        color: #1A2C54;
+        font-size: 0.98rem;
+    }
+
+.rail-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.wa-ico {
+    background: rgba(37, 211, 102, 0.16) !important;
+}
+
+    .wa-ico i {
+        color: #25D366;
+        font-size: 1.3rem;
+    }
+
+.rail-sub {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.placeholder-note {
+    display: block;
+    font-size: 0.85rem;
+    color: #b45309;
+    font-style: italic;
+}
+
+.demo-form {
+    background: linear-gradient(160deg, #ffffff 0%, #eaf4fa 100%);
+    border: 1px solid rgba(61, 143, 181, 0.16);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(11, 31, 51, 0.08);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+    .field.full {
+        grid-column: 1 / -1;
+    }
+
+    .field label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #1A2C54;
+        letter-spacing: 0.03em;
+    }
+
+    .field ::deep input,
+    .field ::deep select {
+        background: #fff;
+        border: 1px solid rgba(11, 31, 51, 0.2);
+        border-radius: 0.5rem;
+        color: #1A2C54;
+        padding: 0.85rem 1rem;
+        font-size: 0.95rem;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+        .field ::deep input:focus,
+        .field ::deep select:focus {
+            border-color: #3D8FB5;
+            box-shadow: 0 0 0 3px rgba(61, 143, 181, 0.15);
+        }
+
+    .field ::deep input::placeholder {
+        color: rgba(11, 31, 51, 0.4);
+    }
+
+    .field ::deep select option {
+        background: #fff;
+    }
+
+.btn-warm {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #1A2C54;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.85rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+    .btn-warm:hover {
+        background-color: #489FB5;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+.form-status {
+    margin-top: 0.85rem;
+    color: #3D8FB5;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.form-note {
+    margin-top: 0.85rem;
+    color: #666;
+    font-size: 0.78rem;
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .demo-grid,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}

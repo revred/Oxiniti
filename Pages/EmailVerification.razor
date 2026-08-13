@@ -1,14 +1,22 @@
 ﻿@page "/email-verification"
+@inject LocalizationService Loc
 
 <div class="login-container">
     <div class="login-form">
-        <h2>Email Sent 📬</h2>
+        <h2>@Loc.T("emailverify.title", "Email Sent 📬")</h2>
         <p class="subtitle">
-            We've sent you an email with a verification link. Please check your inbox and confirm your email to complete your registration.
+            @Loc.T("emailverify.subtitle", "We've sent you an email with a verification link. Please check your inbox and confirm your email to complete your registration.")
         </p>
 
         <div class="signup-link">
-            Already verified? <a href="/login">Sign in</a>
+            @Loc.T("emailverify.alreadyverified", "Already verified?") <a href="/login">@Loc.T("emailverify.signin", "Sign in")</a>
         </div>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

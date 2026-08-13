@@ -1,0 +1,31 @@
+@inject LocalizationService Loc
+
+<div class="field-footage-section" id="field-footage">
+    <span class="kicker">@Loc.T("gal.kicker", "Field footage")</span>
+    <h2 class="section-title">@Loc.T("gal.h2", "No studio. No CGI. Just working ponds.")</h2>
+    <p class="section-lead">@Loc.T("gal.p", "Real footage and photos from a working farm during a live trial.")</p>
+
+    <div class="footage-grid">
+        <div class="footage-card video-card">
+            <video autoplay muted loop playsinline preload="metadata" src="/videos/plume-portrait.mp4"></video>
+            <div class="caption">@Loc.T("ff.cap1", "The nano-plume — oxygen dissolving in real time")</div>
+        </div>
+        <div class="footage-photos">
+            <div class="footage-card photo-card">
+                <img src="/images/unit-pondside.jpg" alt="Two Oxyniti units installed beside a fish pond" loading="lazy" />
+                <div class="caption">@Loc.T("ff.cap2", "On-site install — pond edge, ready to run")</div>
+            </div>
+            <div class="footage-card photo-card">
+                <img src="/images/unit-fishfarm.jpg" alt="Oxyniti units running at a family fish farm" loading="lazy" />
+                <div class="caption">@Loc.T("ff.cap3", "Family Fish Farm — live trial in progress")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

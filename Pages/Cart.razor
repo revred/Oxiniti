@@ -2,9 +2,10 @@
 @inject CartService CartService
 @inject NavigationManager Nav
 @inject IAuthenticationService AuthenticationService
+@inject LocalizationService Loc
 
 <div class="container py-5">
-    <h2 class="mb-4">Your Cart</h2>
+    <h2 class="mb-4">@Loc.T("cart.title", "Your Cart")</h2>
     @if (CartItems == null)
     {
         @foreach (var _ in Enumerable.Range(0, 3))   // show 3 skeleton rows while loading
@@ -41,11 +42,11 @@
                 </div>
             </div>
         }
-        <span class="visually-hidden" role="status">Loading your cart…</span>
+        <span class="visually-hidden" role="status">@Loc.T("cart.loading", "Loading your cart…")</span>
     }
     else if (!CartItems.Any())
     {
-        <p>Your cart is empty.</p>
+        <p>@Loc.T("cart.empty", "Your cart is empty.")</p>
     }
     else
     {
@@ -63,23 +64,23 @@
                     <p class="text-muted mb-2 description">
                         @Shorten(p.Description, 150)
                     </p>
-                    <p class="mb-2"><strong>Quantity:</strong> @p.Quantity</p>
+                    <p class="mb-2"><strong>@Loc.T("cart.quantity", "Quantity:")</strong> @p.Quantity</p>
                     <button class="btn btn-outline-danger btn-sm mb-2" @onclick="() => RemoveFromCart(p.Slug)">
-                        Remove
+                        @Loc.T("cart.remove", "Remove")
                     </button>
                 </div>
                 <div class="product-action col-auto">
                     <button class="btn btn-gradient btn-lg"
                             @onclick="@(() => Nav.NavigateTo($"/product/{p.Slug}"))">
-                        View Details →
+                        @Loc.T("cart.viewdetails", "View Details →")
                     </button>
                 </div>
             </div>
         }
 
         <div class="d-flex gap-3 mt-4">
-            <button class="btn btn-secondary" @onclick="ClearCart">Clear Cart</button>
-            <button class="btn btn-primary" @onclick="HandleCheckout">Proceed to Checkout</button>
+            <button class="btn btn-secondary" @onclick="ClearCart">@Loc.T("cart.clear", "Clear Cart")</button>
+            <button class="btn btn-primary" @onclick="HandleCheckout">@Loc.T("cart.proceedcheckout", "Proceed to Checkout")</button>
         </div>
     }
 </div>
@@ -89,6 +90,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Loc.OnChange += StateHasChanged;
         CartItems = await CartService.GetCartItems();
     }
 

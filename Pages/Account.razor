@@ -4,6 +4,7 @@
 @inject IMakerClient MakerClient
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager Nav
+@inject LocalizationService Loc
 
 <PageTitle>Your Account - Oxyniti</PageTitle>
 
@@ -11,30 +12,30 @@
 {
     <div class="d-flex align-items-center gap-2">
         <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-        <span>Loading account…</span>
+        <span>@Loc.T("account.loading", "Loading account…")</span>
     </div>
 }
 else
 {
-    <h2 class="mb-4">Your Account</h2>
+    <h2 class="mb-4">@Loc.T("account.title", "Your Account")</h2>
 
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title mb-3">Profile</h5>
-            <p class="mb-1"><strong>Email:</strong> @(email ?? "Unknown")</p>
+            <h5 class="card-title mb-3">@Loc.T("account.profile", "Profile")</h5>
+            <p class="mb-1"><strong>@Loc.T("account.email", "Email:")</strong> @(email ?? Loc.T("account.unknown", "Unknown"))</p>
         </div>
     </div>
 
     <div class="mb-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Your Addresses</h5>
+        <h5 class="mb-0">@Loc.T("account.addresses", "Your Addresses")</h5>
         <button class="btn btn-primary" @onclick="() => OpenEditor(new AddressDetails())">
-            <i class="bi bi-plus-lg"></i> Add Address
+            <i class="bi bi-plus-lg"></i> @Loc.T("account.addaddress", "Add Address")
         </button>
     </div>
 
     @if (addresses.Count == 0)
     {
-        <p class="text-muted">No saved addresses yet.</p>
+        <p class="text-muted">@Loc.T("account.noaddresses", "No saved addresses yet.")</p>
     }
     else
     {
@@ -46,13 +47,13 @@ else
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <span class="fw-semibold">
-                                    @(!string.IsNullOrWhiteSpace(addr.Site) ? addr.Site : "Unnamed")
+                                    @(!string.IsNullOrWhiteSpace(addr.Site) ? addr.Site : Loc.T("account.unnamed", "Unnamed"))
                                 </span>
                                 <button type="button"
                                         class="btn btn-sm btn-outline-secondary"
-                                        title="Edit"
+                                        title="@Loc.T("account.edit", "Edit")"
                                         @onclick="() => OpenEditor(Clone(addr))">
-                                    <i class="bi bi-pencil"></i> Edit
+                                    <i class="bi bi-pencil"></i> @Loc.T("account.edit", "Edit")
                                 </button>
                             </div>
                             <div class="mt-2 small text-muted">
@@ -78,7 +79,7 @@ else
     }
 
     <a href="/orders" class="btn btn-outline-dark">
-        <i class="bi bi-receipt"></i> View Your Orders
+        <i class="bi bi-receipt"></i> @Loc.T("account.vieworders", "View Your Orders")
     </a>
 }
 
@@ -89,7 +90,7 @@ else
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@((editing.BarID > 0) ? "Edit Address" : "Add Address")</h5>
+                    <h5 class="modal-title">@((editing.BarID > 0) ? Loc.T("account.editaddress", "Edit Address") : Loc.T("account.addaddress", "Add Address"))</h5>
                     <button type="button" class="btn-close" aria-label="Close" @onclick="CloseEditor"></button>
                 </div>
                 <EditForm Model="editorVm" OnValidSubmit="SaveAsync">
@@ -99,34 +100,34 @@ else
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Site</label>
+                                <label class="form-label">@Loc.T("account.field.site", "Site")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Site" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email</label>
+                                <label class="form-label">@Loc.T("account.email", "Email")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Email" />
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Phone Number</label>
+                                <label class="form-label">@Loc.T("account.field.phone", "Phone Number")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.PhoneNumber" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">State/City</label>
+                                <label class="form-label">@Loc.T("account.field.state", "State/City")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.State" />
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">ZIP / Pincode</label>
+                                <label class="form-label">@Loc.T("account.field.pincode", "ZIP / Pincode")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Pincode" />
                             </div>
                             <div class="col-md-8">
-                                <label class="form-label">Country</label>
+                                <label class="form-label">@Loc.T("account.field.country", "Country")</label>
                                 <InputText class="form-control" @bind-Value="editorVm.Country" />
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Street Address</label>
+                                <label class="form-label">@Loc.T("account.field.address", "Street Address")</label>
                                 <InputTextArea class="form-control" rows="3" @bind-Value="editorVm.Address" />
                             </div>
                         </div>
@@ -137,14 +138,14 @@ else
                                 class="btn btn-outline-secondary"
                                 @onclick="CloseEditor"
                                 disabled="@saving">
-                            Cancel
+                            @Loc.T("account.cancel", "Cancel")
                         </button>
                         <button type="submit" class="btn btn-primary" disabled="@saving">
                             @if (saving)
                             {
                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                             }
-                            Save
+                            @Loc.T("account.save", "Save")
                         </button>
                     </div>
                 </EditForm>
@@ -163,6 +164,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        Loc.OnChange += StateHasChanged;
+
         if (!AuthenticationService.IsAuthenticated)
         {
             Nav.NavigateTo("/login");

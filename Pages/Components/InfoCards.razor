@@ -1,16 +1,25 @@
-﻿<div class="info-cards row g-4">
+﻿@inject LocalizationService Loc
+
+<div class="info-cards row g-4">
     <div class="col-12 col-md-6">
         <div class="info-card p-4 h-100">
-            <h5>Catalog download</h5>
-            <p>Get our complete product catalog with detailed specifications and application cases.</p>
-            <button class="btn btn-dark">Download PDF →</button>
+            <h5>@Loc.T("info.c1.title", "Catalog download")</h5>
+            <p>@Loc.T("info.c1.desc", "Get our complete product catalog with detailed specifications and application cases.")</p>
+            <button class="btn btn-dark">@Loc.T("info.c1.cta", "Download PDF →")</button>
         </div>
     </div>
     <div class="col-12 col-md-6">
         <div class="info-card p-4 h-100">
-            <h5>Talk to our Representatives</h5>
-            <p>Schedule a phone call with our representative to solve your manufacturing problem.</p>
-            <button class="btn btn-dark">Arrange a Call →</button>
+            <h5>@Loc.T("info.c2.title", "Talk to our Representatives")</h5>
+            <p>@Loc.T("info.c2.desc", "Schedule a phone call with our representative to solve your manufacturing problem.")</p>
+            <button class="btn btn-dark">@Loc.T("info.c2.cta", "Arrange a Call →")</button>
         </div>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

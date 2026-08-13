@@ -1,120 +1,299 @@
-.navbar-toggler {
-    appearance: none;
-    cursor: pointer;
-    width: 3.5rem;
-    height: 2.5rem;
-    color: white;
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(255, 255, 255, 0.1);
-}
+/* =========================================================
+   NAVIGATION BAR
+   ========================================================= */
 
-    .navbar-toggler:checked {
-        background-color: rgba(255, 255, 255, 0.5);
-    }
-
-.top-row {
-    min-height: 5.5rem;
-    background-color: transparent;
+.nav-bar {
+    height: 100%;
     display: flex;
-    justify-content: center;
-    padding-top: 1rem;
+    align-items: center;
+    flex-shrink: 1;
+    min-width: 0;
 }
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
 
 .navbar-brand {
+    height: 100%;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
+    gap: 10px;
     padding: 0;
-}
-
-@media (max-width: 640.98px) {
-    .navbar-brand img {
-        height: 150px;
-    }
+    margin-right: 32px;
+    color: #ffffff;
+    text-decoration: none;
+    flex-shrink: 0;
 }
 
 .logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
-.brand-text {
+.brand-name {
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 750;
+    letter-spacing: -0.4px;
+    white-space: nowrap;
+}
+
+.brand-tag {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 0.6rem;
+    font-weight: 600;
+    /* Kept tighter than nbg's 0.22em: at this font size that spacing made
+       the tagline noticeably wider than the logo + name above it, eating
+       into the nav-links' space budget and pushing "Contact" out of view. */
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(220, 242, 238, 0.72);
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   NAVIGATION LINKS (Updated for Multi-line Text)
+   ========================================================= */
+
+.nav-links {
+    height: 100%;
     display: flex;
-    flex-direction: column;
-    color: white;
-    font-weight: bold;
-    font-size: 1.7rem;
-    line-height: 1.2;
-    letter-spacing: 1px;
-    margin-top: 0.5rem;
-    text-align: center;
+    align-items: center;
+    gap: 32px;
+    margin-right: 32px;
+    flex-shrink: 1; /* Allow container to scale smoothly */
+    min-width: 0; /* Required for a flex item to actually shrink below content size */
+
+    /* Safety net: if items still don't fit (e.g. more links added later),
+       scroll horizontally instead of pushing the right-side actions off-screen */
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-.brand-tagline {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-align: center;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 1rem;
-    margin-top: 1rem;
-}
-
-.nav-item {
-    font-size: 1rem;
-    text-align: center;
-    padding-bottom: 0.5rem;
-}
-
-    .nav-item:first-of-type {
-        padding-top: 0; /* Reduced to accommodate search box */
-    }
-
-    .nav-item:last-of-type {
-        padding-bottom: 1rem;
-    }
-
-    .nav-item ::deep .nav-link {
-        color: white;
-        background: none;
-        border: none;
-        height: 2.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 2.5rem;
-        width: 100%;
-        font-weight: 500;
-    }
-
-    .nav-item ::deep a.active {
-        font-weight: 600;
-    }
-
-    .nav-item ::deep .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
-    }
-
-.nav-scrollable {
+.nav-links::-webkit-scrollbar {
     display: none;
 }
-.navbar-toggler:checked ~ .nav-scrollable {
-    display: block;
+
+/*
+    ::deep is required here because "Products" renders through Blazor's
+    built-in <NavLink> component. Its <a> tag is emitted by that child
+    component, not authored directly in this file, so it never receives
+    this file's CSS-isolation scope attribute — without ::deep these
+    rules silently fail to match it while still matching the plain <a>
+    tags (Home, Technology, Results, Field Footage, Contact) authored
+    directly below, which made Products look permanently "unstyled".
+*/
+::deep .nav-link {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #e5ebf0;
+    font-size: 17px;
+    font-weight: 500;
+    text-decoration: none;
+
+    /* Enabled multi-line text wrapping */
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 95px;
+
+    transition: color 0.2s ease, transform 0.2s ease;
 }
-@media (min-width: 641px) {
-    .navbar-toggler {
-        display: none;
+
+/* Single underline rule for all links */
+::deep .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px; /* Adjusted slightly up to fit multi-line titles */
+    height: 2px;
+    border-radius: 2px;
+    background: #2de0e5;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 0 10px rgba(45, 224, 229, 0.45);
+}
+
+
+/* =========================================================
+   HOVER & ACTIVE STATES (Single Underline Fix)
+   ========================================================= */
+
+::deep .nav-link:hover,
+::deep .nav-link.active {
+    color: #2de0e5;
+}
+
+::deep .nav-link:hover {
+    transform: translateY(-1px);
+}
+
+::deep .nav-link:hover::after,
+::deep .nav-link.active::after {
+    opacity: 1;
+}
+
+/* Prevent double lines on child elements */
+::deep .nav-link * {
+    border-bottom: none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+.navbar-toggler {
+    display: none;
+}
+
+.navbar-toggler-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    color: #ffffff;
+    font-size: 25px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1350px) {
+    .navbar-brand {
+        margin-right: 24px;
     }
-    .nav-scrollable {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
-        /* Allow sidebar to scroll for tall menus */
-        height: calc(100vh - 10rem);
-        overflow-y: auto;
+
+    .nav-links {
+        gap: 26px;
+        margin-right: 24px;
+    }
+
+    ::deep .nav-link {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 1150px) {
+    .navbar-brand {
+        margin-right: 25px;
+    }
+
+    .logo {
+        width: 46px;
+        height: 46px;
+    }
+
+    .brand-name {
+        font-size: 21px;
+    }
+
+    .brand-tag {
+        font-size: 0.55rem;
+        letter-spacing: 0.06em;
+    }
+
+    .nav-links {
+        gap: 22px;
+        margin-right: 20px;
+    }
+
+    ::deep .nav-link {
+        font-size: 15px;
+        max-width: 85px; /* Adjust max-width on tighter screens */
+    }
+}
+
+@media (max-width: 860px) {
+    .nav-bar {
+        flex: 1;
+        position: relative;
+    }
+
+    .navbar-brand {
+        margin-right: 0;
+    }
+
+    .navbar-toggler-btn {
+        display: flex;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: -16px;
+        right: -16px;
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        margin-right: 0;
+        padding: 12px;
+        background: #020817;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .navbar-toggler:checked ~ .nav-links {
+        display: flex;
+    }
+
+    ::deep .nav-link {
+        height: 48px;
+        justify-content: flex-start;
+        padding: 0 15px;
+        border-radius: 8px;
+        font-size: 16px;
+        max-width: 100%; /* Reset max-width for mobile menu list */
+        text-align: left;
+    }
+
+    ::deep .nav-link:hover {
+        transform: none;
+        background: rgba(45, 224, 229, 0.06);
+    }
+
+    ::deep .nav-link:hover::after,
+    ::deep .nav-link.active::after {
+        left: 15px;
+        right: auto;
+        width: 30px;
+        bottom: 5px;
+    }
+}
+
+@media (max-width: 520px) {
+    .logo {
+        width: 42px;
+        height: 42px;
+    }
+
+    .brand-name {
+        font-size: 19px;
+    }
+
+    .brand-tag {
+        display: none; /* No room for the tagline once the logo/name itself is shrinking */
     }
 }

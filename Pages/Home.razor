@@ -1,18 +1,64 @@
-﻿@page "/"
+@page "/"
+@inject IJSRuntime JS
 
 <PageTitle>Oxyniti - Natural Innovation</PageTitle>
 
-
 <div style="padding:10px;">
-    <Hero />
+    <!-- Wrap Hero with id="hero" so the ScrollSpy picks up "Home" -->
+    <section id="hero">
+        <Hero />
+    </section>
 
-    <FeaturedProducts />
+    <MarqueeTicker />
 
-    <CoreBenefits />
+    <WhyOxygenSection />
+
+    <TechnologySection />
+
+    <SkyViewSection />
+
+    <ResultsSection />
+
+    <FieldFootageSection />
+
+    <FarmingTypesSection />
+
+    <ProfitCalculatorSection />
+
+    <FreeDemoSection />
 
     <Testimonials/>
 
-    <ShopInsightsBanner />
+    <FAQSection />
 
     <Footer />
+    <MobileCtaBar />
 </div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "scrollTo")]
+    public string? ScrollTo { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // 1. Initialize ScrollSpy so top bar highlights sections while scrolling
+                await JS.InvokeVoidAsync("oxynitiScroll.initScrollSpy");
+
+                // 2. Handle direct URL scrolling if coming from another page (e.g. /?scrollTo=technology)
+                if (!string.IsNullOrEmpty(ScrollTo))
+                {
+                    await Task.Delay(150); // Small delay to let components finish rendering
+                    await JS.InvokeVoidAsync("oxynitiScroll.toId", ScrollTo);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Home] Error initializing scroll utilities: {ex}");
+            }
+        }
+    }
+}

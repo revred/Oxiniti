@@ -1,4 +1,12 @@
-﻿@page "/checkout/return"
+@page "/checkout/return"
+@inject LocalizationService Loc
 
-<h1>Thank You!</h1>
-<p>Your order has been successfully placed.</p>
+<h1>@Loc.T("checkoutreturn.title", "Thank You!")</h1>
+<p>@Loc.T("checkoutreturn.message", "Your order has been successfully placed.")</p>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

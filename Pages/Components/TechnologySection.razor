@@ -1,0 +1,100 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject LocalizationService Loc
+
+<div class="technology-section" id="technology">
+    <div class="tech-grid">
+        <div class="tanks" aria-hidden="true">
+            <div class="tank regular">
+                <div class="tank-label">
+                    <b>@Loc.T("tank.reg", "Normal aerator")</b>
+                    <span>@Loc.T("tank.regsub", "mm bubbles")</span>
+                </div>
+                <div class="tank-surface"></div>
+                <div class="tank-bubble-layer"></div>
+                <div class="tank-verdict">
+                    @Loc.T("tank.regv", "Big bubbles rise & burst in seconds — most oxygen escapes to the air.")
+                </div>
+            </div>
+            <div class="tank nano">
+                <div class="tank-label">
+                    <b>@Loc.T("tank.nano", "Oxyniti nano")</b>
+                    <span>&lt;200 nm</span>
+                </div>
+                <div class="tank-surface"></div>
+                <div class="tank-bubble-layer"></div>
+                <div class="tank-verdict">
+                    @Loc.T("tank.nanov", "Nano-bubbles are neutrally buoyant — they hang in the water and keep dissolving for days.")
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-copy">
+            <span class="kicker">@Loc.T("tech.kicker", "The science, simply")</span>
+            <h2 class="section-title">@Loc.T("tech.h2", "Bubbles so small, they never leave the water.")</h2>
+            <p class="section-lead">
+                @Loc.T("tech.p", "A paddle wheel splashes oxygen in; physics takes it right back out. Oxyniti shears air into bubbles thousands of times thinner than a human hair. At that size they stop rising, stay suspended, and transfer oxygen with near-total efficiency — day and night.")
+            </p>
+            <div class="tech-feats">
+                <div class="tf">
+                    <span class="n">1</span>
+                    <div>
+                        <h4>@Loc.T("tf1.h", "Draw & shear")</h4>
+                        <p>@Loc.T("tf1.p", "The unit draws pond water and injects air through a nano-shear chamber, generating trillions of <200 nm bubbles.")</p>
+                    </div>
+                </div>
+                <div class="tf">
+                    <span class="n">2</span>
+                    <div>
+                        <h4>@Loc.T("tf2.h", "Infuse the whole pond")</h4>
+                        <p>@Loc.T("tf2.p", "The milky nano-bubble plume spreads through the water column — not just the surface — raising DO everywhere fish live.")</p>
+                    </div>
+                </div>
+                <div class="tf">
+                    <span class="n">3</span>
+                    <div>
+                        <h4>@Loc.T("tf3.h", "Hold it for days")</h4>
+                        <p>@Loc.T("tf3.p", "Neutral buoyancy and negative surface charge keep bubbles suspended, buffering your pond through the dangerous night hours.")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _bubblesStarted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        Loc.OnChange += StateHasChanged;
+
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiTankBubbles.start");
+            _bubblesStarted = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[TechnologySection] Error starting tank bubble animation: {ex}");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Loc.OnChange -= StateHasChanged;
+
+        if (!_bubblesStarted) return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiTankBubbles.stop");
+        }
+        catch (Exception)
+        {
+            // JS runtime may already be torn down during navigation/disposal; safe to ignore.
+        }
+    }
+}

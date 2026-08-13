@@ -1,118 +1,40 @@
-﻿@inject IJSRuntime JSRuntime
-@implements IDisposable
+@inject LocalizationService Loc
 
-<div class="carousel-container">
-    @for (int i = 1; i <= 4; i++)
-    {
-        var slideNum = i;
-        <div class="carousel-slide @(currentSlide == slideNum ? "active" : "")" id="slide@(slideNum)">
-           @*  <div class="product-image">
-                <img src="/images/@GetImageForSlide(slideNum)?v=1" alt="@GetAltTextForSlide(slideNum)" />
-            </div> *@
-            <div class="gradient-overlay"></div>
-            <div class="carousel-content">
-                <h1 class="hero-title">
-                    @switch (slideNum)
-                    {
-                        case 1:
-                            @("Oxygen Efficiency.")
-                            <br />
-                            @("Stainless Engineering.")
-                            ;
-                            break;
-                        case 2:
-                            @("Stable Operation.")
-                            <br />
-                            @("Proven Performance.")
-                            ;
-                            break;
-                        case 3:
-                            @("Durable Construction.")
-                            <br />
-                            @("Reliable Design.")
-                            ;
-                            break;
-                        case 4:
-                            @("Energy Savings.")
-                            <br />
-                            @("Low Maintenance.")
-                            ;
-                            break;
-                    }
-                </h1>
-                <div class="action-button">
-                    <a href="@GetLinkForSlide(slideNum)" class="btn btn-explore">@GetButtonTextForSlide(slideNum)</a>
-                </div>
+<div class="hero-container">
+    <video class="hero-video" autoplay muted loop playsinline poster="/images/hero-poster.jpg">
+        <source src="/videos/hero.mp4" type="video/mp4" />
+    </video>
+    <div class="gradient-overlay"></div>
+
+    <div class="hero-content">
+        <h1 class="hero-title">@((MarkupString)Loc.T("hero.title", "Infinite Oxygen.<br />Infinite Yield."))</h1>
+        <p class="hero-sub">
+            @Loc.T("hero.sub", "Oxyniti's nano-bubble generator floods your pond with trillions of invisible oxygen bubbles that stay dissolved for days — not seconds. Healthier fish, faster growth, bigger harvests.")
+        </p>
+        <div class="hero-ctas">
+            <a href="#free-demo" class="btn btn-explore">@Loc.T("hero.cta1", "Book a Free Pond Demo")</a>
+            <a href="#sky-view" class="btn btn-ghost">@Loc.T("hero.cta2", "▶  Watch it work")</a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="num">2&times;</div>
+                <div class="lbl">@Loc.T("hero.s1l", "More dissolved oxygen*")</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">&lt;200nm</div>
+                <div class="lbl">@Loc.T("hero.s2l", "Bubble size — stays for days")</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">@Loc.T("hero.s3n", "1 Day")</div>
+                <div class="lbl">@Loc.T("hero.s3l", "Install — fits any pond")</div>
             </div>
         </div>
-    }
-
-    <div class="carousel-dots">
-        @for (int i = 1; i <= 4; i++)
-        {
-            var dotNum = i;
-            <span class="dot @(currentSlide == dotNum ? "active" : "")" @onclick="() => ActivateSlide(dotNum)"></span>
-        }
     </div>
 </div>
 
 @code {
-    private int currentSlide = 1;
-    private System.Threading.Timer? carouselTimer;
-
-    protected override void OnAfterRender(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            carouselTimer = new System.Threading.Timer(
-                _ => InvokeAsync(() =>
-                {
-                    NextSlide();
-                    StateHasChanged();
-                }),
-                null,
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(5)
-            );
-        }
+        Loc.OnChange += StateHasChanged;
     }
-
-    private void NextSlide() => currentSlide = currentSlide >= 4 ? 1 : currentSlide + 1;
-
-    private void ActivateSlide(int slideNumber)
-    {
-        currentSlide = slideNumber;
-        carouselTimer?.Change(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
-    }
-
-    // private string GetImageForSlide(int slideNumber) => "nano-bubble.jpg";
-
-    // private string GetAltTextForSlide(int slideNumber) => slideNumber switch
-    // {
-    //     1 => "Precision Machined Part",
-    //     2 => "Product Assembly",
-    //     3 => "Customer Solutions",
-    //     4 => "Design Innovation",
-    //     _ => "Precision Part"
-    // };
-
-    private string GetLinkForSlide(int slideNumber) => slideNumber switch
-    {
-        1 => "products",
-        2 => "services",
-        3 => "contact",
-        4 => "about",
-        _ => "products"
-    };
-
-    private string GetButtonTextForSlide(int slideNumber) => slideNumber switch
-    {
-        1 => "Explore Products",
-        2 => "Our Services",
-        3 => "Contact Us",
-        4 => "About Us",
-        _ => "Learn More"
-    };
-
-    public void Dispose() => carouselTimer?.Dispose();
 }

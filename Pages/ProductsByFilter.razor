@@ -4,6 +4,7 @@
 @inject IMakerClient MakerClient
 @inject IAuthenticationService AuthenticationService
 @inject IJSRuntime JS
+@inject LocalizationService Loc
 
 <div class="container py-5">
 
@@ -11,16 +12,16 @@
     <div class="top-section d-flex justify-content-between align-items-start mb-5">
         <!-- Left: Explore Range -->
         <div class="range-section">
-            <h2 class="display-5 fw-bold">Explore Our Nanobubble Product Range</h2>
+            <h2 class="display-5 fw-bold">@Loc.T("productsfilter.title", "Explore Our Nanobubble Product Range")</h2>
             <p class="lead">
-                Discover Oxyniti's comprehensive range of high-precision.
+                @Loc.T("productsfilter.subtitle", "Discover Oxyniti's comprehensive range of high-precision.")
             </p>
             <div class="search-wrapper">
                 <i class="bi bi-search search-icon"></i>
                 <input value="@SearchQuery"
                        @oninput="HandleSearchInput"
                        class="form-control search-input"
-                       placeholder="Search for products by name, type, or application" />
+                       placeholder="@Loc.T("productsfilter.searchplaceholder", "Search for products by name, type, or application")" />
 
             </div>
         </div>
@@ -28,18 +29,18 @@
         <!-- Right: Sort & Filter Panel -->
         <div class="filter-panel p-4 rounded-3">
             <div class="mb-4">
-                <label class="form-label mb-1">Sort By</label>
+                <label class="form-label mb-1">@Loc.T("productsfilter.sortby", "Sort By")</label>
                 <select class="form-select w-100" @onchange="OnSortChanged">
                     <option value="">–</option>
-                    <option value="name">Name</option>
-                    <option value="price_asc">Price: Low → High</option>
-                    <option value="price_desc">Price: High → Low</option>
+                    <option value="name">@Loc.T("productsfilter.sort.name", "Name")</option>
+                    <option value="price_asc">@Loc.T("productsfilter.sort.priceasc", "Price: Low → High")</option>
+                    <option value="price_desc">@Loc.T("productsfilter.sort.pricedesc", "Price: High → Low")</option>
                 </select>
             </div>
             <div>
-                <label class="form-label mb-1">Filter Product Types</label>
+                <label class="form-label mb-1">@Loc.T("productsfilter.filtertypes", "Filter Product Types")</label>
                 <select class="form-select w-100" @onchange="OnFilterChanged">
-                    <option value="">Select Product Types</option>
+                    <option value="">@Loc.T("productsfilter.selecttypes", "Select Product Types")</option>
                     @foreach (var type in AllTypes)
                     {
                         <option value="@type.Slug">@type.Name</option>
@@ -87,7 +88,7 @@
     }
     else if (!FilteredProducts.Any())
     {
-        <p>No products found.</p>
+        <p>@Loc.T("productsfilter.noresults", "No products found.")</p>
     }
     else
     {
@@ -99,10 +100,10 @@
                 @if (AuthenticationService.IsMakerAIUser == true)
                 {
                     <div class="fid-badge" @onclick:stopPropagation>
-                        <span class="text-muted">FID:</span>
+                        <span class="text-muted">@Loc.T("productsfilter.fid", "FID:")</span>
                         <code class="me-1">@p.FriendlyID</code>
                         <button class="btn btn-sm btn-outline-secondary"
-                                title="Copy FriendlyID"
+                                title="@Loc.T("productsfilter.copyfid", "Copy FriendlyID")"
                                 @onclick:stopPropagation
                                 @onclick="@(() => CopyMetaAsync(p.Slug, p.FriendlyID, label: "FriendlyID"))">
                             @if (CopyHints.TryGetValue(p.Slug, out var hint) && hint == "copied")
@@ -134,8 +135,8 @@
                         class="btn btn-gradient btn-lg @(HighlightedQuantities.ContainsKey(p.Slug) ? "added-highlight" : "")">
                     @(
                                     HighlightedQuantities.TryGetValue(p.Slug, out var q)
-                                    ? $"{q} Item{(q > 1 ? "s" : "")} Added!"
-                                    : "Add to Cart →"
+                                    ? string.Format(Loc.T("productsfilter.itemsadded", "{0} Item{1} Added!"), q, q > 1 ? "s" : "")
+                                    : Loc.T("productsfilter.addtocart", "Add to Cart →")
                                     )
                 </button>
             </div>
@@ -144,7 +145,7 @@
         }
 
         <!-- Pager -->
-        <nav class="mt-4 text-center" aria-label="Page navigation">
+        <nav class="mt-4 text-center" aria-label="@Loc.T("productsfilter.pagenav", "Page navigation")">
             <ul class="pagination justify-content-center mb-0">
                 @for (int i = 1; i <= TotalPages; i++)
                 {
@@ -156,7 +157,6 @@
             </ul>
         </nav>
     }
-    <ShopInsightsBanner />
 
     <Footer />
 </div>
@@ -184,6 +184,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Loc.OnChange += StateHasChanged;
+
         // fetch all types so the “Filter Product Types” dropdown can be populated
         try
         {

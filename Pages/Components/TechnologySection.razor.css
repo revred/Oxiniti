@@ -1,0 +1,153 @@
+.technology-section {
+    padding: 3rem 0;
+}
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2.5rem;
+    align-items: stretch;
+}
+
+.kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3D8FB5;
+    margin-bottom: 0.75rem;
+}
+
+.section-title {
+    color: #1A2C54;
+    font-size: 2.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.section-lead {
+    color: #3a3a3a;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.tanks {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    height: 100%;
+}
+
+.tank {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 0.75rem;
+    padding: 1.75rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+}
+
+.tank.regular {
+    background: linear-gradient(135deg, #6b7280, #374151);
+}
+
+.tank.nano {
+    background: linear-gradient(135deg, #3D8FB5, #0B1F33);
+}
+
+.tank-label {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.tank-label span {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+.tank-surface {
+    position: absolute;
+    top: 3.5rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.25);
+    z-index: 1;
+}
+
+.tank-bubble-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.tank-verdict {
+    position: relative;
+    z-index: 1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0.95;
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(2px);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    margin: -0.6rem -0.75rem 0;
+}
+
+.tech-feats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.tf {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.tf .n {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #1A2C54;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.tf h4 {
+    color: #1A2C54;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.tf p {
+    color: #555;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .tech-grid {
+        grid-template-columns: 1fr;
+    }
+}

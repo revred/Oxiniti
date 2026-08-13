@@ -1,0 +1,66 @@
+@inject LocalizationService Loc
+
+<div class="why-oxygen-section" id="why-oxygen">
+    <span class="kicker">@Loc.T("prob.kicker", "The 4 AM problem")</span>
+    <h2 class="section-title">@Loc.T("prob.h2", "Low oxygen is the silent killer in every pond.")</h2>
+    <p class="section-lead">
+        @Loc.T("prob.lead", "Every night, while you sleep, dissolved oxygen in your pond crashes. Fish stop eating, stop growing — and on a bad night, you lose the whole crop.")
+    </p>
+
+    <div class="problem-grid">
+        <div class="problem-card">
+            <div class="ico">&#127769;</div>
+            <h3>@Loc.T("p1.h", "Night-time DO crash")</h3>
+            <p>
+                @Loc.T("p1.p", "After sunset, algae stop making oxygen and start consuming it. By 4 AM, dissolved oxygen can fall below 2 mg/L — the danger zone for every farmed species.")
+            </p>
+        </div>
+        <div class="problem-card">
+            <div class="ico">&#128012;</div>
+            <h3>@Loc.T("p2.h", "Stunted growth, wasted feed")</h3>
+            <p>
+                @Loc.T("p2.p", "Fish under oxygen stress digest poorly. Feed conversion worsens, growth slows, and your biggest cost — feed — goes to waste.")
+            </p>
+        </div>
+        <div class="problem-card">
+            <div class="ico">&#9888;&#65039;</div>
+            <h3>@Loc.T("p3.h", "One bad night = total loss")</h3>
+            <p>
+                @Loc.T("p3.p", "A single severe DO crash can wipe out months of investment in hours. Paddle wheels churn the surface, but oxygen escapes as fast as it enters.")
+            </p>
+        </div>
+    </div>
+
+    <div class="do-curve-wrap">
+        <h3>@Loc.T("curve.h", "Dissolved oxygen over 24 hours")</h3>
+        <p class="sub">@Loc.T("curve.sub", "Typical pond vs an Oxyniti-aerated pond (illustrative)")</p>
+        <svg class="do-svg" viewBox="0 0 800 260" role="img" aria-label="Graph: dissolved oxygen dips dangerously at night in a typical pond, stays high with Oxyniti">
+            <line x1="50" y1="20" x2="50" y2="220" stroke="rgba(11,46,51,0.15)" stroke-width="1.5" />
+            <line x1="50" y1="220" x2="780" y2="220" stroke="rgba(11,46,51,0.15)" stroke-width="1.5" />
+            <rect x="50" y="170" width="730" height="50" fill="rgba(226,69,44,0.07)" />
+            <line x1="50" y1="170" x2="780" y2="170" stroke="#e2452c" stroke-width="1" stroke-dasharray="6 6" opacity="0.5" />
+            <text class="danger-lbl" x="58" y="188">@Loc.T("curve.danger", "Danger zone < 3 mg/L")</text>
+            <text class="axis-lbl" x="10" y="30">DO</text>
+            <text class="axis-lbl" x="46" y="238" text-anchor="middle">6 PM</text>
+            <text class="axis-lbl" x="235" y="238" text-anchor="middle">12 AM</text>
+            <text class="axis-lbl" x="420" y="238" text-anchor="middle">4 AM</text>
+            <text class="axis-lbl" x="600" y="238" text-anchor="middle">10 AM</text>
+            <text class="axis-lbl" x="770" y="238" text-anchor="middle">6 PM</text>
+            <path class="do-path typical" d="M 50 70 C 150 85, 220 130, 300 165 C 360 190, 400 205, 430 200 C 480 190, 560 120, 640 85 C 700 62, 750 58, 780 62" fill="none" stroke-width="3" />
+            <path class="do-path oxy" d="M 50 55 C 160 60, 260 74, 400 78 C 540 82, 660 62, 780 52" fill="none" stroke-width="3" />
+            <text class="oxy-lbl" x="600" y="45">@Loc.T("curve.with", "With Oxyniti")</text>
+            <text class="danger-lbl" x="330" y="215">@Loc.T("curve.typical", "Typical pond")</text>
+        </svg>
+        <div class="legend">
+            <span><i style="background:#e2452c"></i> @Loc.T("curve.l1", "Typical pond")</span>
+            <span><i style="background:#0fbfae"></i> @Loc.T("curve.l2", "With Oxyniti nano-bubbles")</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

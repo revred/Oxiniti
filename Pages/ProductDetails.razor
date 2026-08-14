@@ -10,7 +10,7 @@
 
 @if (Detail is null)
 {
-    <div class="product-details container py-5" aria-busy="true">
+    <div class="product-details container-fluid px-4 py-5" aria-busy="true">
         <div class="row g-5">
             <!-- Left: carousel/media skeleton -->
             <div class="col-12 col-lg-6">
@@ -132,7 +132,7 @@
 }
 else
 {
-    <div class="product-details container py-5">
+    <div class="product-details container-fluid px-4 py-5">
         <div class="row g-5">
             <!-- Left: Main Image Only -->
             <div class="col-12 col-lg-6">
@@ -223,7 +223,7 @@ else
                     }
 
                     <h2>@Detail.Name</h2>
-                    <p class="fs-4 fw-bold text-purple">$@Detail.Price</p>
+                    <p class="fs-4 fw-bold text-purple">₹@Detail.Price</p>
                     <div class="mb-3">
                         <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
                         <div class="d-inline-flex align-items-center">

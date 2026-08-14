@@ -3,6 +3,7 @@
 @inject NavigationManager Nav
 @inject LocalizationService Loc
 
+<div class="container-fluid px-4 py-5">
 <h2 class="mb-4">@Loc.T("orders.title", "Your Orders")</h2>
 
 @if (UserOrders is null)
@@ -213,6 +214,7 @@ else
     }
 
 }
+</div>
 
 @code {
     private List<OrderDetail>? UserOrders;
@@ -297,7 +299,7 @@ else
         return Loc.T("orders.date.unknown", "Unknown");
     }
 
-    private string FormatMoney(int cents) => (cents / 100.0m).ToString("C");
+    private string FormatMoney(int cents) => $"₹{(cents / 100.0m).ToString("N2", System.Globalization.CultureInfo.InvariantCulture)}";
 
     private void NavigateToProduct(string? slug)
     {

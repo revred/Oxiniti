@@ -46,14 +46,17 @@
                 <div class="field">
                     <label>@Loc.T("f.name", "Your name")</label>
                     <InputText @bind-Value="model.Name" placeholder="@Loc.T("f.name.ph", "e.g. Murugan")" />
+                    <ValidationMessage For="@(() => model.Name)" />
                 </div>
                 <div class="field">
                     <label>@Loc.T("f.phone", "Phone / WhatsApp")</label>
                     <InputText @bind-Value="model.Phone" placeholder="+91 ..." />
+                    <ValidationMessage For="@(() => model.Phone)" />
                 </div>
                 <div class="field">
                     <label>@Loc.T("f.place", "Village / Town")</label>
                     <InputText @bind-Value="model.Place" placeholder="@Loc.T("f.place.ph", "e.g. Lalgudi, Trichy")" />
+                    <ValidationMessage For="@(() => model.Place)" />
                 </div>
                 <div class="field full">
                     <label>@Loc.T("f.map", "Pond location (tap the map to mark it — optional)")</label>
@@ -147,9 +150,9 @@
 
     private class DemoRequest
     {
-        [Required] public string Name { get; set; } = string.Empty;
-        [Required] public string Phone { get; set; } = string.Empty;
-        [Required] public string Place { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Please fill this mandatory field.")] public string Name { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Please fill this mandatory field.")] public string Phone { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Please fill this mandatory field.")] public string Place { get; set; } = string.Empty;
         public string Size { get; set; } = "½ – 1 acre";
         public string Species { get; set; } = "Tilapia / GIFT";
     }

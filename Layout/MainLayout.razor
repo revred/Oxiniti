@@ -73,7 +73,8 @@
             </div>
 
 
-            <!-- Cart -->
+            <!-- Cart — hidden for the duration; site doesn't need cart right now.
+                 Uncomment to restore the header cart entry point.
             <a href="cart"
                class="cart-control @(HighlightCart ? "cart-highlight" : "")">
 
@@ -91,6 +92,7 @@
                 }
 
             </a>
+            -->
 
 
             <!-- User -->
@@ -228,9 +230,9 @@
 
 @code {
 
-    private int CartCount;
-
-    private bool HighlightCart;
+    // Cart count/highlight — unused while the header cart entry point is hidden.
+    // private int CartCount;
+    // private bool HighlightCart;
 
     private bool IsUserMenuOpen = false;
 
@@ -247,7 +249,7 @@
     {
         AuthenticationService.OnChange += StateHasChanged;
 
-        CartService.OnChange += UpdateCartCount;
+        // CartService.OnChange += UpdateCartCount; // cart entry point hidden for the duration
 
         Loc.OnChange += StateHasChanged;
 
@@ -285,7 +287,7 @@
         }
 
 
-        await UpdateCartCountAsync();
+        // await UpdateCartCountAsync(); // feeds the header cart badge, hidden for the duration
     }
 
 
@@ -416,39 +418,40 @@
     }
 
 
-    private void UpdateCartCount()
-        => _ = UpdateCartCountAsync();
-
-
-    private async Task UpdateCartCountAsync()
-    {
-        try
-        {
-            var items =
-                await CartService.GetCartItems();
-
-            CartCount =
-                items.Count;
-
-
-            HighlightCart = true;
-
-            StateHasChanged();
-
-
-            await Task.Delay(1000);
-
-
-            HighlightCart = false;
-
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(
-                $"[MainLayout] Error updating cart count: {ex}");
-        }
-    }
+    // Feeds the header cart badge, hidden for the duration. Uncomment along with
+    // CartCount/HighlightCart and the wiring above to restore.
+    // private void UpdateCartCount()
+    //     => _ = UpdateCartCountAsync();
+    //
+    // private async Task UpdateCartCountAsync()
+    // {
+    //     try
+    //     {
+    //         var items =
+    //             await CartService.GetCartItems();
+    //
+    //         CartCount =
+    //             items.Count;
+    //
+    //
+    //         HighlightCart = true;
+    //
+    //         StateHasChanged();
+    //
+    //
+    //         await Task.Delay(1000);
+    //
+    //
+    //         HighlightCart = false;
+    //
+    //         StateHasChanged();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine(
+    //             $"[MainLayout] Error updating cart count: {ex}");
+    //     }
+    // }
 
 
     bool IsGoToMakerAIRunning = false;

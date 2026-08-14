@@ -137,6 +137,8 @@
     }
 
 .demo-picker-map {
+    position: relative;
+    z-index: 1;
     height: 220px;
     border-radius: 0.5rem;
     border: 1px solid rgba(11, 31, 51, 0.2);
@@ -169,8 +171,20 @@
             box-shadow: 0 0 0 3px rgba(61, 143, 181, 0.15);
         }
 
+        .field ::deep input.invalid,
+        .field ::deep select.invalid {
+            border-color: #dc3545;
+        }
+
     .field ::deep input::placeholder {
         color: rgba(11, 31, 51, 0.4);
+    }
+
+    .field ::deep .validation-message {
+        display: block;
+        margin-top: -0.15rem;
+        font-size: 0.8rem;
+        color: #dc3545;
     }
 
     .field ::deep select option {

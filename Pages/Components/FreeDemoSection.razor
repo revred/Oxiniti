@@ -1,5 +1,8 @@
 @using System.ComponentModel.DataAnnotations
+@using Oxyniti.Services
 @inject LocalizationService Loc
+@inject IJSRuntime JS
+@inject DemoService DemoService
 
 <div class="free-demo-section" id="free-demo">
     <div class="demo-grid">
@@ -52,6 +55,10 @@
                     <label>@Loc.T("f.place", "Village / Town")</label>
                     <InputText @bind-Value="model.Place" placeholder="@Loc.T("f.place.ph", "e.g. Lalgudi, Trichy")" />
                 </div>
+                <div class="field full">
+                    <label>@Loc.T("f.map", "Pond location (tap the map to mark it — optional)")</label>
+                    <div id="@mapId" class="demo-picker-map"></div>
+                </div>
                 <div class="field">
                     <label>@Loc.T("f.size", "Pond size")</label>
                     <InputSelect @bind-Value="model.Size">
@@ -88,15 +95,53 @@
 @code {
     private readonly DemoRequest model = new();
     private string? statusMessage;
+    private readonly string mapId = $"demo-picker-{Guid.NewGuid():N}";
+    private bool _mapInitialized;
 
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
     }
 
-    private void HandleValidSubmit()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // TODO: wire up to a real lead-capture endpoint / WhatsApp / email once contact details are configured.
+        if (firstRender && !_mapInitialized)
+        {
+            _mapInitialized = true;
+            await JS.InvokeVoidAsync("oxynitiMap.initPicker", mapId, null, null);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        double? lat = null, lng = null;
+        try
+        {
+            var picked = await JS.InvokeAsync<double[]?>("oxynitiMap.getPickerLocation", mapId);
+            if (picked is { Length: 2 })
+            {
+                lat = picked[0];
+                lng = picked[1];
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[FreeDemoSection] Error reading picked location: {ex}");
+        }
+
+        // Demo bookings aren't persisted server-side yet — saved locally
+        // (see DemoService) so they show up on the "My Demos" page.
+        await DemoService.AddDemo(new DemoBooking
+        {
+            Name = model.Name,
+            Phone = model.Phone,
+            Place = model.Place,
+            Size = model.Size,
+            Species = model.Species,
+            Latitude = lat,
+            Longitude = lng
+        });
+
         statusMessage = "Demo request captured — we'll be in touch once contact details are configured.";
     }
 

@@ -1,0 +1,101 @@
+.floating-actions {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 1030;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    pointer-events: none;
+}
+
+.floating-btn {
+    pointer-events: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(11, 31, 51, 0.28);
+    opacity: 0;
+    transform: translateX(24px);
+    animation: floatIn 0.45s ease forwards;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+    .floating-btn:hover {
+        transform: translateY(-3px) scale(1.06);
+        box-shadow: 0 12px 26px rgba(11, 31, 51, 0.35);
+    }
+
+    .floating-btn i {
+        font-size: 1.4rem;
+        color: #fff;
+        line-height: 1;
+    }
+
+.floating-btn-profit {
+    background: linear-gradient(135deg, #1A2C54, #3D8FB5);
+    animation-delay: 0.05s;
+}
+
+.floating-btn-whatsapp {
+    background: #25D366;
+    animation-delay: 0.2s;
+}
+
+.floating-tooltip {
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(6px);
+    background: #1A2C54;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.4rem;
+    box-shadow: 0 4px 12px rgba(11, 31, 51, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.floating-btn:hover .floating-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+@keyframes floatIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .floating-actions {
+        right: 1rem;
+        bottom: 5.5rem;
+        gap: 0.75rem;
+    }
+
+    .floating-btn {
+        width: 46px;
+        height: 46px;
+    }
+
+        .floating-btn i {
+            font-size: 1.2rem;
+        }
+
+    .floating-tooltip {
+        display: none;
+    }
+}

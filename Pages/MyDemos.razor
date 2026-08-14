@@ -1,0 +1,109 @@
+@page "/my-demos"
+@using Oxyniti.Services
+@inject DemoService DemoService
+@inject IJSRuntime JS
+@inject LocalizationService Loc
+
+<PageTitle>@Loc.T("demos.pagetitle", "My Demos - Oxyniti")</PageTitle>
+
+<div class="container-fluid px-4 py-5">
+    <h2 class="mb-1">@Loc.T("demos.title", "Live Pond Demos")</h2>
+
+    @if (demos is null)
+    {
+        <div class="d-flex align-items-center gap-2 mt-3">
+            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+            <span>@Loc.T("demos.loading", "Loading demos…")</span>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mb-4">
+            @Loc.T("demos.count.prefix", "Demos given till now:")
+            <strong>@demos.Count</strong>
+        </p>
+
+        @if (demos.Count == 0)
+        {
+            <p>@Loc.T("demos.empty", "No demo requests yet.")</p>
+        }
+        else
+        {
+            <div id="@mapId" class="demos-map mb-4"></div>
+
+            <div class="list-group">
+                @foreach (var demo in demos.OrderByDescending(d => d.CreatedAtUtc))
+                {
+                    var hasLocation = demo.Latitude.HasValue && demo.Longitude.HasValue;
+                    <div class="list-group-item demo-row @(hasLocation ? "cursor-pointer" : "")"
+                         @onclick="() => FocusDemo(demo)">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <div class="fw-semibold">
+                                    @demo.Name
+                                    @if (hasLocation)
+                                    {
+                                        <i class="bi bi-geo-alt-fill text-primary ms-1" title="@Loc.T("demos.hasmap", "Shown on map")"></i>
+                                    }
+                                </div>
+                                <div class="text-muted small">
+                                    @demo.Place &middot; @demo.Species &middot; @demo.Size
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a href="tel:@demo.Phone" class="text-decoration-none" @onclick:stopPropagation>
+                                    <i class="bi bi-telephone-fill me-1"></i>@demo.Phone
+                                </a>
+                                <div class="text-muted small">@demo.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<DemoBooking>? demos;
+    private readonly string mapId = $"demos-map-{Guid.NewGuid():N}";
+    private bool _mapInitialized;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loc.OnChange += StateHasChanged;
+        demos = await DemoService.GetDemos();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_mapInitialized && demos is { Count: > 0 })
+        {
+            _mapInitialized = true;
+
+            var points = demos
+                .Where(d => d.Latitude.HasValue && d.Longitude.HasValue)
+                .Select(d => new
+                {
+                    lat = d.Latitude!.Value,
+                    lng = d.Longitude!.Value,
+                    name = d.Name,
+                    place = d.Place,
+                    phone = d.Phone,
+                    species = d.Species,
+                    size = d.Size
+                })
+                .ToArray();
+
+            await JS.InvokeVoidAsync("oxynitiMap.initDisplay", mapId, points);
+        }
+    }
+
+    private async Task FocusDemo(DemoBooking demo)
+    {
+        if (demo.Latitude.HasValue && demo.Longitude.HasValue)
+        {
+            await JS.InvokeVoidAsync("oxynitiMap.focusPoint", mapId, demo.Latitude.Value, demo.Longitude.Value);
+        }
+    }
+}

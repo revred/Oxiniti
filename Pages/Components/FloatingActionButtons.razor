@@ -1,0 +1,58 @@
+@inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
+@inject LocalizationService Loc
+
+<div class="floating-actions">
+
+    <button class="floating-btn floating-btn-profit"
+            @onclick="GoToProfitCalculator"
+            title="@Loc.T("roi.kicker", "Profit Calc")"
+            aria-label="@Loc.T("roi.kicker", "Profit Calc")">
+
+        <i class="bi bi-graph-up-arrow"></i>
+        <span class="floating-tooltip">@Loc.T("roi.kicker", "Profit Calc")</span>
+
+    </button>
+
+    <a class="floating-btn floating-btn-whatsapp"
+       href="@SiteContact.WhatsAppLink()"
+       target="_blank"
+       rel="noopener"
+       title="@Loc.T("nav.whatsapp", "Chat with us on WhatsApp")"
+       aria-label="@Loc.T("nav.whatsapp", "Chat with us on WhatsApp")">
+
+        <i class="bi bi-whatsapp"></i>
+        <span class="floating-tooltip">@Loc.T("nav.whatsapp", "Chat on WhatsApp")</span>
+
+    </a>
+
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
+    private async Task GoToProfitCalculator()
+    {
+        var relative = Nav.ToBaseRelativePath(Nav.Uri);
+        var isHome = string.IsNullOrEmpty(relative) || relative.StartsWith("?");
+
+        if (isHome)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("oxynitiScroll.toId", "profit-calculator");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FloatingActionButtons] Error scrolling to profit calculator: {ex}");
+            }
+        }
+        else
+        {
+            Nav.NavigateTo("/?scrollTo=profit-calculator");
+        }
+    }
+}

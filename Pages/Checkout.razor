@@ -6,6 +6,7 @@
 @inject NavigationManager Nav
 @inject LocalizationService Loc
 
+<div class="container-fluid px-4 py-5">
 <h2 class="mb-4">@Loc.T("checkout.title", "Checkout")</h2>
 
 @if (!isReady)
@@ -175,6 +176,7 @@ else
         </div>
     </div>
 }
+</div>
 
 @code {
     // State

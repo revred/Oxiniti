@@ -6,7 +6,7 @@
 @inject IJSRuntime JS
 @inject LocalizationService Loc
 
-<div class="container py-5">
+<div class="container-fluid px-4 py-5">
 
     <!-- Top Section: Title / Subtitle / Search & Filters -->
     <div class="top-section d-flex justify-content-between align-items-start mb-5">
@@ -127,7 +127,7 @@
                     @Shorten(p.Description, 150)
                 </p>
 
-                <p class="fw-bold text-purple">$@p.Price</p>
+                <p class="fw-bold text-purple">₹@p.Price</p>
             </div>
             <div class="product-action col-auto">
                 <button @onclick:stopPropagation

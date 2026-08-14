@@ -34,10 +34,13 @@
     color: #fff;
 }
 
-.tagline {
-    margin-top: 0.25rem;
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.7);
+.brand-caption {
+    margin-top: 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(141, 220, 238, 0.8);
 }
 
 .foot-desc {

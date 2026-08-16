@@ -14,13 +14,18 @@
             </p>
 
             <div class="contact-rails">
-                <div class="rail">
+                <a class="rail rail-link" href="@SiteContact.PhoneLink"
+                   @onclick="OnCallClick" @onclick:preventDefault="_preventCallDefault">
                     <span class="ico">&#128222;</span>
                     <span>
                         <b>@Loc.T("con.r1b", "Call us")</b>
-                        <span class="placeholder-note">@Loc.T("con.r1s", "Phone number not yet configured")</span>
+                        <span class="rail-sub">
+                            @(_phoneCopied
+                                ? $"{Loc.T("con.r1copied", "Copied!")} · {SiteContact.PhoneDisplay}"
+                                : $"{Loc.T("con.r1s", "Tap to call")} · {SiteContact.PhoneDisplay}")
+                        </span>
                     </span>
-                </div>
+                </a>
                 <a class="rail rail-link" href="@SiteContact.WhatsAppLink("Hi, I'd like to book a free pond demo for Oxyniti.")"
                    target="_blank" rel="noopener">
                     <span class="ico wa-ico"><i class="bi bi-whatsapp"></i></span>
@@ -32,7 +37,7 @@
                 <div class="rail">
                     <span class="ico">&#128205;</span>
                     <span>
-                        <b>@Loc.T("con.r3b", "Serving Tamil Nadu & South India")</b>
+                        <b>@Loc.T("con.r3b", "Serving South India")</b>
                         <span class="placeholder-note">@Loc.T("con.r3s", "Pilot territory not yet confirmed")</span>
                     </span>
                 </div>
@@ -100,6 +105,8 @@
     private string? statusMessage;
     private readonly string mapId = $"demo-picker-{Guid.NewGuid():N}";
     private bool _mapInitialized;
+    private bool _preventCallDefault;
+    private bool _phoneCopied;
 
     protected override void OnInitialized()
     {
@@ -112,6 +119,46 @@
         {
             _mapInitialized = true;
             await JS.InvokeVoidAsync("oxynitiMap.initPicker", mapId, null, null);
+        }
+
+        if (firstRender)
+        {
+            try
+            {
+                var isCoarsePointer = await JS.InvokeAsync<bool>("oxynitiUi.isCoarsePointer");
+                _preventCallDefault = !isCoarsePointer;
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                // Detection unavailable — leave the tel: link as the default (mobile-safe) behaviour.
+                Console.WriteLine($"[FreeDemoSection] Error detecting pointer type: {ex}");
+            }
+        }
+    }
+
+    private async Task OnCallClick()
+    {
+        // On touch devices the tel: link is left to navigate normally (opens the dialer directly).
+        // On desktop/mouse devices we intercept the click and copy the number instead of
+        // triggering the OS "select an app to open this tel: link" picker.
+        if (!_preventCallDefault)
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", SiteContact.PhoneDisplay);
+            _phoneCopied = true;
+            StateHasChanged();
+            await Task.Delay(1500);
+            _phoneCopied = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[FreeDemoSection] Error copying phone number: {ex}");
         }
     }
 

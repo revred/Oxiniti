@@ -1,4 +1,9 @@
-﻿let registeredHandlers = {};
+﻿window.oxynitiUi = window.oxynitiUi || {};
+window.oxynitiUi.isCoarsePointer = function () {
+    return !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+};
+
+let registeredHandlers = {};
 
 window.registerClickOutside = function (elementId, dotNetObjRef, methodName) {
     // If already registered for this element, remove previous handler

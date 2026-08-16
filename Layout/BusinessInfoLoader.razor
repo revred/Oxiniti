@@ -15,7 +15,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await InfoService.LoadAsync();
-        _loaded = true;
+        try
+        {
+            await InfoService.LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            // Business info (branding/testimonials/etc.) is a nice-to-have from an external CMS —
+            // the whole site must not go down just because that one call failed.
+            Console.WriteLine($"[BusinessInfoLoader] Failed to load business info: {ex}");
+        }
+        finally
+        {
+            _loaded = true;
+        }
     }
 }

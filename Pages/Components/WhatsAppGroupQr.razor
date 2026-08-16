@@ -1,0 +1,27 @@
+@using Oxyniti
+@inject IJSRuntime JS
+
+<div class="wa-group-qr">
+    <div id="@_elementId" class="wa-group-qr-code" style="width:@(Size)px;height:@(Size)px;"></div>
+    @if (!string.IsNullOrEmpty(Caption))
+    {
+        <span class="wa-group-qr-caption">@Caption</span>
+    }
+</div>
+
+@code {
+    [Parameter] public int Size { get; set; } = 120;
+    [Parameter] public string? Caption { get; set; } = "Scan to join our WhatsApp group";
+
+    private readonly string _elementId = $"wa-group-qr-{Guid.NewGuid():N}";
+    private bool _rendered;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_rendered)
+        {
+            _rendered = true;
+            await JS.InvokeVoidAsync("oxynitiQr.render", _elementId, SiteContact.WhatsAppGroupLink);
+        }
+    }
+}

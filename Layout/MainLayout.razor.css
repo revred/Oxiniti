@@ -696,6 +696,8 @@ main {
         width: 42px;
 
         padding: 0;
+
+        justify-content: center;
     }
 
     .language-select,

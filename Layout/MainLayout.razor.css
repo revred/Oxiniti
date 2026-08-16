@@ -221,7 +221,7 @@
 
     color: #28dce5;
 
-    font-size: 14px;
+    font-size: 18px;
 }
 
 
@@ -700,7 +700,22 @@ main {
         justify-content: center;
     }
 
-    .language-select,
+    /* The globe icon is decorative only — keep the <select> itself present
+       and tappable (stretched over the whole pill, just invisible) so the
+       control still opens the native picker on mobile. Only the arrow,
+       which has no room to show, is dropped. */
+    .language-select {
+        position: absolute;
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+
+        opacity: 0;
+
+        cursor: pointer;
+    }
+
     .language-arrow {
         display: none;
     }

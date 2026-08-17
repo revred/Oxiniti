@@ -1,0 +1,202 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject LocalizationService Loc
+
+<section class="oxy-video-section" id="oxy-nano-video" aria-labelledby="oxy-video-title">
+
+    <div class="oxy-video-inner">
+
+        <div class="oxy-video-heading">
+
+            <span class="oxy-video-kicker">
+                @Loc.T("oxyNano.kicker", "OXY-NANO SERIES")
+            </span>
+
+            <h2 id="oxy-video-title">
+                @Loc.T(
+                    "oxyNano.title",
+                    "See the OXY-Nano Series in action."
+                )
+            </h2>
+
+            <p>
+                @Loc.T(
+                    "oxyNano.description",
+                    "Explore Oxyniti's nano-bubble technology and the OXY-Nano 1.5, 3 and 5 HP solutions in this complete product overview."
+                )
+            </p>
+
+        </div>
+
+
+        <div class="oxy-video-card">
+
+            <div class="oxy-video-frame">
+
+                <video @ref="_videoElement"
+                       controls
+                       playsinline
+                       muted
+                       preload="metadata"
+                       poster="/images/oxy-nano-poster.jpg"
+                       aria-label="@Loc.T(
+                           "oxyNano.videoAria",
+                           "OXY-Nano Series product video"
+                       )">
+
+                    <source src="@VideoSource" type="video/mp4" />
+
+                    @Loc.T(
+                        "oxyNano.videoUnsupported",
+                        "Your browser does not support the video tag."
+                    )
+
+                </video>
+
+
+                <div class="oxy-video-duration" aria-hidden="true">
+
+                    <span class="oxy-video-dot"></span>
+
+                    @Loc.T(
+                        "oxyNano.productVideo",
+                        "Product video"
+                    )
+                    · 6:53
+
+                </div>
+
+            </div>
+
+
+            <div class="oxy-video-meta">
+
+                <div>
+
+                    <strong>
+                        @Loc.T(
+                            "oxyNano.powerOptions",
+                            "Three power options"
+                        )
+                    </strong>
+
+                    <span>
+                        @Loc.T(
+                            "oxyNano.powerDescription",
+                            "Choose the model that matches your pond and available power supply."
+                        )
+                    </span>
+
+                </div>
+
+
+                <div class="oxy-models"
+                     aria-label="@Loc.T(
+                         "oxyNano.modelsAria",
+                         "OXY-Nano models"
+                     )">
+
+                    <span>OXY-Nano-1.5</span>
+                    <span>OXY-Nano-3</span>
+                    <span>OXY-Nano-5</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@code {
+
+    private ElementReference _videoElement;
+
+    private IJSObjectReference? _videoModule;
+    private IJSObjectReference? _videoController;
+
+
+    private string VideoSource =>
+        string.Equals(
+            Loc.CurrentLanguage,
+            "ta",
+            StringComparison.OrdinalIgnoreCase)
+            ? "/videos/oxyniti_explainer_16x9_tamil.mp4"
+            : "/videos/oxy-nano-series.mp4";
+
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += OnLanguageChanged;
+    }
+
+
+    private async void OnLanguageChanged()
+    {
+        await InvokeAsync(async () =>
+        {
+            // Refresh all translated text.
+            StateHasChanged();
+
+            // Allow Blazor to update the <source>.
+            await Task.Yield();
+
+            // Reload the newly selected language video.
+            if (_videoController is not null)
+            {
+                await _videoController.InvokeVoidAsync("reload");
+            }
+        });
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            _videoModule = await JS.InvokeAsync<IJSObjectReference>(
+                "import",
+                "./js/oxyNanoVideo.js");
+
+            _videoController =
+                await _videoModule.InvokeAsync<IJSObjectReference>(
+                    "init",
+                    _videoElement);
+        }
+        catch (JSException)
+        {
+            // Prevent page from breaking if JS is unavailable.
+        }
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        Loc.OnChange -= OnLanguageChanged;
+
+        try
+        {
+            if (_videoController is not null)
+            {
+                await _videoController.InvokeVoidAsync("dispose");
+                await _videoController.DisposeAsync();
+            }
+
+            if (_videoModule is not null)
+            {
+                await _videoModule.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Safe to ignore when Blazor circuit disconnects.
+        }
+    }
+}

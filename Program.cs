@@ -19,10 +19,13 @@ builder.Services.AddSingleton<CartService>();
 builder.Services.AddSingleton<DemoService>();
 builder.Services.AddSingleton<BusinessInfoService>();
 builder.Services.AddSingleton<LocalizationService>();
+builder.Services.AddSingleton<IDemoAccountService, DemoAccountService>();
 builder.Services.AddOptions<StripeSettings>()
     .BindConfiguration("Stripe");
 builder.Services.AddOptions<RampEdgeSettings>()
     .BindConfiguration(RampEdgeSettings.SectionName);
+builder.Services.AddOptions<OxynitiApiSettings>()
+    .BindConfiguration(OxynitiApiSettings.SectionName);
 
 
 builder.Services.AddMakerClient(builder.Configuration, onUnauthorized: async req =>

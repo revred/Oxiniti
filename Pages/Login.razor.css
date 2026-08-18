@@ -28,6 +28,37 @@
         font-size: 16px;
     }
 
+.login-mode-toggle {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    background: #ffffffaa;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+    .login-mode-toggle .mode-btn {
+        flex: 1;
+        padding: 8px 10px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: #1C4E6E;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .login-mode-toggle .mode-btn.active {
+        background: #1C4E6E;
+        color: #fff;
+    }
+
+.passcode-hint {
+    color: #555;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
 .form-group {
     margin-bottom: 15px;
 }
@@ -40,11 +71,25 @@
 
     .form-group input {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
+        padding: 12px 14px;
+        border: 1px solid rgba(11, 31, 51, 0.12);
+        border-radius: 10px;
+        background: #F0F6FA;
+        color: #1A2C54;
         font-size: 15px;
+        outline: none;
+        transition: border-color 0.25s, box-shadow 0.25s, background-color 0.25s;
     }
+
+        .form-group input:focus {
+            background: #fff;
+            border-color: #3D8FB5;
+            box-shadow: 0 0 0 3px rgba(61, 143, 181, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(11, 31, 51, 0.4);
+        }
 
 .forgot-password {
     text-align: right;

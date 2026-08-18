@@ -3,6 +3,7 @@
 @inject LocalizationService Loc
 @inject IJSRuntime JS
 @inject DemoService DemoService
+@inject IDemoAccountService DemoAccountService
 
 <div class="free-demo-section" id="free-demo">
     <div class="demo-grid">
@@ -89,7 +90,7 @@
             {
                 <p class="form-status">@statusMessage</p>
             }
-            <p class="form-note">@Loc.T("f.note", "No spam, ever.")</p>
+            <p class="form-note">@Loc.T("f.note", "We respect your privacy — no spam, ever.")</p>
         </EditForm>
         </div>
     </div>
@@ -145,7 +146,23 @@
             Longitude = lng
         });
 
-        statusMessage = "Demo request captured — we'll be in touch once contact details are configured.";
+        // This is the user's entry point — no signup/login required first.
+        // Ask the (not-yet-deployed) Oxyniti backend to create their account
+        // and send a WhatsApp passcode; see DemoAccountService for the contract.
+        var accountResult = await DemoAccountService.CreateAccountAndSendPasscodeAsync(new CreateDemoAccountRequest
+        {
+            Name = model.Name,
+            Phone = model.Phone,
+            Place = model.Place,
+            Size = model.Size,
+            Species = model.Species,
+            Latitude = lat,
+            Longitude = lng
+        });
+
+        statusMessage = accountResult.IsSuccess
+            ? "Demo request received! Your login passcode has been sent to your WhatsApp."
+            : "Demo request received! We'll contact you shortly.";
     }
 
     private class DemoRequest

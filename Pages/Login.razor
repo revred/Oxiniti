@@ -10,19 +10,45 @@
         <h2>@Loc.T("login.title", "Welcome Back 👋")</h2>
         <p class="subtitle">@Loc.T("login.subtitle1", "Today is a new day. It's your day. You shape it.")<br />@Loc.T("login.subtitle2", "Sign in to start managing your projects.")</p>
 
-        <div class="form-group">
-            <label>@Loc.T("login.email", "Email")</label>
-            <input @bind="email" type="email" placeholder="@Loc.T("login.email.placeholder", "Example@email.com")" />
+        <div class="login-mode-toggle">
+            <button type="button" class="mode-btn @(usePasscode ? "" : "active")" @onclick="() => SwitchMode(false)">
+                @Loc.T("login.mode.password", "Email")
+            </button>
+            <button type="button" class="mode-btn @(usePasscode ? "active" : "")" @onclick="() => SwitchMode(true)">
+                @Loc.T("login.mode.passcode", "WhatsApp")
+            </button>
         </div>
 
-        <div class="form-group">
-            <label>@Loc.T("login.password", "Password")</label>
-            <input @bind="password" type="password" placeholder="@Loc.T("login.password.placeholder", "at least 8 characters")" />
-        </div>
+        @if (!usePasscode)
+        {
+            <div class="form-group">
+                <label>@Loc.T("login.email", "Email")</label>
+                <input @bind="email" type="email" placeholder="@Loc.T("login.email.placeholder", "Example@email.com")" />
+            </div>
 
-        <div class="forgot-password">
-            <a href="#">@Loc.T("login.forgot", "Forgot Password?")</a>
-        </div>
+            <div class="form-group">
+                <label>@Loc.T("login.password", "Password")</label>
+                <input @bind="password" type="password" placeholder="@Loc.T("login.password.placeholder", "at least 8 characters")" />
+            </div>
+
+            <div class="forgot-password">
+                <a href="#">@Loc.T("login.forgot", "Forgot Password?")</a>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <label>@Loc.T("login.phone", "WhatsApp number")</label>
+                <input @bind="phone" type="tel" placeholder="@Loc.T("login.phone.placeholder", "+91 ...")" />
+            </div>
+
+            <div class="form-group">
+                <label>@Loc.T("login.passcode", "Passcode")</label>
+                <input @bind="passcode" type="text" inputmode="numeric" placeholder="@Loc.T("login.passcode.placeholder", "Passcode from WhatsApp")" />
+            </div>
+
+            <p class="passcode-hint">@Loc.T("login.passcode.hint", "Enter the passcode you received on WhatsApp.")</p>
+        }
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
@@ -62,6 +88,9 @@
 @code {
     private string email = string.Empty;
     private string password = string.Empty;
+    private string phone = string.Empty;
+    private string passcode = string.Empty;
+    private bool usePasscode;
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
     private bool isBusy;
@@ -71,12 +100,28 @@
         Loc.OnChange += StateHasChanged;
     }
 
+    private void SwitchMode(bool passcodeMode)
+    {
+        usePasscode = passcodeMode;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+    }
+
     private async Task OnLogin()
     {
         errorMessage = string.Empty;
         successMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        // Free Pond Demo accounts log in with phone + WhatsApp passcode instead
+        // of email + password. There's no separate passcode-login endpoint yet —
+        // the compiled auth client only exposes LoginAsync(identifier, secret) —
+        // so this reuses it with the phone number as the identifier and the
+        // WhatsApp passcode as the secret. That relies on the (not-yet-built)
+        // demo account-creation backend registering accounts that way.
+        var identifier = usePasscode ? phone : email;
+        var secret = usePasscode ? passcode : password;
+
+        if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(secret))
         {
             errorMessage = Loc.T("login.error.fillfields", "Please fill in all fields.");
             return;
@@ -85,9 +130,14 @@
         isBusy = true;
         try
         {
-            bool isLoggedIn = await AuthenticationService.LoginAsync(email, password);
+            bool isLoggedIn = await AuthenticationService.LoginAsync(identifier, secret);
             if (isLoggedIn)
             {
+                // Remembered so Account.razor can show "verified" only for
+                // WhatsApp-passcode logins (implying the phone number was
+                // confirmed), not for plain email/password logins.
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "oxyniti_login_method", usePasscode ? "passcode" : "email");
+
                 await CartService.SyncLocalCartToServerIfNeeded();
                 successMessage = Loc.T("login.success", "Login successful! Redirecting...");
                 StateHasChanged();

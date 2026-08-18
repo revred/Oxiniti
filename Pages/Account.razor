@@ -1,154 +1,144 @@
 @page "/account"
-@using System.ComponentModel.DataAnnotations
 @using System.IdentityModel.Tokens.Jwt
-@inject IMakerClient MakerClient
+@using Oxyniti.Services
+@inject IJSRuntime JSRuntime
 @inject IAuthenticationService AuthenticationService
+@inject IDemoAccountService DemoAccountService
+@inject CartService CartService
 @inject NavigationManager Nav
 @inject LocalizationService Loc
 
 <PageTitle>Your Account - Oxyniti</PageTitle>
 
-<div class="container-fluid px-4 py-5">
+<div class="account-page">
 @if (!isReady)
 {
-    <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2 p-4">
         <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
         <span>@Loc.T("account.loading", "Loading account…")</span>
     </div>
 }
 else
 {
-    <h2 class="mb-4">@Loc.T("account.title", "Your Account")</h2>
+    <div class="account-shell">
+        <aside class="account-sidebar">
+            <nav class="sidebar-nav">
+                <span class="sidebar-item active">
+                    <i class="bi bi-person-fill"></i> @Loc.T("account.nav.profile", "Profile")
+                </span>
+                <a class="sidebar-item" href="/my-demos">
+                    <i class="bi bi-geo-alt-fill"></i> @Loc.T("account.nav.demos", "My Demos")
+                </a>
+                <a class="sidebar-item" href="/orders">
+                    <i class="bi bi-box-seam-fill"></i> @Loc.T("account.nav.orders", "My Orders")
+                </a>
+                <button type="button" class="sidebar-item sidebar-logout" @onclick="HandleLogout">
+                    <i class="bi bi-box-arrow-right"></i> @Loc.T("account.nav.logout", "Logout")
+                </button>
+            </nav>
+        </aside>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-3">@Loc.T("account.profile", "Profile")</h5>
-            <p class="mb-1"><strong>@Loc.T("account.email", "Email:")</strong> @(email ?? Loc.T("account.unknown", "Unknown"))</p>
-        </div>
-    </div>
+        <div class="account-main">
+            <div class="account-header">
+                <div>
+                    <h2 class="mb-1">@Loc.T("account.title", "My Account")</h2>
+                    <p class="text-muted mb-0">@Loc.T("account.subtitle", "Manage your account details")</p>
+                </div>
+                @if (isPasscodeVerified)
+                {
+                    <div class="verified-badge">
+                        <span class="verified-icon"><i class="bi bi-shield-fill-check"></i></span>
+                        <span class="verified-copy">
+                            <strong>@Loc.T("account.verified", "Your account is verified")</strong>
+                            <small>@Loc.T("account.verified.sub", "You can update your details anytime.")</small>
+                        </span>
+                    </div>
+                }
+            </div>
 
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">@Loc.T("account.addresses", "Your Addresses")</h5>
-        <button class="btn btn-primary" @onclick="() => OpenEditor(new AddressDetails())">
-            <i class="bi bi-plus-lg"></i> @Loc.T("account.addaddress", "Add Address")
-        </button>
-    </div>
-
-    @if (addresses.Count == 0)
-    {
-        <p class="text-muted">@Loc.T("account.noaddresses", "No saved addresses yet.")</p>
-    }
-    else
-    {
-        <div class="row g-3 mb-4">
-            @foreach (var addr in addresses)
-            {
-                <div class="col-12 col-md-6">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <span class="fw-semibold">
-                                    @(!string.IsNullOrWhiteSpace(addr.Site) ? addr.Site : Loc.T("account.unnamed", "Unnamed"))
-                                </span>
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-secondary"
-                                        title="@Loc.T("account.edit", "Edit")"
-                                        @onclick="() => OpenEditor(Clone(addr))">
-                                    <i class="bi bi-pencil"></i> @Loc.T("account.edit", "Edit")
-                                </button>
-                            </div>
-                            <div class="mt-2 small text-muted">
-                                @if (!string.IsNullOrWhiteSpace(addr.Address))
-                                {
-                                    <div>@addr.Address</div>
-                                }
-                                <div>
-                                    @addr.State @((!string.IsNullOrWhiteSpace(addr.State) && (!string.IsNullOrWhiteSpace(addr.Pincode) || !string.IsNullOrWhiteSpace(addr.Country))) ? "," : "")
-                                    @addr.Pincode @((!string.IsNullOrWhiteSpace(addr.Pincode) && !string.IsNullOrWhiteSpace(addr.Country)) ? "," : "")
-                                    @addr.Country
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(addr.PhoneNumber))
-                                {
-                                    <div>📞 @addr.PhoneNumber</div>
-                                }
-                            </div>
-                        </div>
+            <div class="account-card">
+                <div class="card-heading">
+                    <span class="card-icon"><i class="bi bi-person-fill"></i></span>
+                    <div>
+                        <h5 class="mb-0">@Loc.T("account.profile.info", "Profile Information")</h5>
+                        <p class="text-muted small mb-0">@Loc.T("account.profile.info.sub", "Update your personal details used for demos and communication.")</p>
                     </div>
                 </div>
-            }
-        </div>
-    }
 
-    <a href="/orders" class="btn btn-outline-dark">
-        <i class="bi bi-receipt"></i> @Loc.T("account.vieworders", "View Your Orders")
-    </a>
-}
-
-<!-- Address Editor Modal -->
-@if (editing != null)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,.5);" role="dialog" aria-modal="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@((editing.BarID > 0) ? Loc.T("account.editaddress", "Edit Address") : Loc.T("account.addaddress", "Add Address"))</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseEditor"></button>
-                </div>
-                <EditForm Model="editorVm" OnValidSubmit="SaveAsync">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("account.field.site", "Site")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Site" />
+                <EditForm Model="profileVm" OnValidSubmit="SaveProfileAsync">
+                    <div class="profile-grid">
+                        <div class="field">
+                            <label>@Loc.T("account.field.name", "Full Name") <span class="req">*</span></label>
+                            <InputText class="acc-input" @bind-Value="profileVm.Name" />
+                        </div>
+                        <div class="field">
+                            <label>@Loc.T("account.field.whatsapp", "WhatsApp Number") <span class="req">*</span></label>
+                            <div class="input-with-icon">
+                                <input class="acc-input" value="@profileVm.Phone" disabled />
+                                <i class="bi bi-whatsapp"></i>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("account.email", "Email")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Email" />
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("account.field.phone", "Phone Number")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.PhoneNumber" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("account.field.state", "State/City")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.State" />
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label">@Loc.T("account.field.pincode", "ZIP / Pincode")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Pincode" />
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label">@Loc.T("account.field.country", "Country")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Country" />
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label">@Loc.T("account.field.address", "Street Address")</label>
-                                <InputTextArea class="form-control" rows="3" @bind-Value="editorVm.Address" />
-                            </div>
+                            <small class="field-hint">@Loc.T("account.field.whatsapp.hint", "This number is used to login and cannot be changed.")</small>
+                        </div>
+                        <div class="field">
+                            <label>@Loc.T("account.field.email", "Email")</label>
+                            <input class="acc-input" value="@profileVm.Email" disabled />
+                            <small class="field-hint">@Loc.T("account.field.email.hint", "Linked to your account and cannot be changed here.")</small>
+                        </div>
+                        <div class="field">
+                            <label>@Loc.T("account.field.altphone", "Alternate Phone (Optional)")</label>
+                            <InputText class="acc-input" @bind-Value="profileVm.AlternatePhone" placeholder="@Loc.T("account.field.altphone.ph", "Enter alternate number")" />
+                        </div>
+                        <div class="field">
+                            <label>@Loc.T("account.field.place", "Village / Town") <span class="req">*</span></label>
+                            <InputText class="acc-input" @bind-Value="profileVm.Place" />
+                        </div>
+                        <div class="field">
+                            <label>@Loc.T("account.field.state", "State") <span class="req">*</span></label>
+                            <InputText class="acc-input" @bind-Value="profileVm.State" />
+                        </div>
+                        <div class="field">
+                            <label>@Loc.T("account.field.pondlocation", "Pond Location") <span class="req">*</span></label>
+                            <InputText class="acc-input" @bind-Value="profileVm.PondLocation" placeholder="@Loc.T("account.field.pondlocation.ph", "e.g. Near Lalgudi Main Road")" />
+                        </div>
+                        <div class="field">
+                            <label>@Loc.T("account.field.size", "Pond Size") <span class="req">*</span></label>
+                            <InputSelect class="acc-input" @bind-Value="profileVm.Size">
+                                <option>@Loc.T("o.size1", "Under ½ acre")</option>
+                                <option>@Loc.T("o.size2", "½ – 1 acre")</option>
+                                <option>@Loc.T("o.size3", "1 – 3 acres")</option>
+                                <option>@Loc.T("o.size4", "3+ acres / multiple ponds")</option>
+                            </InputSelect>
+                        </div>
+                        <div class="field full">
+                            <label>@Loc.T("account.field.species", "What do you farm?") <span class="req">*</span></label>
+                            <InputSelect class="acc-input" @bind-Value="profileVm.Species">
+                                <option>@Loc.T("o.sp1", "Tilapia / GIFT")</option>
+                                <option>@Loc.T("o.sp2", "Murrel (Viral meen)")</option>
+                                <option>@Loc.T("o.sp3", "Pangasius")</option>
+                                <option>@Loc.T("o.sp4", "Freshwater prawn")</option>
+                                <option>@Loc.T("o.sp5", "Carp polyculture")</option>
+                                <option>@Loc.T("o.sp6", "Biofloc / RAS")</option>
+                                <option>@Loc.T("o.sp7", "Other")</option>
+                            </InputSelect>
                         </div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button type="button"
-                                class="btn btn-outline-secondary"
-                                @onclick="CloseEditor"
-                                disabled="@saving">
-                            @Loc.T("account.cancel", "Cancel")
-                        </button>
-                        <button type="submit" class="btn btn-primary" disabled="@saving">
-                            @if (saving)
-                            {
-                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            }
-                            @Loc.T("account.save", "Save")
-                        </button>
-                    </div>
+                    @if (!string.IsNullOrEmpty(profileStatusMessage))
+                    {
+                        <p class="profile-status @(profileStatusIsError ? "is-error" : "is-success")">@profileStatusMessage</p>
+                    }
+
+                    <button type="submit" class="btn-save" disabled="@profileSaving">
+                        @if (profileSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-save2"></i>
+                        }
+                        @Loc.T("account.save", "Save Changes")
+                    </button>
                 </EditForm>
             </div>
         </div>
@@ -158,11 +148,11 @@ else
 
 @code {
     private bool isReady;
-    private string? email;
-    private List<AddressDetails> addresses = new();
-    private AddressDetails? editing;
-    private AddressEditorVm editorVm = new();
-    private bool saving;
+    private bool isPasscodeVerified;
+    private ProfileEditorVm profileVm = new();
+    private bool profileSaving;
+    private string? profileStatusMessage;
+    private bool profileStatusIsError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -174,140 +164,84 @@ else
             return;
         }
 
-        email = GetEmailFromAccessToken(AuthenticationService.AccessToken);
+        profileVm.Email = GetClaimFromAccessToken(AuthenticationService.AccessToken, "email", JwtRegisteredClaimNames.Email) ?? string.Empty;
+        profileVm.Phone = GetClaimFromAccessToken(AuthenticationService.AccessToken, "phone_number", "phone") ?? string.Empty;
 
-        await LoadAddressesAsync();
+        var loginMethod = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "oxyniti_login_method");
+        isPasscodeVerified = loginMethod == "passcode";
+
         isReady = true;
     }
 
-    private async Task LoadAddressesAsync()
+    private async Task SaveProfileAsync()
     {
+        profileSaving = true;
+        profileStatusMessage = null;
         try
         {
-            var res = await MakerClient.GetAddressAsync();
-            addresses = res?.AddressDetails?.OrderByDescending(a => a.BarID).ToList() ?? new();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[Account] Error loading addresses: {ex}");
-            addresses = new();
-        }
-    }
-
-    private void OpenEditor(AddressDetails toEdit)
-    {
-        editing = toEdit;
-        editorVm = AddressEditorVm.From(toEdit);
-
-        if (string.IsNullOrWhiteSpace(editorVm.Email) && !string.IsNullOrWhiteSpace(email))
-        {
-            editorVm.Email = email!;
-        }
-        StateHasChanged();
-    }
-
-    private void CloseEditor()
-    {
-        if (saving) return;
-        editing = null;
-        editorVm = new();
-    }
-
-    private async Task SaveAsync()
-    {
-        if (editing is null) return;
-
-        saving = true;
-        try
-        {
-            var req = new AddressRequest
+            var result = await DemoAccountService.UpdateProfileAsync(new UpdateDemoProfileRequest
             {
-                BarID = editing.BarID,
-                AddressDetails = new AddressDetails
-                {
-                    BarID = editing.BarID,
-                    Email = editorVm.Email?.Trim() ?? "",
-                    Site = editorVm.Site?.Trim() ?? "",
-                    PhoneNumber = editorVm.PhoneNumber?.Trim() ?? "",
-                    State = editorVm.State?.Trim() ?? "",
-                    Pincode = editorVm.Pincode?.Trim() ?? "",
-                    Country = editorVm.Country?.Trim() ?? "",
-                    Address = editorVm.Address?.Trim() ?? ""
-                }
-            };
-
-            await MakerClient.UpsertAddressAsync(req);
-            await LoadAddressesAsync();
-        }
-        catch (ApiException ex)
-        {
-            Console.Error.WriteLine(ex.Message);
+                Name = profileVm.Name,
+                Phone = profileVm.Phone,
+                Email = profileVm.Email,
+                AlternatePhone = profileVm.AlternatePhone,
+                Place = profileVm.Place,
+                State = profileVm.State,
+                PondLocation = profileVm.PondLocation,
+                Size = profileVm.Size,
+                Species = profileVm.Species
+            });
+            profileStatusMessage = result.Message;
+            profileStatusIsError = !result.IsSuccess;
         }
         finally
         {
-            saving = false;
-            CloseEditor();
-            StateHasChanged();
+            profileSaving = false;
         }
     }
 
-    private static AddressDetails Clone(AddressDetails a) => new()
+    private async Task HandleLogout()
     {
-        BarID = a.BarID,
-        Email = a.Email,
-        Site = a.Site,
-        PhoneNumber = a.PhoneNumber,
-        State = a.State,
-        Pincode = a.Pincode,
-        Country = a.Country,
-        Address = a.Address
-    };
+        try
+        {
+            await AuthenticationService.LogoutAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Account] Error during logout: {ex}");
+        }
 
-    private static string? GetEmailFromAccessToken(string? accessToken)
+        try
+        {
+            await CartService.ClearCart();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Account] Error clearing cart: {ex}");
+        }
+
+        Nav.NavigateTo("/");
+    }
+
+    private static string? GetClaimFromAccessToken(string? accessToken, params string[] claimTypes)
     {
         if (string.IsNullOrWhiteSpace(accessToken)) return null;
         var handler = new JwtSecurityTokenHandler();
         if (!handler.CanReadToken(accessToken)) return null;
         var jwt = handler.ReadJwtToken(accessToken);
-        return jwt.Claims.FirstOrDefault(c =>
-            c.Type == "email" || c.Type == JwtRegisteredClaimNames.Email)?.Value;
+        return jwt.Claims.FirstOrDefault(c => claimTypes.Contains(c.Type))?.Value;
     }
 
-    private class AddressEditorVm
+    private class ProfileEditorVm
     {
-        public long BarID { get; set; }
-
-        [Required, StringLength(200)]
-        public string Site { get; set; } = string.Empty;
-
-        [Required, EmailAddress, StringLength(200)]
+        public string Name { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-
-        [StringLength(50)]
-        public string PhoneNumber { get; set; } = string.Empty;
-
-        [StringLength(100)]
+        public string AlternatePhone { get; set; } = string.Empty;
+        public string Place { get; set; } = string.Empty;
         public string State { get; set; } = string.Empty;
-
-        [StringLength(20)]
-        public string Pincode { get; set; } = string.Empty;
-
-        [StringLength(100)]
-        public string Country { get; set; } = string.Empty;
-
-        [Required, StringLength(500)]
-        public string Address { get; set; } = string.Empty;
-
-        public static AddressEditorVm From(AddressDetails d) => new()
-        {
-            BarID = d.BarID,
-            Site = d.Site ?? string.Empty,
-            Email = d.Email ?? string.Empty,
-            PhoneNumber = d.PhoneNumber ?? string.Empty,
-            State = d.State ?? string.Empty,
-            Pincode = d.Pincode ?? string.Empty,
-            Country = d.Country ?? string.Empty,
-            Address = d.Address ?? string.Empty
-        };
+        public string PondLocation { get; set; } = string.Empty;
+        public string Size { get; set; } = "½ – 1 acre";
+        public string Species { get; set; } = "Tilapia / GIFT";
     }
 }

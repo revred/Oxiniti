@@ -30,6 +30,11 @@
 @code {
     private int? OpenIndex = 0;
 
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
     private void Toggle(int index) => OpenIndex = OpenIndex == index ? null : index;
 
     private record Faq(string Question, string Answer);

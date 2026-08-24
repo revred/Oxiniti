@@ -11,3 +11,4 @@
 # git and NOT by GitHub, which ignores .gitattributes merge drivers -- that is why
 # PRs 5 and 6 conflicted on a shared events.jsonl while the local merge was clean.
 # Safety comes from the shards being disjoint, not from this line.
+wwwroot/videos/oxy-nano-series.mp4 filter=lfs diff=lfs merge=lfs -text

@@ -52,31 +52,6 @@
             integrity="sha256-eeyG+ChWAFsciHkFz8z8++w4Icphx/1alS+qX3ePeRw=" crossorigin=""></script>
     <script src="./js/qrHelper.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        let __embeddedCheckout = null;
-        let __stripe = null;
-
-        async function mountEmbeddedCheckout(stripePublicKey, clientSecret, containerSelector = '#checkout-container') {
-            // If already mounted, destroy first (idempotent)
-            if (__embeddedCheckout) {
-                try { await __embeddedCheckout.destroy(); } catch (_) { }
-                __embeddedCheckout = null;
-            }
-
-            if (!__stripe) {
-                __stripe = Stripe(stripePublicKey);
-            }
-
-            const el = document.querySelector(containerSelector);
-            if (!el) throw new Error(`Container ${containerSelector} not found`);
-            el.innerHTML = '';
-
-            __embeddedCheckout = await __stripe.initEmbeddedCheckout({ clientSecret });
-            await __embeddedCheckout.mount(containerSelector);
-            return true;
-        }
-    </script>
 
 </body>
 </html>

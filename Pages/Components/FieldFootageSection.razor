@@ -1,3 +1,6 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
 @inject LocalizationService Loc
 
 <div class="field-footage-section" id="use-cases">
@@ -7,7 +10,10 @@
 
     <div class="footage-grid">
         <div class="footage-card video-card">
-            <video autoplay muted loop playsinline preload="metadata" src="/videos/plume-portrait.mp4"></video>
+            <video @ref="_videoElement" muted loop playsinline poster="/images/plume-poster.jpg">
+                <source data-src="/videos/plume-portrait.webm" type="video/webm" />
+                <source data-src="/videos/plume-portrait.mp4" type="video/mp4" />
+            </video>
             <div class="caption">@Loc.T("ff.cap1", "The nano-plume — oxygen dissolving in real time")</div>
         </div>
         <div class="footage-photos">
@@ -32,8 +38,57 @@
 </div>
 
 @code {
+    private ElementReference _videoElement;
+    private IJSObjectReference? _videoModule;
+    private IJSObjectReference? _videoController;
+
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            _videoModule = await JS.InvokeAsync<IJSObjectReference>(
+                "import",
+                "./js/lazyBackgroundVideo.js");
+
+            _videoController = await _videoModule.InvokeAsync<IJSObjectReference>(
+                "init",
+                _videoElement,
+                new { eager = false });
+        }
+        catch (JSException)
+        {
+            // Prevent page from breaking if JS is unavailable.
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Loc.OnChange -= StateHasChanged;
+
+        try
+        {
+            if (_videoController is not null)
+            {
+                await _videoController.InvokeVoidAsync("dispose");
+                await _videoController.DisposeAsync();
+            }
+
+            if (_videoModule is not null)
+            {
+                await _videoModule.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Safe to ignore when Blazor circuit disconnects.
+        }
     }
 }

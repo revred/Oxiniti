@@ -67,7 +67,11 @@
         </div>
 
         <div class="product-showcase">
-            <img src="/images/nanobubble.png?v=1" alt="@Loc.T("benefits.showcaseAlt", "Nano bubble")" />
+            <picture>
+                <source type="image/avif" srcset="/images/nanobubble.avif" />
+                <source type="image/webp" srcset="/images/nanobubble.webp" />
+                <img src="/images/nanobubble.png?v=1" width="626" height="417" loading="lazy" decoding="async" alt="@Loc.T("benefits.showcaseAlt", "Nano bubble")" />
+            </picture>
         </div>
     </div>
 

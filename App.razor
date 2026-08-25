@@ -1,17 +1,31 @@
 ﻿@inject BusinessInfoService InfoService
+@inject NavigationManager Nav
 
 <BusinessInfoLoader>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
+            <HeadContent>
+                <link rel="canonical" href="@CanonicalUrl" />
+            </HeadContent>
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
 
         <NotFound>
             <PageTitle>Not found</PageTitle>
+            <HeadContent>
+                <meta name="robots" content="noindex" />
+            </HeadContent>
             <LayoutView Layout="@typeof(MainLayout)">
                 <p role="alert">Sorry, there's nothing at this address.</p>
             </LayoutView>
         </NotFound>
     </Router>
 </BusinessInfoLoader>
+
+@code {
+    // Self-referencing canonical, stripped of query string, so it stays
+    // correct across every route (including ?scrollTo=... deep links)
+    // without needing a canonical tag hand-maintained on each page.
+    private string CanonicalUrl => new Uri(Nav.Uri).GetLeftPart(UriPartial.Path);
+}

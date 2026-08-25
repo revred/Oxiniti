@@ -2,6 +2,11 @@
 @inject BusinessInfoService InfoService
 @inject LocalizationService Loc
 
+<PageTitle>@Loc.T("about.pagetitle", "About Oxyniti | Nano-Bubble Aeration")</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Loc.T("about.meta", "Oxyniti designs and manufactures nano-bubble aeration systems for aquaculture, wastewater treatment and hydroponics, with 100+ installations across India.")" />
+</HeadContent>
+
 <h2 class="section-title">@Loc.T("about.title", "About") @InfoService.ApplicationName</h2>
 
 <div class="content-section">

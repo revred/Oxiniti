@@ -4,7 +4,7 @@
 @inject LocalizationService Loc
 
 <div class="hero-container">
-    <img class="hero-poster" src="/images/hero-poster.avif" width="1280" height="720"
+    <img @ref="_posterElement" class="hero-poster" src="/images/hero-poster.avif" width="1280" height="720"
          fetchpriority="high" decoding="async" alt="" />
     <video @ref="_videoElement" class="hero-video" muted loop playsinline poster="/images/hero-poster.jpg">
         <source data-src="/videos/hero.webm" type="video/webm" />
@@ -41,6 +41,7 @@
 
 @code {
     private ElementReference _videoElement;
+    private ElementReference _posterElement;
     private IJSObjectReference? _videoModule;
     private IJSObjectReference? _videoController;
 
@@ -63,7 +64,8 @@
             _videoController = await _videoModule.InvokeAsync<IJSObjectReference>(
                 "init",
                 _videoElement,
-                new { eager = true, respectNarrowViewport = false, deferToWindowLoad = true });
+                _posterElement,
+                new { eager = true, respectNarrowViewport = false, deferUntilPosterPaint = true });
         }
         catch (JSException)
         {

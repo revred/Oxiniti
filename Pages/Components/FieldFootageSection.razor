@@ -61,6 +61,7 @@
             _videoController = await _videoModule.InvokeAsync<IJSObjectReference>(
                 "init",
                 _videoElement,
+                null,
                 new { eager = false });
         }
         catch (JSException)

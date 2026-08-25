@@ -17,23 +17,46 @@ function shouldStayPosterOnly(respectNarrowViewport) {
     return false;
 }
 
-export function init(video, options) {
+export function init(video, poster, options) {
     if (!video) {
         throw new Error("Background video element was not found.");
     }
 
     const eager = options?.eager === true;
     const respectNarrowViewport = options?.respectNarrowViewport !== false;
-    const deferToWindowLoad = options?.deferToWindowLoad === true;
+    const deferUntilPosterPaint = options?.deferUntilPosterPaint === true;
 
     video.muted = true;
     video.playsInline = true;
 
     let attached = false;
-    let windowLoadListener = null;
 
     const onPlaying = () => video.classList.add("is-visible");
     video.addEventListener("playing", onPlaying);
+
+    /*
+     * Resolves once the poster <img> has had its first chance to paint, so
+     * the (much larger) video fetch never races it for LCP. By the time this
+     * module runs, Blazor has already rendered the component -- the browser
+     * 'load' event fires long before that (it only covers the static shell),
+     * so it is useless as a gate here; the poster's own paint is the signal
+     * that actually matters.
+     */
+    const waitForPosterPaint = () => {
+        if (!poster) {
+            return Promise.resolve();
+        }
+        if (poster.complete) {
+            // Already decoded (e.g. served from disk cache) -- still yield
+            // a couple of frames so the browser paints it before we start
+            // the video download on the same thread.
+            return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        }
+        return new Promise((resolve) => {
+            poster.addEventListener("load", resolve, { once: true });
+            poster.addEventListener("error", resolve, { once: true });
+        });
+    };
 
     /*
      * Swap the real sources in from data-src and start playback.
@@ -69,14 +92,8 @@ export function init(video, options) {
             return;
         }
 
-        if (deferToWindowLoad && document.readyState !== "complete") {
-            /*
-             * Hold off on fetching the (much larger) video until the page
-             * has finished its initial load, so the poster image is what
-             * paints first and becomes the LCP candidate.
-             */
-            windowLoadListener = () => swapInSources();
-            window.addEventListener("load", windowLoadListener, { once: true });
+        if (deferUntilPosterPaint) {
+            waitForPosterPaint().then(swapInSources);
             return;
         }
 
@@ -88,9 +105,6 @@ export function init(video, options) {
         return {
             dispose() {
                 video.removeEventListener("playing", onPlaying);
-                if (windowLoadListener) {
-                    window.removeEventListener("load", windowLoadListener);
-                }
             }
         };
     }

@@ -1,0 +1,46 @@
+@page "/ras-oxygenation"
+@inject LocalizationService Loc
+
+<PageTitle>@Loc.T("rasox.pagetitle", "RAS & Biofloc Oxygenation | Oxyniti")</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Loc.T("rasox.meta", "Nano-bubble oxygenation for recirculating aquaculture (RAS) and biofloc systems, where maintaining dissolved oxygen at high stocking density is critical.")" />
+</HeadContent>
+
+<section class="cp-hero">
+    <div class="cp-hero-inner">
+        <span class="cp-kicker">@Loc.T("rasox.kicker", "RAS & biofloc")</span>
+        <h1 class="cp-title">@Loc.T("rasox.h1", "Oxygenation for RAS and Biofloc Systems")</h1>
+        <p class="cp-lead">
+            @Loc.T("rasox.intro", "Recirculating aquaculture systems (RAS) and biofloc systems run at much higher stocking densities than open ponds, which makes dissolved oxygen a tighter operating constraint. Oxyniti's nano-bubble aeration is designed to support these higher-density systems alongside conventional pond farming.")
+        </p>
+    </div>
+</section>
+
+<div class="cp-body">
+    <div class="cp-section">
+        <h2>@Loc.T("rasox.why.h", "Why high-density systems need more from aeration")</h2>
+        <p>@Loc.T("rasox.why.p", "Higher stocking density means more oxygen demand per unit of water, less margin for a dissolved-oxygen dip, and often less water volume to buffer against a shortfall than an equivalent open pond. Aeration that keeps oxygen suspended through the water column, rather than escaping quickly at the surface, matters more as density rises.")</p>
+    </div>
+
+    <div class="cp-callout">
+        <h2>@Loc.T("rasox.how.h", "How Oxyniti fits into a RAS or biofloc setup")</h2>
+        <p>@Loc.T("rasox.how.p", "The same nano-shear aeration technology used across our pond installations applies to tanks and biofloc systems: it draws water, generates sub-200nm bubbles, and keeps oxygen in suspension rather than releasing it immediately at the surface. Because every RAS and biofloc setup differs in flow, biomass and target species, we size each installation individually rather than quoting a single fixed configuration.")</p>
+    </div>
+
+    <div class="cp-cta">
+        <p>@Loc.T("rasox.cta", "Tell us about your system and we'll help size a solution.")</p>
+        <a class="cp-cta-btn" href="/contact">@Loc.T("rasox.cta.link", "Contact Oxyniti")<i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="cp-links-row">
+        <a href="/technology"><i class="bi bi-lightning-charge"></i>@Loc.T("rasox.link.tech", "How the nano-bubble technology works")</a>
+        <a href="/aquaculture-oxygenation"><i class="bi bi-water"></i>@Loc.T("rasox.link.aq", "Aquaculture oxygenation overview")</a>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

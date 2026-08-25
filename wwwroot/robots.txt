@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
+
+# ChatGPT search discovery — allowed
+User-agent: OAI-SearchBot
+Allow: /
+
+# ChatGPT user-triggered fetches — allowed
+User-agent: ChatGPT-User
+Allow: /
+
+# ChatGPT/OpenAI model-training crawler — blocked by default.
+# Flip to "Allow: /" if training-data use is acceptable.
+User-agent: GPTBot
+Disallow: /
+
+Sitemap: https://www.oxyniti.com/sitemap.xml

@@ -1,0 +1,60 @@
+@page "/technology"
+@inject LocalizationService Loc
+
+<PageTitle>@Loc.T("techpg.pagetitle", "Nano-Bubble Aeration Technology | Oxyniti")</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Loc.T("techpg.meta", "How Oxyniti's nano-shear chamber generates sub-200nm bubbles that stay suspended in water and keep transferring oxygen for days instead of seconds.")" />
+</HeadContent>
+
+<section class="cp-hero">
+    <div class="cp-hero-inner">
+        <span class="cp-kicker">@Loc.T("techpg.kicker", "The science, simply")</span>
+        <h1 class="cp-title">@Loc.T("techpg.h1", "Bubbles so small, they never leave the water")</h1>
+        <p class="cp-lead">
+            @Loc.T("techpg.intro", "A paddle-wheel aerator splashes oxygen in; physics takes it right back out. Oxyniti shears air into bubbles thousands of times thinner than a human hair. At that size they stop rising, stay suspended, and transfer oxygen with far less loss to the atmosphere — day and night.")
+        </p>
+    </div>
+</section>
+
+<div class="cp-body">
+    <div class="cp-step">
+        <div class="cp-step-num">1</div>
+        <div class="cp-step-body">
+            <h2>@Loc.T("techpg.s1.h", "1. Draw and shear")</h2>
+            <p>@Loc.T("techpg.s1.p", "The unit draws pond or tank water and injects air through a nano-shear chamber, generating very large numbers of bubbles under 200 nanometres across.")</p>
+        </div>
+    </div>
+
+    <div class="cp-step">
+        <div class="cp-step-num">2</div>
+        <div class="cp-step-body">
+            <h2>@Loc.T("techpg.s2.h", "2. Infuse the whole water column")</h2>
+            <p>@Loc.T("techpg.s2.p", "The resulting nano-bubble plume spreads through the water column — not just the surface — raising dissolved oxygen everywhere fish live, rather than only at the point of aeration.")</p>
+        </div>
+    </div>
+
+    <div class="cp-step">
+        <div class="cp-step-num">3</div>
+        <div class="cp-step-body">
+            <h2>@Loc.T("techpg.s3.h", "3. Hold it for longer")</h2>
+            <p>@Loc.T("techpg.s3.p", "Neutral buoyancy keeps bubbles suspended rather than rising and bursting immediately, buffering dissolved oxygen through the highest-risk night-time hours.")</p>
+        </div>
+    </div>
+
+    <div class="cp-callout">
+        <h2>@Loc.T("techpg.compare.h", "Compared with conventional aeration")</h2>
+        <p>@Loc.T("techpg.compare.p", "Conventional paddle-wheel and diffused-air aeration produce millimetre-scale bubbles that rise and burst within seconds, so much of the injected oxygen never fully dissolves. Because nano-bubbles do not rise and burst the same way, more of the injected air has the opportunity to transfer into solution before it is lost.")</p>
+    </div>
+
+    <div class="cp-links-row">
+        <a href="/aquaculture-oxygenation"><i class="bi bi-water"></i>@Loc.T("techpg.link.aq", "See how this applies to aquaculture")</a>
+        <a href="/products"><i class="bi bi-box-seam"></i>@Loc.T("techpg.link.products", "View products")</a>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+}

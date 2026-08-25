@@ -20,6 +20,29 @@ jobs:
           submodules: true
           lfs: false
 
+      - name: Enforce wwwroot/images size budget
+        run: |
+          set -e
+          MAX_FILE_BYTES=512000
+          MAX_TOTAL_BYTES=5242880
+          DIR=wwwroot/images
+          fail=0
+          total=0
+          while IFS= read -r -d '' f; do
+            size=$(stat -c%s "$f")
+            total=$((total + size))
+            if [ "$size" -gt "$MAX_FILE_BYTES" ]; then
+              echo "::error file=$f::$f is $size bytes, exceeds the 500 KB per-file budget"
+              fail=1
+            fi
+          done < <(find "$DIR" -type f -print0)
+          echo "Total size of $DIR: $total bytes (budget: $MAX_TOTAL_BYTES bytes)"
+          if [ "$total" -gt "$MAX_TOTAL_BYTES" ]; then
+            echo "::error::$DIR total is $total bytes, exceeds the 5 MB budget"
+            fail=1
+          fi
+          exit $fail
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:

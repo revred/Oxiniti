@@ -24,27 +24,21 @@ export function init(video, options) {
 
     const eager = options?.eager === true;
     const respectNarrowViewport = options?.respectNarrowViewport !== false;
+    const deferToWindowLoad = options?.deferToWindowLoad === true;
 
     video.muted = true;
     video.playsInline = true;
 
     let attached = false;
+    let windowLoadListener = null;
+
+    const onPlaying = () => video.classList.add("is-visible");
+    video.addEventListener("playing", onPlaying);
 
     /*
      * Swap the real sources in from data-src and start playback.
-     * Skipped entirely for reduced-data / narrow-viewport visitors,
-     * who keep only the poster image.
      */
-    const attach = () => {
-        if (attached) {
-            return;
-        }
-        attached = true;
-
-        if (shouldStayPosterOnly(respectNarrowViewport)) {
-            return;
-        }
-
+    const swapInSources = () => {
         video.querySelectorAll("source[data-src]").forEach((source) => {
             source.src = source.dataset.src;
             source.removeAttribute("data-src");
@@ -61,11 +55,42 @@ export function init(video, options) {
         });
     };
 
+    /*
+     * Skipped entirely for reduced-data / narrow-viewport visitors,
+     * who keep only the poster image.
+     */
+    const attach = () => {
+        if (attached) {
+            return;
+        }
+        attached = true;
+
+        if (shouldStayPosterOnly(respectNarrowViewport)) {
+            return;
+        }
+
+        if (deferToWindowLoad && document.readyState !== "complete") {
+            /*
+             * Hold off on fetching the (much larger) video until the page
+             * has finished its initial load, so the poster image is what
+             * paints first and becomes the LCP candidate.
+             */
+            windowLoadListener = () => swapInSources();
+            window.addEventListener("load", windowLoadListener, { once: true });
+            return;
+        }
+
+        swapInSources();
+    };
+
     if (eager) {
         attach();
         return {
             dispose() {
-                // Nothing to tear down for the eager path.
+                video.removeEventListener("playing", onPlaying);
+                if (windowLoadListener) {
+                    window.removeEventListener("load", windowLoadListener);
+                }
             }
         };
     }
@@ -90,6 +115,7 @@ export function init(video, options) {
     return {
         dispose() {
             observer.disconnect();
+            video.removeEventListener("playing", onPlaying);
         }
     };
 }

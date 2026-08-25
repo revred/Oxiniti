@@ -1,0 +1,304 @@
+/* =========================================================
+   PREMIUM CONTENT PAGES
+   Shared look for long-form informational pages (Technology,
+   Aquaculture Oxygenation, RAS & Biofloc Oxygenation, ...).
+   Brand tokens match Home's TechnologySection / WhyOxygenSection:
+   navy #1A2C54 / #0B1F33, teal #3D8FB5, cyan accent #2de0e5.
+   ========================================================= */
+
+.cp-hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0B1F33 0%, #1A2C54 60%, #3D8FB5 150%);
+    color: #fff;
+    padding: 3.5rem 1.5rem 3.25rem;
+    margin-bottom: 3rem;
+}
+
+.cp-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 88% 12%, rgba(45, 224, 229, 0.20), transparent 42%),
+        radial-gradient(circle at 6% 95%, rgba(61, 143, 181, 0.28), transparent 45%);
+    pointer-events: none;
+}
+
+.cp-hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1320px;
+    margin: 0 auto;
+}
+
+.cp-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7fe9ee;
+    margin-bottom: 0.9rem;
+}
+
+.cp-title {
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.18;
+    margin-bottom: 1.1rem;
+    color: #fff;
+}
+
+.cp-lead {
+    font-size: 1.08rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 100%;
+    margin: 0;
+}
+
+.cp-body {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+}
+
+/* Numbered steps (used where content is a sequence, e.g. "1. Draw and shear") */
+.cp-step {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.6rem 0;
+    border-bottom: 1px solid #e7ebf0;
+}
+
+.cp-step:first-of-type {
+    padding-top: 0;
+}
+
+.cp-step:last-of-type {
+    border-bottom: none;
+}
+
+.cp-step-num {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #1A2C54;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.cp-step-body h2 {
+    color: #1A2C54;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.cp-step-body p {
+    color: #3a3a3a;
+    line-height: 1.65;
+    margin: 0;
+}
+
+/* Plain sections (question / answer style, e.g. "Why dissolved oxygen matters") */
+.cp-section {
+    padding: 1.75rem 0;
+    border-bottom: 1px solid #e7ebf0;
+}
+
+.cp-section:first-of-type {
+    padding-top: 0;
+}
+
+.cp-section:last-of-type {
+    border-bottom: none;
+}
+
+.cp-section h2 {
+    color: #1A2C54;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 0.65rem;
+}
+
+.cp-section p {
+    color: #3a3a3a;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Highlighted comparison / callout block */
+.cp-callout {
+    background: linear-gradient(160deg, #ffffff 0%, #eaf4fa 100%);
+    border: 1px solid rgba(61, 143, 181, 0.18);
+    border-radius: 1rem;
+    padding: 1.85rem 2rem;
+    margin: 2rem 0;
+}
+
+.cp-callout h2 {
+    color: #1A2C54;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.65rem;
+}
+
+.cp-callout p {
+    color: #3a3a3a;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Related-links card grid (replaces bare <ul><li><a>) */
+.cp-link-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+}
+
+.cp-link-grid li {
+    margin: 0;
+}
+
+.cp-link-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    height: 100%;
+    padding: 1rem 1.15rem;
+    border-radius: 0.85rem;
+    background: #f6f9fb;
+    border: 1px solid #e7ebf0;
+    color: #1A2C54;
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cp-link-card i {
+    flex-shrink: 0;
+    color: #3D8FB5;
+    font-size: 1.15rem;
+}
+
+.cp-link-card:hover {
+    border-color: #3D8FB5;
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(26, 44, 84, 0.10);
+    color: #1A2C54;
+}
+
+/* Inline pill link row (footer "see also" links) */
+.cp-links-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.75rem;
+}
+
+.cp-links-row a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 2rem;
+    background: #f6f9fb;
+    border: 1px solid #e7ebf0;
+    color: #1A2C54;
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cp-links-row a:hover {
+    background: #ffffff;
+    border-color: #3D8FB5;
+    box-shadow: 0 6px 16px rgba(26, 44, 84, 0.10);
+    color: #1A2C54;
+}
+
+/* CTA banner */
+.cp-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    background: linear-gradient(135deg, #1A2C54, #0B1F33);
+    color: #fff;
+    border-radius: 1rem;
+    padding: 1.85rem 2.15rem;
+    margin: 2.25rem 0 0.5rem;
+}
+
+.cp-cta p {
+    margin: 0;
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.cp-cta-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #2de0e5;
+    color: #00121d;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cp-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(45, 224, 229, 0.35);
+    color: #00121d;
+}
+
+@media (max-width: 640px) {
+    .cp-hero {
+        padding: 2.5rem 1.25rem 2.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .cp-body {
+        padding: 0 1.25rem 2.25rem;
+    }
+
+    .cp-step {
+        gap: 1rem;
+    }
+
+    .cp-step-num {
+        width: 2.1rem;
+        height: 2.1rem;
+        font-size: 0.95rem;
+    }
+
+    .cp-cta {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.6rem 1.5rem;
+    }
+
+    .cp-cta-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

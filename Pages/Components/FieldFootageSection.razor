@@ -18,11 +18,19 @@
         </div>
         <div class="footage-photos">
             <div class="footage-card photo-card">
-                <img src="/images/unit-pondside.jpg" alt="Two Oxyniti units installed beside a fish pond" loading="lazy" />
+                <picture>
+                    <source type="image/avif" srcset="/images/unit-pondside.avif 1x, /images/unit-pondside@2x.avif 2x" />
+                    <source type="image/webp" srcset="/images/unit-pondside.webp 1x, /images/unit-pondside@2x.webp 2x" />
+                    <img src="/images/unit-pondside.jpg" srcset="/images/unit-pondside.jpg 1x, /images/unit-pondside@2x.jpg 2x" width="560" height="315" loading="lazy" decoding="async" alt="Two Oxyniti units installed beside a fish pond" />
+                </picture>
                 <div class="caption">@Loc.T("ff.cap2", "On-site install — pond edge, ready to run")</div>
             </div>
             <div class="footage-card photo-card">
-                <img src="/images/unit-fishfarm.jpg" alt="Oxyniti units running at a family fish farm" loading="lazy" />
+                <picture>
+                    <source type="image/avif" srcset="/images/unit-fishfarm.avif 1x, /images/unit-fishfarm@2x.avif 2x" />
+                    <source type="image/webp" srcset="/images/unit-fishfarm.webp 1x, /images/unit-fishfarm@2x.webp 2x" />
+                    <img src="/images/unit-fishfarm.jpg" srcset="/images/unit-fishfarm.jpg 1x, /images/unit-fishfarm@2x.jpg 2x" width="560" height="315" loading="lazy" decoding="async" alt="Oxyniti units running at a family fish farm" />
+                </picture>
                 <div class="caption">@Loc.T("ff.cap3", "Family Fish Farm — live trial in progress")</div>
             </div>
         </div>

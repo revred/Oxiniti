@@ -1,6 +1,7 @@
 ﻿@implements IDisposable
 @inject BusinessInfoService InfoService
 @inject LocalizationService Loc
+@inject IJSRuntime JS
 @* Testimonials come from the CMS. Until (or unless) they land there is nothing
    to show, so the whole section stays out of the flow rather than rendering a
    bare heading over an empty box. *@
@@ -22,6 +23,17 @@
     }
 
     private void OnInfoChanged() => InvokeAsync(StateHasChanged);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!string.IsNullOrWhiteSpace(InfoService.Testimonials))
+        {
+            // Wires hover-to-translate on whatever testimonial quotes are in
+            // the DOM; idempotent per element (see testimonialTranslate.js),
+            // so re-running it on every render is cheap and safe.
+            await JS.InvokeVoidAsync("testimonialHoverTranslate.init", ".testimonials-section");
+        }
+    }
 
     public void Dispose()
     {

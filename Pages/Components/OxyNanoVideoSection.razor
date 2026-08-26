@@ -34,25 +34,48 @@
 
             <div class="oxy-video-frame">
 
-                <video @ref="_videoElement"
-                       controls
-                       playsinline
-                       muted
-                       preload="metadata"
-                       poster="/images/oxy-nano-poster.jpg"
-                       aria-label="@Loc.T(
-                           "oxyNano.videoAria",
-                           "OXY-Nano Series product video"
-                       )">
+                @if (_playing)
+                {
+                    <video @ref="_videoElement"
+                           controls
+                           autoplay
+                           playsinline
+                           preload="auto"
+                           poster="/images/oxy-nano-poster.webp"
+                           aria-label="@Loc.T(
+                               "oxyNano.videoAria",
+                               "OXY-Nano Series product video"
+                           )">
 
-                    <source src="@VideoSource" type="video/mp4" />
+                        <source src="@VideoSource" type="video/mp4" />
 
-                    @Loc.T(
-                        "oxyNano.videoUnsupported",
-                        "Your browser does not support the video tag."
-                    )
+                        @Loc.T(
+                            "oxyNano.videoUnsupported",
+                            "Your browser does not support the video tag."
+                        )
 
-                </video>
+                    </video>
+                }
+                else
+                {
+                    <button type="button"
+                            class="oxy-video-play"
+                            @onclick="Play"
+                            aria-label="@Loc.T(
+                                "oxyNano.videoAria",
+                                "OXY-Nano Series product video"
+                            )">
+
+                        <img src="/images/oxy-nano-poster.webp"
+                             alt=""
+                             width="1280"
+                             height="720"
+                             loading="lazy" />
+
+                        <span class="oxy-video-play-icon" aria-hidden="true"></span>
+
+                    </button>
+                }
 
 
                 <div class="oxy-video-duration" aria-hidden="true">
@@ -119,6 +142,8 @@
     private IJSObjectReference? _videoModule;
     private IJSObjectReference? _videoController;
 
+    private bool _playing;
+
 
     private string VideoSource =>
         string.Equals(
@@ -135,12 +160,21 @@
     }
 
 
+    private void Play()
+    {
+        _playing = true;
+    }
+
+
     private async void OnLanguageChanged()
     {
         await InvokeAsync(async () =>
         {
-            // Refresh all translated text.
+            // Refresh all translated text (and the poster/button when not yet playing).
             StateHasChanged();
+
+            if (!_playing)
+                return;
 
             // Allow Blazor to update the <source>.
             await Task.Yield();
@@ -156,7 +190,11 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        // The <video> element only exists in the DOM once the visitor
+        // clicks play, so the JS module is loaded lazily on that render
+        // instead of on first render (which would still be the poster
+        // button and has no element to attach to).
+        if (!_playing || _videoModule is not null)
             return;
 
         try

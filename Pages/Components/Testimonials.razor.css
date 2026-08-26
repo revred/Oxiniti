@@ -1,23 +1,27 @@
-﻿.testimonials-section {
+.testimonials-section {
     padding: 3rem 0;
     margin: 0 auto;
 }
 
 .section-title {
     font-size: 2.5rem;
-    color: #417893;
+    color: #1A2C54;
     margin-bottom: 2.5rem;
     font-weight: 600;
 }
 
-.testimonials-container {
+/* Everything below targets markup injected from the CMS via MarkupString,
+   which never receives Blazor's scoped-CSS attribute. ::deep is what makes
+   these rules reach that dynamically-injected content. */
+
+::deep .testimonials-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
 }
 
-.testimonial-card {
-    background: linear-gradient(180deg, #6FA3BF 0%, #D6E6F0 100%);
+::deep .testimonial-card {
+    background: linear-gradient(180deg, #2F5F78 0%, #4D7B93 100%);
     border-radius: 1rem;
     padding: 2rem;
     color: white;
@@ -28,12 +32,12 @@
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
-    .testimonial-card:hover {
+    ::deep .testimonial-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
-.testimonial-quote {
+::deep .testimonial-quote {
     font-size: 1.5rem;
     font-weight: 600;
     line-height: 1.4;
@@ -41,12 +45,18 @@
     flex-grow: 1;
 }
 
-.testimonial-author {
+::deep .testimonial-quote--translatable {
+    cursor: help;
+    text-decoration: underline dotted rgba(255, 255, 255, 0.6);
+    text-underline-offset: 4px;
+}
+
+::deep .testimonial-author {
     display: flex;
     align-items: center;
 }
 
-.author-avatar {
+::deep .author-avatar {
     min-width: 50px;
     max-width: 50px;
     min-height: 50px;
@@ -57,30 +67,30 @@
     border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
-    .author-avatar img {
+    ::deep .author-avatar img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-.author-info {
+::deep .author-info {
     display: flex;
     flex-direction: column;
 }
 
-.author-name {
+::deep .author-name {
     font-weight: 600;
     font-size: 1rem;
 }
 
-.author-description {
+::deep .author-description {
     font-size: 0.875rem;
     opacity: 0.9;
-    color:black;
+    color: white;
 }
 
 @media (max-width: 768px) {
-    .testimonials-container {
+    ::deep .testimonials-container {
         grid-template-columns: 1fr;
     }
 
@@ -89,7 +99,7 @@
         margin-bottom: 1.5rem;
     }
 
-    .testimonial-quote {
+    ::deep .testimonial-quote {
         font-size: 1.25rem;
     }
 }

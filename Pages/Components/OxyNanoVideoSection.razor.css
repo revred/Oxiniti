@@ -80,6 +80,61 @@
     background: #03151c;
 }
 
+.oxy-video-play {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    cursor: pointer;
+    background: #03151c;
+}
+
+.oxy-video-play img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.oxy-video-play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: rgba(3, 18, 25, 0.72);
+    border: 1px solid rgba(39, 208, 202, 0.55);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
+    transform: translate(-50%, -50%);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.oxy-video-play-icon::before {
+    content: "";
+    margin-left: 0.3rem;
+    border-style: solid;
+    border-width: 0.75rem 0 0.75rem 1.2rem;
+    border-color: transparent transparent transparent #ffffff;
+}
+
+.oxy-video-play:hover .oxy-video-play-icon,
+.oxy-video-play:focus-visible .oxy-video-play-icon {
+    background: rgba(39, 208, 202, 0.85);
+    transform: translate(-50%, -50%) scale(1.06);
+}
+
+.oxy-video-play:focus-visible {
+    outline: 2px solid #27d0ca;
+    outline-offset: 3px;
+}
+
 .oxy-video-duration {
     position: absolute;
     left: 1rem;

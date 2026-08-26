@@ -1,4 +1,4 @@
-@implements IDisposable
+﻿@implements IDisposable
 @inject NavigationManager NavigationManager
 @inject BusinessInfoService InfoService
 @inject IJSRuntime JSRuntime
@@ -8,13 +8,10 @@
 
     <!-- BRAND -->
     <a class="navbar-brand" href="">
-        @if (InfoService.Asset != null)
-        {
-            <img src="@InfoService.Asset.Url"
-                 class="logo"
-                 width="50" height="50" loading="eager" decoding="async"
-                 alt="@InfoService.ApplicationName logo" />
-        }
+        <img src="@InfoService.LogoUrl"
+             class="logo"
+             width="50" height="50" loading="eager" decoding="async"
+             alt="@InfoService.ApplicationName logo" />
 
         <span>
             <span class="brand-name">
@@ -106,6 +103,7 @@
     {
         NavigationManager.LocationChanged += OnLocationChanged;
         Loc.OnChange += StateHasChanged;
+        InfoService.OnChange += OnInfoChanged;
     }
 
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -154,9 +152,15 @@
         }
     }
 
+    // Business info arrives off the render loop (kicked off in Program.cs), so
+    // marshal back onto the renderer before touching component state.
+    private void OnInfoChanged() => InvokeAsync(StateHasChanged);
+
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+        Loc.OnChange -= StateHasChanged;
+        InfoService.OnChange -= OnInfoChanged;
     }
 
 }

@@ -1,4 +1,5 @@
-@page "/terms"
+﻿@page "/terms"
+@implements IDisposable
 @inject BusinessInfoService InfoService
 @inject LocalizationService Loc
 
@@ -41,5 +42,14 @@
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+        InfoService.OnChange += OnInfoChanged;
+    }
+
+    private void OnInfoChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Loc.OnChange -= StateHasChanged;
+        InfoService.OnChange -= OnInfoChanged;
     }
 }

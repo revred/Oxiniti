@@ -1,5 +1,7 @@
 @page "/my-demos"
+@using Microsoft.JSInterop
 @using Oxyniti.Services
+@implements IAsyncDisposable
 @inject DemoService DemoService
 @inject IJSRuntime JS
 @inject LocalizationService Loc
@@ -68,6 +70,7 @@
     private List<DemoBooking>? demos;
     private readonly string mapId = $"demos-map-{Guid.NewGuid():N}";
     private bool _mapInitialized;
+    private IJSObjectReference? _mapLoaderModule;
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,7 +98,23 @@
                 })
                 .ToArray();
 
+            _mapLoaderModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mapLoader.js");
+            await _mapLoaderModule.InvokeVoidAsync("ensureLoaded");
             await JS.InvokeVoidAsync("oxynitiMap.initDisplay", mapId, points);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_mapLoaderModule is null) return;
+
+        try
+        {
+            await _mapLoaderModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // Safe to ignore when Blazor circuit disconnects.
         }
     }
 

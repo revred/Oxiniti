@@ -1,6 +1,6 @@
 window.oxynitiQr = {
     // Renders a QR code for `text` into the element with id `elementId`.
-    // Requires qrcode-generator (window.qrcode) to already be loaded — see index.html.
+    // Requires qrcode-generator (window.qrcode) to already be loaded — see qrLoader.js.
     render: function (elementId, text) {
         var el = document.getElementById(elementId);
         if (!el) return;

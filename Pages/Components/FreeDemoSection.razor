@@ -1,5 +1,7 @@
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.JSInterop
 @using Oxyniti.Services
+@implements IAsyncDisposable
 @inject LocalizationService Loc
 @inject IJSRuntime JS
 @inject DemoService DemoService
@@ -101,6 +103,7 @@
     private string? statusMessage;
     private readonly string mapId = $"demo-picker-{Guid.NewGuid():N}";
     private bool _mapInitialized;
+    private IJSObjectReference? _mapLoaderModule;
 
     protected override void OnInitialized()
     {
@@ -112,7 +115,37 @@
         if (firstRender && !_mapInitialized)
         {
             _mapInitialized = true;
-            await JS.InvokeVoidAsync("oxynitiMap.initPicker", mapId, null, null);
+
+            try
+            {
+                _mapLoaderModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/mapLoader.js");
+
+                // This section sits below the fold on the homepage — wait
+                // until it actually scrolls into view before pulling in
+                // Leaflet + OpenStreetMap tiles.
+                await _mapLoaderModule.InvokeVoidAsync("whenVisible", mapId);
+                await _mapLoaderModule.InvokeVoidAsync("ensureLoaded");
+                await JS.InvokeVoidAsync("oxynitiMap.initPicker", mapId, null, null);
+            }
+            catch (JSDisconnectedException)
+            {
+                // The circuit disconnected (e.g. the user navigated away)
+                // before the map ever scrolled into view.
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_mapLoaderModule is null) return;
+
+        try
+        {
+            await _mapLoaderModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // Safe to ignore when Blazor circuit disconnects.
         }
     }
 

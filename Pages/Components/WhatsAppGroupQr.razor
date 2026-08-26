@@ -1,4 +1,6 @@
+@using Microsoft.JSInterop
 @using Oxyniti
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 
 <div class="wa-group-qr">
@@ -15,13 +17,44 @@
 
     private readonly string _elementId = $"wa-group-qr-{Guid.NewGuid():N}";
     private bool _rendered;
+    private IJSObjectReference? _qrLoaderModule;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_rendered)
         {
             _rendered = true;
-            await JS.InvokeVoidAsync("oxynitiQr.render", _elementId, SiteContact.WhatsAppGroupLink);
+
+            try
+            {
+                _qrLoaderModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/qrLoader.js");
+
+                // The footer (and this QR code) sits below the fold on
+                // every page — wait until it scrolls into view before
+                // pulling in qrcode-generator.
+                await _qrLoaderModule.InvokeVoidAsync("whenVisible", _elementId);
+                await _qrLoaderModule.InvokeVoidAsync("ensureLoaded");
+                await JS.InvokeVoidAsync("oxynitiQr.render", _elementId, SiteContact.WhatsAppGroupLink);
+            }
+            catch (JSDisconnectedException)
+            {
+                // The circuit disconnected (e.g. the user navigated away)
+                // before the footer ever scrolled into view.
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_qrLoaderModule is null) return;
+
+        try
+        {
+            await _qrLoaderModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // Safe to ignore when Blazor circuit disconnects.
         }
     }
 }

@@ -1,4 +1,4 @@
-using Oxyniti;
+﻿using Oxyniti;
 using Oxyniti.Configuration;
 using Oxyniti.Services;
 using Maker.RampEdge.Configuration;
@@ -38,4 +38,11 @@ builder.Services.AddMakerClient(builder.Configuration, onUnauthorized: async req
 
 // You can now inject these wherever you want (including GRPCConfigure)
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+// Fire-and-forget: business info is a nice-to-have CMS overlay, so it loads
+// alongside the first render instead of gating it. Components subscribe to
+// BusinessInfoService.OnChange and re-render if/when it lands.
+_ = host.Services.GetRequiredService<BusinessInfoService>().EnsureLoadedAsync();
+
+await host.RunAsync();

@@ -1,3 +1,4 @@
+﻿@implements IDisposable
 @inject BusinessInfoService Info
 @inject LocalizationService Loc
 
@@ -5,14 +6,11 @@
     <div class="container">
         <div class="footer-content">
             <div class="footer-brand">
-                @if (Info.Asset != null)
-                {
-                    <img src="@Info.Asset.Url"
-                         class="logo"
-                         style="width:100px;"
-                         width="100" height="100" loading="lazy" decoding="async"
-                         alt="@Info.ApplicationName logo" />
-                }
+                <img src="@Info.LogoUrl"
+                     class="logo"
+                     style="width:100px;"
+                     width="100" height="100" loading="lazy" decoding="async"
+                     alt="@Info.ApplicationName logo" />
                 <div class="brand-text">
                     <h3>@Info.ApplicationName</h3>
                     <p class="brand-caption">@Loc.T("brand.tag", "Nano-bubble aeration")</p>
@@ -72,5 +70,14 @@
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+        Info.OnChange += OnInfoChanged;
+    }
+
+    private void OnInfoChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Loc.OnChange -= StateHasChanged;
+        Info.OnChange -= OnInfoChanged;
     }
 }

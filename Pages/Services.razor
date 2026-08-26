@@ -1,4 +1,5 @@
 ﻿@page "/services/{Key}"
+@implements IDisposable
 @inject BusinessInfoService InfoService
 @inject LocalizationService Loc
 
@@ -23,13 +24,25 @@ else
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+        InfoService.OnChange += OnInfoChanged;
     }
 
-    protected override void OnParametersSet()
+    protected override void OnParametersSet() => ResolveValue();
+
+    private void ResolveValue()
+        => Value = InfoService.Contents.TryGetValue(Key, out var val) ? val : null;
+
+    // Contents arrive with the CMS payload, which is no longer awaited before the
+    // first render — re-resolve the key once it lands.
+    private void OnInfoChanged()
     {
-        if (InfoService.Contents.TryGetValue(Key, out var val))
-        {
-            Value = val;
-        }
+        ResolveValue();
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Loc.OnChange -= StateHasChanged;
+        InfoService.OnChange -= OnInfoChanged;
     }
 }

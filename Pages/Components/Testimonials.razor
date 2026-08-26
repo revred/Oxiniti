@@ -1,15 +1,31 @@
-﻿@inject BusinessInfoService InfoService
+﻿@implements IDisposable
+@inject BusinessInfoService InfoService
 @inject LocalizationService Loc
-<section class="testimonials-section" id="testimonials">
-    <h2 class="section-title">@Loc.T("testi.h1", "Testimonials")</h2>
-    <div>
-        @((MarkupString)InfoService.Testimonials)
-    </div>
-</section>
+@* Testimonials come from the CMS. Until (or unless) they land there is nothing
+   to show, so the whole section stays out of the flow rather than rendering a
+   bare heading over an empty box. *@
+@if (!string.IsNullOrWhiteSpace(InfoService.Testimonials))
+{
+    <section class="testimonials-section" id="testimonials">
+        <h2 class="section-title">@Loc.T("testi.h1", "Testimonials")</h2>
+        <div>
+            @((MarkupString)InfoService.Testimonials)
+        </div>
+    </section>
+}
 
 @code {
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+        InfoService.OnChange += OnInfoChanged;
+    }
+
+    private void OnInfoChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Loc.OnChange -= StateHasChanged;
+        InfoService.OnChange -= OnInfoChanged;
     }
 }

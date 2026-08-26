@@ -9,5 +9,24 @@
       "/app.css",
       "/icon-192.png"
     ]
-  }
+  },
+  "mimeTypes": {
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".avif": "image/avif",
+    ".webp": "image/webp",
+    ".wasm": "application/wasm",
+    ".json": "application/json"
+  },
+  "globalHeaders": {
+    "Vary": "Accept-Encoding"
+  },
+  "routes": [
+    { "route": "/_framework/blazor.boot.json", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } },
+    { "route": "/_framework/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
+    { "route": "/images/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/videos/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/bootstrap/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/index.html", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } }
+  ]
 }

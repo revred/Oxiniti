@@ -3,11 +3,21 @@
     "rewrite": "/index.html",
     "exclude": [
       "/favicon.ico",
-      "/images/*",
-      "/js/*",
-      "/bootstrap/*",
+      "/robots.txt",
+      "/sitemap.xml",
       "/app.css",
-      "/icon-192.png"
+      "/Oxyniti.styles.css",
+      "/appsettings.json",
+      "/oxyniti.png",
+      "/icon-192.png",
+      "/_framework/*",
+      "/images/*",
+      "/videos/*",
+      "/js/*",
+      "/css/*",
+      "/vendor/*",
+      "/i18n/*",
+      "/bootstrap/*"
     ]
   },
   "mimeTypes": {
@@ -16,7 +26,11 @@
     ".avif": "image/avif",
     ".webp": "image/webp",
     ".wasm": "application/wasm",
-    ".json": "application/json"
+    ".json": "application/json",
+    ".ico": "image/x-icon",
+    ".svg": "image/svg+xml",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2"
   },
   "globalHeaders": {
     "Vary": "Accept-Encoding"
@@ -24,9 +38,21 @@
   "routes": [
     { "route": "/_framework/blazor.boot.json", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } },
     { "route": "/_framework/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
+    { "route": "/appsettings.json", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } },
     { "route": "/images/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
     { "route": "/videos/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
     { "route": "/bootstrap/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/vendor/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/oxyniti.png", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/icon-192.png", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/favicon.ico", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/js/*", "headers": { "Cache-Control": "public, max-age=3600, must-revalidate" } },
+    { "route": "/css/*", "headers": { "Cache-Control": "public, max-age=3600, must-revalidate" } },
+    { "route": "/i18n/*", "headers": { "Cache-Control": "public, max-age=3600, must-revalidate" } },
+    { "route": "/app.css", "headers": { "Cache-Control": "public, max-age=3600, must-revalidate" } },
+    { "route": "/Oxyniti.styles.css", "headers": { "Cache-Control": "public, max-age=3600, must-revalidate" } },
+    { "route": "/robots.txt", "headers": { "Cache-Control": "public, max-age=3600" } },
+    { "route": "/sitemap.xml", "headers": { "Cache-Control": "public, max-age=3600" } },
     { "route": "/index.html", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } }
   ]
 }

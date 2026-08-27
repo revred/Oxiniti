@@ -1,9 +1,7 @@
 @inject LocalizationService Loc
 
 <div class="faq-section" id="faq">
-    <span class="kicker">@Loc.T("faq.kicker", "Frequently asked questions")</span>
-    <h2 class="section-title">@Loc.T("faq.title", "Still have questions?")</h2>
-    <p class="section-lead">@Loc.T("faq.lead", "Everything farmers usually ask us before their first demo.")</p>
+    <h2 class="section-title">@Loc.T("faq.kicker", "Frequently asked questions")</h2>
 
     <div class="faq-list">
         @for (var i = 0; i < Faqs.Count; i++)

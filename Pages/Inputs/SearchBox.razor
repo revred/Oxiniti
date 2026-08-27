@@ -4,7 +4,7 @@
 <div class="search-container">
     <div class="search-box">
         <i class="bi bi-search search-icon"></i>
-        <input type="text" placeholder="@Loc.T("nav.search", "Search")" class="search-input" @bind="SearchTerm" @bind:event="oninput"/>
+        <input type="text" placeholder="@Loc.T("nav.search", "Search")" class="search-input" @bind="SearchTerm" @bind:event="oninput" @onkeydown="SearchKeyPress"/>
     </div>
 </div>
 
@@ -34,7 +34,7 @@
             else
             {
                 // Default behavior - navigate to search page
-                NavigationManager.NavigateTo($"search?q={Uri.EscapeDataString(SearchTerm)}");
+                NavigationManager.NavigateTo($"/search?q={Uri.EscapeDataString(SearchTerm)}");
             }
         }
     }

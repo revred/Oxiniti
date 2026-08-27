@@ -1,0 +1,187 @@
+@page "/search"
+@inject NavigationManager Nav
+@inject CartService CartService
+@inject IMakerClient MakerClient
+@inject LocalizationService Loc
+
+<PageTitle>Search Results | Oxyniti</PageTitle>
+
+<div class="container-fluid px-4 py-5">
+
+    <div class="range-section mb-5">
+        <h2 class="display-5 fw-bold">@Loc.T("search.title", "Search Results")</h2>
+        @if (!string.IsNullOrWhiteSpace(Query))
+        {
+            <p class="lead">@Loc.T("search.for", "Showing results for") "@Query"</p>
+        }
+    </div>
+
+    @if (Results is null)
+    {
+        <div class="row g-4">
+            @foreach (var _ in Enumerable.Range(0, 6))
+            {
+                <div class="col-12">
+                    <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light">
+                        <div class="product-img col-auto">
+                            <div class="placeholder-wave">
+                                <div class="rounded bg-white placeholder" style="width:200px; height:140px;"></div>
+                            </div>
+                        </div>
+                        <div class="product-info col">
+                            <div class="placeholder-wave">
+                                <div class="placeholder col-7 mb-2"></div>
+                                <div class="placeholder col-11 mb-2"></div>
+                                <div class="placeholder col-9 mb-2"></div>
+                                <div class="placeholder col-5 mb-2"></div>
+                            </div>
+                        </div>
+                        <div class="product-action col-auto">
+                            <div class="placeholder-wave">
+                                <div class="btn placeholder disabled" style="width:160px; height:48px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (!Results.Any())
+    {
+        <p>@Loc.T("search.noresults", "No products found for") "@Query".</p>
+    }
+    else
+    {
+        @foreach (var p in Results)
+        {
+            <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light" @onclick="() => NavigateToDetail(p.Slug)">
+                <div class="product-img col-auto">
+                    <img src="@p.Asset?.Url" class="img-fluid rounded" alt="@p.Name" style="width:200px;" />
+                </div>
+                <div class="product-info col">
+                    <h5 class="mb-1">@p.Name</h5>
+                    <p class="text-muted mb-2 description">
+                        @Shorten(p.Description, 150)
+                    </p>
+                    <p class="fw-bold text-purple">₹@p.Price</p>
+                </div>
+                <div class="product-action col-auto">
+                    <button @onclick:stopPropagation
+                            @onclick="() => AddToCart(p)"
+                            class="btn btn-gradient btn-lg @(HighlightedQuantities.ContainsKey(p.Slug) ? "added-highlight" : "")">
+                        @(
+                                        HighlightedQuantities.TryGetValue(p.Slug, out var q)
+                                        ? string.Format(Loc.T("productsfilter.itemsadded", "{0} Item{1} Added!"), q, q > 1 ? "s" : "")
+                                        : Loc.T("productsfilter.addtocart", "Add to Cart →")
+                                        )
+                    </button>
+                </div>
+            </div>
+        }
+    }
+
+    <Footer />
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Query { get; set; }
+
+    private ICollection<ProductData>? Results;
+    private readonly Dictionary<string, int> HighlightedQuantities = new();
+
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadResults();
+    }
+
+    private async Task LoadResults()
+    {
+        if (string.IsNullOrWhiteSpace(Query))
+        {
+            Results = new List<ProductData>();
+            return;
+        }
+
+        Results = null;
+        StateHasChanged();
+
+        try
+        {
+            var groups = await MakerClient.ProductGroupsAsync();
+
+            var perGroup = await Task.WhenAll(groups.Products.Select(async g =>
+            {
+                try
+                {
+                    var result = await MakerClient.ProductsBySlugAsync(body: new ProductRequest
+                    {
+                        Slug = g.Slug,
+                        Search = Query,
+                        Page = 1,
+                        PageSize = 50
+                    });
+                    return result.Products;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Search] Error searching group '{g.Slug}': {ex}");
+                    return new List<ProductData>();
+                }
+            }));
+
+            Results = perGroup.SelectMany(p => p).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Search] Error loading product groups: {ex}");
+            Results = new List<ProductData>();
+        }
+    }
+
+    private void NavigateToDetail(string productSlug)
+        => Nav.NavigateTo($"/product/{productSlug}");
+
+    private async Task AddToCart(ProductData product)
+    {
+        try
+        {
+            await CartService.AddToCart(product);
+
+            var cart = await CartService.GetCartItems();
+            var currentQty = cart.FirstOrDefault(c => c.Slug == product.Slug)?.Quantity ?? 1;
+
+            HighlightedQuantities[product.Slug] = currentQty;
+            StateHasChanged();
+
+            await Task.Delay(500);
+
+            cart = await CartService.GetCartItems();
+            var updatedQty = cart.FirstOrDefault(c => c.Slug == product.Slug)?.Quantity;
+
+            if (updatedQty == currentQty)
+            {
+                HighlightedQuantities.Remove(product.Slug);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Search] Error adding to cart: {ex}");
+        }
+    }
+
+    private string Shorten(string text, int maxChars)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return "";
+        return text.Length <= maxChars
+            ? text
+            : text.Substring(0, maxChars) + "...";
+    }
+}

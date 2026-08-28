@@ -57,6 +57,34 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o ./bin/Release/publish
 
+      # Same idea as the wwwroot/images budget above, for the .NET payload. The
+      # ceiling is ~3% over the size achieved by #35, so a regression fails the
+      # build rather than quietly costing every first-time visitor.
+      #
+      # Brotli only: Static Web Apps serves .br, and measuring decoded bytes is
+      # what produced the inflated savings estimates on #35 in the first place.
+      #
+      # This counts everything on disk (all three ICU shards, both fingerprinted
+      # copies), which is larger than what any one visitor downloads (~2.7 MB).
+      # It is a regression tripwire, not a model of the user experience.
+      - name: Enforce _framework payload budget
+        run: |
+          set -e
+          MAX_TOTAL_BYTES=3354636
+          DIR=bin/Release/publish/wwwroot/_framework
+          total=0
+          count=0
+          while IFS= read -r -d '' f; do
+            total=$((total + $(stat -c%s "$f")))
+            count=$((count + 1))
+          done < <(find "$DIR" -type f -name '*.br' -print0)
+          echo "$DIR: $count brotli files, $total bytes (budget: $MAX_TOTAL_BYTES bytes)"
+          if [ "$total" -gt "$MAX_TOTAL_BYTES" ]; then
+            echo "::error::$DIR is $total bytes, over the $MAX_TOTAL_BYTES byte budget."
+            echo "::error::Every byte here is on the critical path before first paint. See issue #35."
+            exit 1
+          fi
+
       - name: Deploy to Azure Static Web Apps
         id: deploy
         uses: Azure/static-web-apps-deploy@v1

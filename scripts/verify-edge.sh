@@ -36,7 +36,7 @@ CACHED_PATHS=(
   "/Oxyniti.styles.css:3600"
   "/css/content-pages.css:3600"
   "/js/scrollHelper.js:3600"
-  "/i18n/translations.json:3600"
+  "/i18n/ta.json:3600"
 )
 
 # Paths that must NOT be cached long -- the shell and the API config.

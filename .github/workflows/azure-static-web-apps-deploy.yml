@@ -67,10 +67,14 @@ jobs:
       # This counts everything on disk (all three ICU shards, both fingerprinted
       # copies), which is larger than what any one visitor downloads (~2.7 MB).
       # It is a regression tripwire, not a model of the user experience.
+      #
+      # Calibrated against THIS job, not a local build: SDK 9.0.x here produces
+      # 3,306,399 bytes where SDK 10.0.204 locally produces 3,256,929, and the
+      # budget has to clear the number the gate actually measures. ~3% headroom.
       - name: Enforce _framework payload budget
         run: |
           set -e
-          MAX_TOTAL_BYTES=3354636
+          MAX_TOTAL_BYTES=3405591
           DIR=bin/Release/publish/wwwroot/_framework
           total=0
           count=0

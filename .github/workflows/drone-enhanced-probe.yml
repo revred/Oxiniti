@@ -26,7 +26,8 @@ jobs:
       - name: Inspect master and current web encodes
         run: |
           set -euo pipefail
-          mkdir -p artifacts/probe/frames
+          mkdir -p artifacts/probe/frames artifacts/probe/master
+          cp wwwroot/videos/drone_enhanced.mp4 artifacts/probe/master/drone_enhanced.mp4
           for f in \
             wwwroot/videos/drone_enhanced.mp4 \
             wwwroot/videos/drone.mp4 \
@@ -65,4 +66,4 @@ jobs:
           name: drone-enhanced-probe
           path: artifacts/probe
           if-no-files-found: error
-          compression-level: 6
+          compression-level: 0

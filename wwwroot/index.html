@@ -47,11 +47,47 @@
 <body>
     <script src="bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
     <div id="app">
-        <div class="static-shell">
-            <img src="/oxyniti.png" alt="Oxyniti" class="static-shell-logo" />
-            <h1>Oxyniti &mdash; Infinite Oxygen. Infinite Yield.</h1>
+        <div class="shell-loading-bar" aria-hidden="true"></div>
 
-            <p>Oxyniti's nano-bubble generator floods your pond with trillions of invisible oxygen bubbles that stay dissolved for days &mdash; not seconds. Healthier fish, faster growth, bigger harvests.</p>
+        <!-- Pixel-matched clone of Hero.razor(.css) — see the CSS comment in
+             app.css for why. No fade/transition on purpose: if this matches
+             the real hero exactly, Blazor's instant DOM swap is already
+             invisible, and a transition would just be another way for a
+             stuck element to hide the site. -->
+        <div class="shell-header-spacer" aria-hidden="true"></div>
+        <div class="shell-hero-wrap">
+            <div class="shell-hero-container">
+                <img src="/images/hero-poster.avif" width="1280" height="720" fetchpriority="high" decoding="async" alt="" class="shell-hero-poster" />
+                <div class="shell-gradient-overlay"></div>
+                <div class="shell-hero-content">
+                    <span class="shell-hero-kicker">Namaskar, Fish Farmers! 🐟</span>
+                    <h1 class="shell-hero-title">Infinite Oxygen.<br />Infinite Yield.</h1>
+                    <p class="shell-hero-sub">Oxyniti's nano-bubble generator floods your pond with trillions of invisible oxygen bubbles that stay dissolved for days &mdash; not seconds. Healthier fish, faster growth, bigger harvests.</p>
+                    <div class="shell-hero-ctas">
+                        <a href="#free-demo" class="shell-btn-explore">Book a Free Pond Demo</a>
+                        <a href="#sky-view" class="shell-btn-ghost">&#9654;&nbsp; Watch it work</a>
+                    </div>
+                    <div class="shell-hero-stats">
+                        <div class="shell-hero-stat">
+                            <div class="shell-num">2&times;</div>
+                            <div class="shell-lbl">More dissolved oxygen*</div>
+                        </div>
+                        <div class="shell-hero-stat">
+                            <div class="shell-num">&lt;200nm</div>
+                            <div class="shell-lbl">Bubble size &mdash; stays for days</div>
+                        </div>
+                        <div class="shell-hero-stat">
+                            <div class="shell-num">1 Day</div>
+                            <div class="shell-lbl">Install &mdash; fits any pond</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Below the fold: crawlable but not part of the matched first
+             screen, so no pixel-matching constraint applies here. -->
+        <div class="static-shell">
             <p>Every night, while you sleep, dissolved oxygen in your pond crashes. Fish stop eating, stop growing &mdash; and on a bad night, you lose the whole crop.</p>
             <p>Oxygen is the cheapest growth promoter ever made: typical field results are 2&times; more dissolved oxygen, +15% higher survival rate, &minus;15% feed conversion ratio, and +30% stocking density potential. Actual results vary with species, pond condition and management.</p>
 
@@ -99,10 +135,6 @@
                     <h3>Where do you currently install?</h3>
                     <p>We're currently serving Tamil Nadu and South India.</p>
                 </div>
-            </div>
-
-            <div class="logo-loading-container">
-                <img src="/oxyniti.png" alt="Oxyniti Logo" class="logo-loading-animation" />
             </div>
         </div>
     </div>

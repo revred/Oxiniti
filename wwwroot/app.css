@@ -154,7 +154,185 @@ code {
     text-align: start;
 }
 
-/* Splash styling */
+/* =========================================================
+   PRE-BOOT SHELL — pixel-matched clone of Hero.razor(.css) so the
+   Blazor swap into #app is visually a no-op. Duplicated (not shared)
+   because Hero.razor.css is scoped: its compiled selectors carry a
+   generated b-xxxxx attribute this static markup can never have. #63
+   removes the duplication by generating this shell from the component.
+   ========================================================= */
+
+.shell-header-spacer {
+    /* Mirrors .site-header's height exactly (MainLayout.razor.css) so
+       the real sticky header doesn't shove the hero down on swap. */
+    height: 88px;
+    background: #020817;
+}
+
+.shell-hero-wrap {
+    /* Mirrors Home.razor's <div style="padding:10px;"> wrapper, nested
+       inside MainLayout's <article class="content">, which itself carries
+       "padding-top: 1.1rem" (see .content above) — both stack above the
+       hero on the real page, so both are reproduced here. */
+    padding: 10px;
+    padding-top: calc(1.1rem + 10px);
+}
+
+.shell-hero-container {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    min-height: 560px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.shell-hero-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.shell-gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #3D8FB5 0%, #0B1F33 100%);
+    opacity: 0.82;
+    z-index: 2;
+}
+
+.shell-hero-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    height: 100%;
+    min-height: 560px;
+    padding: 3rem 2.5rem;
+    text-align: left;
+    color: #fff;
+}
+
+.shell-hero-kicker {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(11, 31, 51, 0.65);
+    border: 1px solid rgba(45, 224, 229, 0.6);
+    padding: 0.4rem 1.1rem;
+    border-radius: 100px;
+    margin-bottom: 1.25rem;
+}
+
+.shell-hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0 0 1.25rem;
+}
+
+.shell-hero-sub {
+    max-width: 640px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.92);
+    margin-bottom: 1.75rem;
+}
+
+.shell-hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.shell-btn-explore {
+    display: inline-block;
+    background-color: #1A2C54;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    border: none;
+    font-size: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+.shell-btn-ghost {
+    display: inline-block;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+}
+
+.shell-hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem;
+}
+
+.shell-num {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.shell-lbl {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 160px;
+}
+
+@media (max-width: 1150px) {
+    .shell-header-spacer {
+        height: 82px;
+    }
+}
+
+@media (max-width: 860px) {
+    .shell-header-spacer {
+        height: 76px;
+    }
+}
+
+@media (max-width: 768px) {
+    .shell-hero-title {
+        font-size: 2.25rem;
+    }
+
+    .shell-hero-container {
+        min-height: 480px;
+    }
+
+    .shell-hero-content {
+        min-height: 480px;
+        padding: 2rem 1.25rem;
+    }
+
+    .shell-hero-stats {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .shell-header-spacer {
+        height: 70px;
+    }
+}
+
+/* Below-the-fold content — crawlable but not part of the pixel-matched
+   first screen, so it doesn't need to visually match anything. */
 
 .static-shell {
     display: flex;
@@ -163,19 +341,7 @@ code {
     text-align: center;
     max-width: 640px;
     margin: 0 auto;
-    padding: 3rem 1.5rem 2rem;
-}
-
-.static-shell-logo {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 1rem;
-}
-
-.static-shell h1 {
-    font-size: 1.75rem;
-    color: #1A2C54;
-    margin-bottom: 0.75rem;
+    padding: 2rem 1.5rem;
 }
 
 .static-shell p {
@@ -223,29 +389,31 @@ code {
         margin-bottom: 1.25rem;
     }
 
-.logo-loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.shell-loading-bar {
+    /* Replaces the old pulsing-logo spinner: a pulsing logo doesn't exist
+       anywhere in the real hero and would break the pixel-match illusion.
+       Fixed so it reads as page-load progress regardless of scroll. */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #2DE0E5;
+    z-index: 2000;
+    animation: shellBarPulse 1.2s ease-in-out infinite;
 }
 
-.logo-loading-animation {
-    width: 48px;
-    height: 48px;
-    animation: zoomInOut 1.5s ease-in-out infinite;
-}
-/* Apply offset to all section IDs on the page */
-[id] {
-    scroll-margin-top: 90px;
-}
-@keyframes zoomInOut {
+@keyframes shellBarPulse {
     0%, 100% {
-        transform: scale(1);
-        opacity: 1;
+        opacity: 0.35;
     }
 
     50% {
-        transform: scale(1.2);
-        opacity: 0.8;
+        opacity: 1;
     }
+}
+
+/* Apply offset to all section IDs on the page */
+[id] {
+    scroll-margin-top: 90px;
 }

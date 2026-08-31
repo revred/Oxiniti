@@ -26,6 +26,15 @@
     <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
 
     <!--
+      Drops the ICU dataset (issue #35, item 1). LocalizationService owns all
+      user-facing translation and every date/money format in the app already
+      uses an explicit format string ("dd/MM/yyyy", "N2") with either the
+      invariant culture or invariant-safe format specifiers, so there is no
+      culture-dependent formatting left for ICU to serve.
+    -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!--
       Source-generate the binder for the three BindConfiguration calls in
       Program.cs.
 

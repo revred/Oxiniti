@@ -24,11 +24,32 @@
 
     <link rel="preload" as="image" href="/images/hero-poster-wide.avif" fetchpriority="high" />
 
+    <!-- app.css alone is render-blocking: it's what the pre-boot shell needs
+         (see wwwroot/index.html body), and at ~12KB it doesn't meaningfully
+         delay first paint. -->
     <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="css/content-pages.css" />
-    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" />
-    <link href="Oxyniti.styles.css" rel="stylesheet" />
-    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap-icons.min.css">
+
+    <!-- The other four stylesheets (~450KB combined: bootstrap.min.css,
+         bootstrap-icons.min.css, content-pages.css, and the ~100KB Blazor
+         scoped-CSS bundle) are not needed by the shell and were previously
+         all render-blocking in <head> -- nothing painted, including the
+         shell, until every one of them had downloaded. The media="print"
+         -> onload="this.media='all'" trick (Filament Group's loadCSS
+         pattern) makes each one load with normal priority but non-blocking,
+         then apply once ready. In practice all four finish well before
+         Blazor's WASM payload (much larger) does, so there's no FOUC on the
+         real page once it boots. <noscript> keeps a normal blocking load
+         for clients without JS. -->
+    <link rel="stylesheet" href="css/content-pages.css" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" media="print" onload="this.media='all'" />
+    <link href="Oxyniti.styles.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap-icons.min.css" media="print" onload="this.media='all'" />
+    <noscript>
+        <link rel="stylesheet" href="css/content-pages.css" />
+        <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" />
+        <link href="Oxyniti.styles.css" rel="stylesheet" />
+        <link rel="stylesheet" href="bootstrap/dist/css/bootstrap-icons.min.css" />
+    </noscript>
 
     <script type="application/ld+json">
     {

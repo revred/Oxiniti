@@ -8,6 +8,41 @@
 	<RootNamespace>Oxyniti</RootNamespace>
   </PropertyGroup>
 
+  <!--
+    First-visit payload (issue #35). The runtime is 2.7 MB over the wire before a
+    single pixel renders, and the audience arrives on rural mobile connections.
+
+    Note the SDK already sets PublishTrimmed=true and TrimMode=partial for Blazor
+    WASM, so publish has always trimmed the framework. These are the levers on top
+    of that. TrimMode=full is deliberately NOT set: it would start trimming the
+    closed-source Maker.RampEdge assembly, whose reflection surface cannot be
+    verified, and trim breakage here is silent (nulls and default-bound options,
+    not build errors).
+  -->
+  <PropertyGroup>
+    <!-- Feature switches. Each removes code the app never reaches. -->
+    <EventSourceSupport>false</EventSourceSupport>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+
+    <!--
+      Source-generate the binder for the three BindConfiguration calls in
+      Program.cs.
+
+      Measured: this COSTS 1.6 KB rather than saving anything. It does not shrink
+      System.Linq.Expressions, because that is rooted through System.Text.Json,
+      which is in turn rooted by Maker.RampEdge calling JsonSerializer directly.
+      RampEdge is untrimmed under TrimMode=partial, so no amount of first-party
+      source generation removes either assembly.
+
+      Kept anyway for correctness, not size: it replaces a RequiresUnreferencedCode
+      reflection path, and is the prerequisite for ever taking TrimMode=full:
+      under full trimming the reflection binder can silently bind nothing, which
+      would break Stripe checkout at the API rather than at startup.
+    -->
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include=".github\workflows\azure-static-web-apps-deploy.yml" />
   </ItemGroup>
@@ -16,7 +51,12 @@
     <PackageReference Include="Maker.RampEdgeV1" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.8" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0-preview.5.25277.114" />
+    <!--
+      Was pinned to 10.0.0-preview.5.25277.114 on a net9.0 app, which pulled a
+      .NET 10 preview Microsoft.Extensions.Configuration.* set in alongside the
+      9.0 runtime. Matched to the rest of the graph (issue #35, item 4).
+    -->
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 </Project>

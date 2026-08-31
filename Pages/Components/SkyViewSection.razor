@@ -11,10 +11,34 @@
     </p>
 
     <div class="drone-stage">
-        <video @ref="_videoElement" muted loop playsinline poster="/images/drone-poster.jpg">
-            <source data-src="/videos/drone.webm" type="video/webm" />
-            <source data-src="/videos/drone.mp4" type="video/mp4" />
+        <picture class="drone-poster" aria-hidden="true">
+            <source media="(max-width: 640px)" type="image/webp" srcset="/images/drone-hero-v2-poster-mobile.webp" />
+            <source media="(max-width: 640px)" type="image/jpeg" srcset="/images/drone-hero-v2-poster-mobile.jpg" />
+            <source type="image/webp" srcset="/images/drone-hero-v2-poster-desktop.webp" />
+            <img @ref="_posterElement"
+                 src="/images/drone-hero-v2-poster-desktop.jpg"
+                 width="1600"
+                 height="640"
+                 loading="lazy"
+                 decoding="async"
+                 fetchpriority="low"
+                 alt="" />
+        </picture>
+
+        <video @ref="_videoElement"
+               muted
+               loop
+               playsinline
+               preload="none"
+               aria-hidden="true">
+            <source media="(max-width: 640px)" data-src="/videos/drone-hero-v2-mobile-av1.webm" type="video/webm; codecs=av01.0.04M.08" />
+            <source media="(max-width: 640px)" data-src="/videos/drone-hero-v2-mobile-vp9.webm" type="video/webm; codecs=vp9" />
+            <source media="(max-width: 640px)" data-src="/videos/drone-hero-v2-mobile.mp4" type="video/mp4; codecs=avc1.64001F" />
+            <source media="(min-width: 641px)" data-src="/videos/drone-hero-v2-desktop-av1.webm" type="video/webm; codecs=av01.0.05M.08" />
+            <source media="(min-width: 641px)" data-src="/videos/drone-hero-v2-desktop-vp9.webm" type="video/webm; codecs=vp9" />
+            <source media="(min-width: 641px)" data-src="/videos/drone-hero-v2-desktop.mp4" type="video/mp4; codecs=avc1.640029" />
         </video>
+
         <div class="rec-badge"><i></i><span>@Loc.T("sky.rec", "DRONE · LIVE TRIAL")</span></div>
         <div class="hud-chips">
             <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c1", "Unit 1 · nano-plume active")</div>
@@ -26,6 +50,7 @@
 
 @code {
     private ElementReference _videoElement;
+    private ElementReference _posterElement;
     private IJSObjectReference? _videoModule;
     private IJSObjectReference? _videoController;
 
@@ -48,8 +73,15 @@
             _videoController = await _videoModule.InvokeAsync<IJSObjectReference>(
                 "init",
                 _videoElement,
-                null,
-                new { eager = false });
+                _posterElement,
+                new
+                {
+                    eager = false,
+                    respectNarrowViewport = false,
+                    deferUntilPosterPaint = true,
+                    rootMargin = "800px 0px",
+                    pauseWhenHidden = true
+                });
         }
         catch (JSException)
         {

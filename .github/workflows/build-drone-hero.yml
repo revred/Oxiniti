@@ -1,0 +1,65 @@
+name: Build enhanced drone hero assets
+
+on:
+  push:
+    branches:
+      - chatgpt/export-drone-enhanced-20260831
+    paths:
+      - scripts/build-drone-hero.sh
+      - .github/workflows/build-drone-hero.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Keep the master outside the deployed web root
+        run: |
+          set -euo pipefail
+          mkdir -p media-source
+          if [[ -f wwwroot/videos/drone_enhanced.mp4 ]]; then
+            git mv wwwroot/videos/drone_enhanced.mp4 media-source/drone_enhanced.mp4
+          fi
+          cat > media-source/README.md <<'EOF'
+          # Media source masters
+
+          Files in this directory are editing masters and are not copied into
+          the published `wwwroot` output. Regenerate the responsive pond hero
+          assets with:
+
+          ```bash
+          bash scripts/build-drone-hero.sh
+          ```
+          EOF
+
+      - name: Build responsive assets from the enhanced master
+        run: |
+          chmod +x scripts/build-drone-hero.sh
+          bash scripts/build-drone-hero.sh media-source/drone_enhanced.mp4
+          rm -f wwwroot/images/drone-poster.jpg
+
+      - name: Commit generated assets
+        run: |
+          set -euo pipefail
+          # These workflows are one-time tooling for this branch, not runtime
+          # project infrastructure.
+          rm -f .github/workflows/drone-enhanced-probe.yml
+          rm -f .github/workflows/build-drone-hero.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git status --short
+          git commit -m "perf: rebuild pond hero from enhanced master"
+          git push origin HEAD:chatgpt/export-drone-enhanced-20260831

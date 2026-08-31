@@ -1,22 +1,41 @@
 # Oxyniti
 
-> Oxyniti builds nano-bubble oxygen generators for aquaculture, raising dissolved oxygen in fish and shrimp ponds to improve survival rate, feed conversion, and stocking density. Currently serving Tamil Nadu and South India.
+> Oxyniti builds nano-bubble oxygen generators for aquaculture. The generator floods a fish or shrimp pond with trillions of invisible oxygen bubbles that stay dissolved for days, not seconds, so dissolved oxygen no longer crashes overnight when algae stop producing it. Typical field results: 2x higher dissolved oxygen, +15% survival rate, -15% feed conversion ratio, and +30% stocking density potential (figures are typical ranges reported in published nano-bubble aquaculture studies and field trials; results vary with species, pond condition and management). Works for Tilapia/GIFT, Murrel, Pangasius, freshwater prawn, carp polyculture, and biofloc/RAS systems, with install completed in about a day. Currently serving Tamil Nadu and South India.
 
-## Product
+## FAQ
 
-- [Homepage](https://www.oxyniti.com/): Overview, profit calculator, and FAQ.
-- [Products](https://www.oxyniti.com/products): Nano-bubble generator product lineup.
+Q: How does Oxyniti actually raise dissolved oxygen?
+A: Oxyniti dissolves oxygen into the pond as a fine nano-bubble plume instead of just churning the surface like a paddle wheel. The bubbles are small enough to stay suspended and dissolve into the water column, so oxygen reaches the fish even overnight, when algae stop producing oxygen and DO crashes.
+
+Q: How is this different from a paddle wheel aerator?
+A: Paddle wheels mix the surface, but a lot of that oxygen escapes back into the air as fast as it goes in. Oxyniti's nano-bubbles have far more surface area and stay in the water longer, so more of the oxygen you're paying to add actually ends up dissolved.
+
+Q: What results can I expect?
+A: Typical ranges reported in published nano-bubble aquaculture studies and field trials: around 2x higher dissolved oxygen, +15% survival rate, and -15% feed conversion ratio, which opens up roughly +30% stocking density. Actual results vary with species, pond condition and management.
+
+Q: Which species and pond types does it work for?
+A: Tilapia/GIFT, Murrel, Pangasius, freshwater prawn, carp polyculture, and biofloc/RAS systems, on almost any pond, with install completed in about a day.
+
+Q: Can I see it working on my own pond before I commit?
+A: Yes. The Oxyniti team installs a unit on the pond, measures dissolved oxygen before and after with a calibrated DO meter, and shows the difference the same day, no obligation.
+
+Q: How do I estimate the profit impact for my pond?
+A: Use the profit calculator on the Oxyniti homepage, entering pond size and species, to see an estimate of extra yield and margin.
+
+Q: Where do you currently install?
+A: Oxyniti is currently serving Tamil Nadu and South India.
+
+## Site
+
+- [Homepage](https://www.oxyniti.com/): Overview, profit calculator, and full FAQ.
 - [Technology](https://www.oxyniti.com/technology): How nano-bubble oxygenation works.
 - [Aquaculture Oxygenation](https://www.oxyniti.com/aquaculture-oxygenation): Oxygenation for fish ponds.
-- [RAS Oxygenation](https://www.oxyniti.com/ras-oxygenation): Oxygenation for recirculating aquaculture systems.
-
-## Company
-
+- [RAS Oxygenation](https://www.oxyniti.com/ras-oxygenation): Oxygenation for recirculating aquaculture and biofloc systems.
+- [Products](https://www.oxyniti.com/products): Nano-bubble generator product range (live catalog).
 - [About](https://www.oxyniti.com/about): Company background.
-- [Contact](https://www.oxyniti.com/contact): Get in touch.
-- [Get a Quote](https://www.oxyniti.com/quote): Request pricing.
 
-## Policies
+## Contact
 
-- [Privacy Policy](https://www.oxyniti.com/privacy)
-- [Terms](https://www.oxyniti.com/terms)
+- Phone / WhatsApp: +91 96597 27477
+- [Contact form](https://www.oxyniti.com/contact)
+- Service area: Tamil Nadu and South India

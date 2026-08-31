@@ -12,44 +12,136 @@ Disallow: /payment
 Disallow: /email-verification
 Disallow: /verify
 
+# Every User-agent block below is independent — a crawler matches exactly one
+# group and does not inherit the Disallow rules above, so each named block
+# repeats the same private-route disallows as the wildcard group.
+
 # ChatGPT search discovery — allowed
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 # ChatGPT user-triggered fetches — allowed
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 # OpenAI's model-training crawler — allowed. Young B2B brand with no organic
 # footprint yet: being learnable by the model (so it can name/recommend the
 # brand without a live fetch) is worth more than the copyright posture.
 User-agent: GPTBot
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 # Anthropic's crawler (feeds Claude's answers/citations) — allowed for the
 # same reason as GPTBot above.
 User-agent: ClaudeBot
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 # Perplexity's crawler (feeds Perplexity answers/citations) — allowed for the
 # same reason as GPTBot above.
 User-agent: PerplexityBot
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 # Google's AI-training-specific crawler (distinct from standard Googlebot,
 # which is already allowed via the wildcard rule above) — allowed for the
 # same reason as GPTBot above.
 User-agent: Google-Extended
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 # Apple's AI-training-specific crawler (Siri/Spotlight; distinct from
 # standard Applebot) — allowed for the same reason as GPTBot above.
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 # Meta's AI-training crawler (Meta AI / Facebook / Instagram assistants) —
 # allowed for the same reason as GPTBot above.
 User-agent: meta-externalagent
 Allow: /
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkout/return
+Disallow: /login
+Disallow: /register
+Disallow: /orders
+Disallow: /my-demos
+Disallow: /payment
+Disallow: /email-verification
+Disallow: /verify
 
 Sitemap: https://www.oxyniti.com/sitemap.xml

@@ -53,7 +53,7 @@
 
             <p>Oxyniti's nano-bubble generator floods your pond with trillions of invisible oxygen bubbles that stay dissolved for days &mdash; not seconds. Healthier fish, faster growth, bigger harvests.</p>
             <p>Every night, while you sleep, dissolved oxygen in your pond crashes. Fish stop eating, stop growing &mdash; and on a bad night, you lose the whole crop.</p>
-            <p>Oxygen is the cheapest growth promoter ever made: typical field results are 2&times; more dissolved oxygen, +15% higher survival rate, &minus;15% feed conversion ratio, and +30% stocking density potential.*</p>
+            <p>Oxygen is the cheapest growth promoter ever made: typical field results are 2&times; more dissolved oxygen, +15% higher survival rate, &minus;15% feed conversion ratio, and +30% stocking density potential. Actual results vary with species, pond condition and management.</p>
 
             <nav class="static-shell-nav" aria-label="Site">
                 <a href="/">Home</a>
@@ -109,24 +109,22 @@
 
     <script>
         (function () {
-            var shown = false;
-            function showErrorUi() {
-                if (shown || document.getElementById('blazor-error-ui')) {
-                    return;
-                }
-                shown = true;
-                var el = document.createElement('div');
-                el.id = 'blazor-error-ui';
-                el.setAttribute('data-nosnippet', '');
-                el.innerHTML = 'An unhandled error has occurred.'
-                    + '<a href="." class="reload">Reload</a>'
-                    + '<span class="dismiss">🗙</span>';
-                document.body.appendChild(el);
-                el.querySelector('.reload').onclick = function (e) { location.reload(); e.preventDefault(); };
-                el.querySelector('.dismiss').onclick = function (e) { el.style.display = 'none'; e.preventDefault(); };
-            }
-            window.addEventListener('error', showErrorUi);
-            window.addEventListener('unhandledrejection', showErrorUi);
+            // Created here (not shipped in the static markup) so a no-JS fetch
+            // never sees "An unhandled error has occurred" as page text. Must
+            // exist before blazor.webassembly.js runs: Blazor's own runtime
+            // finds it by a live `#blazor-error-ui` lookup and toggles
+            // display:block itself (both on a boot failure and on any
+            // unhandled .NET exception) — it does not go through window
+            // 'error'/'unhandledrejection', so this can't be created lazily
+            // on those events. CSS default is display:none (app.css), so it
+            // stays invisible until Blazor's own runtime shows it.
+            var el = document.createElement('div');
+            el.id = 'blazor-error-ui';
+            el.setAttribute('data-nosnippet', '');
+            el.innerHTML = 'An unhandled error has occurred.'
+                + '<a href="." class="reload">Reload</a>'
+                + '<span class="dismiss">🗙</span>';
+            document.body.appendChild(el);
         })();
     </script>
     <script src="./js/clickOutsideHelper.js" defer></script>

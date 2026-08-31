@@ -14,12 +14,9 @@
                     <span>@Loc.T($"faq.q{index + 1}", faq.Question)</span>
                     <i class="bi @(OpenIndex == index ? "bi-dash-lg" : "bi-plus-lg")"></i>
                 </button>
-                @if (OpenIndex == index)
-                {
-                    <div class="faq-answer">
-                        <p>@Loc.T($"faq.a{index + 1}", faq.Answer)</p>
-                    </div>
-                }
+                <div class="faq-answer" aria-hidden="@(OpenIndex == index ? "false" : "true")">
+                    <p>@Loc.T($"faq.a{index + 1}", faq.Answer)</p>
+                </div>
             </div>
         }
     </div>

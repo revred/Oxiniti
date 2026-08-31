@@ -1,0 +1,22 @@
+# Oxyniti
+
+> Oxyniti builds nano-bubble oxygen generators for aquaculture, raising dissolved oxygen in fish and shrimp ponds to improve survival rate, feed conversion, and stocking density. Currently serving Tamil Nadu and South India.
+
+## Product
+
+- [Homepage](https://www.oxyniti.com/): Overview, profit calculator, and FAQ.
+- [Products](https://www.oxyniti.com/products): Nano-bubble generator product lineup.
+- [Technology](https://www.oxyniti.com/technology): How nano-bubble oxygenation works.
+- [Aquaculture Oxygenation](https://www.oxyniti.com/aquaculture-oxygenation): Oxygenation for fish ponds.
+- [RAS Oxygenation](https://www.oxyniti.com/ras-oxygenation): Oxygenation for recirculating aquaculture systems.
+
+## Company
+
+- [About](https://www.oxyniti.com/about): Company background.
+- [Contact](https://www.oxyniti.com/contact): Get in touch.
+- [Get a Quote](https://www.oxyniti.com/quote): Request pricing.
+
+## Policies
+
+- [Privacy Policy](https://www.oxyniti.com/privacy)
+- [Terms](https://www.oxyniti.com/terms)

@@ -5,6 +5,7 @@
       "/favicon.ico",
       "/robots.txt",
       "/sitemap.xml",
+      "/llms.txt",
       "/app.css",
       "/Oxyniti.styles.css",
       "/appsettings.json",
@@ -53,6 +54,7 @@
     { "route": "/Oxyniti.styles.css", "headers": { "Cache-Control": "public, max-age=3600, must-revalidate" } },
     { "route": "/robots.txt", "headers": { "Cache-Control": "public, max-age=3600" } },
     { "route": "/sitemap.xml", "headers": { "Cache-Control": "public, max-age=3600" } },
+    { "route": "/llms.txt", "headers": { "Cache-Control": "public, max-age=3600" } },
     { "route": "/index.html", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } }
   ]
 }

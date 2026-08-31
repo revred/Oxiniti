@@ -156,17 +156,82 @@ code {
 
 /* Splash styling */
 
+.static-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 2rem;
+}
+
+.static-shell-logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+}
+
+.static-shell h1 {
+    font-size: 1.75rem;
+    color: #1A2C54;
+    margin-bottom: 0.75rem;
+}
+
+.static-shell p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.static-shell-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+    .static-shell-nav a {
+        color: #3D8FB5;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .static-shell-nav a:hover {
+        text-decoration: underline;
+    }
+
+.static-shell h2 {
+    font-size: 1.25rem;
+    color: #1A2C54;
+    margin-bottom: 1rem;
+}
+
+.static-shell-faq {
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
+
+    .static-shell-faq h3 {
+        font-size: 1rem;
+        color: #1A2C54;
+        margin-bottom: 0.25rem;
+    }
+
+    .static-shell-faq p {
+        margin-bottom: 1.25rem;
+    }
+
 .logo-loading-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background-color: white;
 }
 
 .logo-loading-animation {
-    width: 120px;
-    height: 120px;
+    width: 48px;
+    height: 48px;
     animation: zoomInOut 1.5s ease-in-out infinite;
 }
 /* Apply offset to all section IDs on the page */

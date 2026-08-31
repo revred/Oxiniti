@@ -63,10 +63,15 @@
 }
 
 .faq-answer {
+    display: none;
     padding: 0 1.4rem 1.25rem;
     color: #555;
     font-size: 0.95rem;
     line-height: 1.6;
+}
+
+.faq-item.open .faq-answer {
+    display: block;
 }
 
     .faq-answer p {

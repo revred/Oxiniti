@@ -20,9 +20,36 @@ Allow: /
 User-agent: ChatGPT-User
 Allow: /
 
-# ChatGPT/OpenAI model-training crawler — blocked by default.
-# Flip to "Allow: /" if training-data use is acceptable.
+# OpenAI's model-training crawler — allowed. Young B2B brand with no organic
+# footprint yet: being learnable by the model (so it can name/recommend the
+# brand without a live fetch) is worth more than the copyright posture.
 User-agent: GPTBot
-Disallow: /
+Allow: /
+
+# Anthropic's crawler (feeds Claude's answers/citations) — allowed for the
+# same reason as GPTBot above.
+User-agent: ClaudeBot
+Allow: /
+
+# Perplexity's crawler (feeds Perplexity answers/citations) — allowed for the
+# same reason as GPTBot above.
+User-agent: PerplexityBot
+Allow: /
+
+# Google's AI-training-specific crawler (distinct from standard Googlebot,
+# which is already allowed via the wildcard rule above) — allowed for the
+# same reason as GPTBot above.
+User-agent: Google-Extended
+Allow: /
+
+# Apple's AI-training-specific crawler (Siri/Spotlight; distinct from
+# standard Applebot) — allowed for the same reason as GPTBot above.
+User-agent: Applebot-Extended
+Allow: /
+
+# Meta's AI-training crawler (Meta AI / Facebook / Instagram assistants) —
+# allowed for the same reason as GPTBot above.
+User-agent: meta-externalagent
+Allow: /
 
 Sitemap: https://www.oxyniti.com/sitemap.xml

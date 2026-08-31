@@ -1,0 +1,75 @@
+name: Probe enhanced drone master
+
+on:
+  push:
+    branches:
+      - chatgpt/export-drone-enhanced-20260831
+    paths:
+      - .github/workflows/drone-enhanced-probe.yml
+      - wwwroot/videos/drone_enhanced.mp4
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Inspect master and current web encodes
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/probe/frames
+          for f in \
+            wwwroot/videos/drone_enhanced.mp4 \
+            wwwroot/videos/drone.mp4 \
+            wwwroot/videos/drone.webm; do
+            base="$(basename "$f")"
+            ffprobe -v error -show_format -show_streams -of json "$f" > "artifacts/probe/${base}.ffprobe.json"
+            ffprobe -v error \
+              -select_streams v:0 \
+              -show_entries stream=codec_name,profile,pix_fmt,width,height,r_frame_rate,avg_frame_rate,bit_rate,nb_frames,duration,color_space,color_transfer,color_primaries \
+              -show_entries format=duration,size,bit_rate \
+              -of default=noprint_wrappers=1 "$f" > "artifacts/probe/${base}.summary.txt"
+          done
+
+      - name: Build source review images
+        run: |
+          set -euo pipefail
+          src=wwwroot/videos/drone_enhanced.mp4
+          duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$src")"
+          python3 - "$duration" <<'PY'
+          import sys
+          duration = float(sys.argv[1])
+          for i, fraction in enumerate((0.00, 0.16, 0.32, 0.48, 0.64, 0.80, 0.96)):
+              print(f"{i}\t{max(0.0, duration * fraction):.6f}")
+          PY
+          while IFS=$'\t' read -r index timestamp; do
+            ffmpeg -hide_banner -loglevel error -y -ss "$timestamp" -i "$src" \
+              -frames:v 1 -vf "scale=960:-2:flags=lanczos" \
+              "artifacts/probe/frames/frame-${index}.png"
+          done < <(python3 - "$duration" <<'PY'
+          import sys
+          duration = float(sys.argv[1])
+          for i, fraction in enumerate((0.00, 0.16, 0.32, 0.48, 0.64, 0.80, 0.96)):
+              print(f"{i}\t{max(0.0, duration * fraction):.6f}")
+          PY
+          )
+          ffmpeg -hide_banner -loglevel error -y \
+            -pattern_type glob -i 'artifacts/probe/frames/frame-*.png' \
+            -vf "scale=480:-2:flags=lanczos,tile=4x2:padding=8:margin=8:color=white" \
+            -frames:v 1 -q:v 2 artifacts/probe/contact-sheet.jpg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: drone-enhanced-probe
+          path: artifacts/probe
+          if-no-files-found: error
+          compression-level: 6

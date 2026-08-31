@@ -29,6 +29,7 @@
 
 .drone-stage {
     position: relative;
+    isolation: isolate;
     border-radius: 1rem;
     overflow: hidden;
     min-height: 420px;
@@ -36,18 +37,91 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.drone-stage video {
+/*
+ * The compact 480 x 500 source is kept close to native scale in the centre.
+ * Its existing poster fills the sides only as a deliberately soft background,
+ * so enlargement artifacts become atmosphere rather than visible detail.
+ */
+.drone-stage::before {
+    content: "";
+    position: absolute;
+    inset: -8%;
+    z-index: 0;
+    background: url('/images/drone-poster.jpg') center / cover no-repeat;
+    filter: blur(24px) saturate(1.15) brightness(0.58);
+    transform: scale(1.08);
+}
+
+.drone-stage-backdrop {
+    position: absolute;
+    inset: -8%;
+    z-index: 1;
+    width: 116%;
+    height: 116%;
+    object-fit: cover;
+    opacity: 0;
+    filter: blur(26px) saturate(1.18) brightness(0.58);
+    transform: scale(1.08);
+    transition: opacity 0.45s ease;
+}
+
+.drone-stage-backdrop.is-active {
+    opacity: 0.94;
+}
+
+.drone-stage-video {
+    position: absolute;
+    top: 2%;
+    left: 50%;
+    z-index: 2;
+    height: 96%;
+    width: auto;
+    max-width: 100%;
+    aspect-ratio: 480 / 500;
+    object-fit: cover;
+    border-radius: 0.45rem;
+    opacity: 0.96;
+    transform: translateX(-50%);
+    filter: contrast(1.08) saturate(0.9) brightness(0.96);
+    box-shadow:
+        0 0 0 1px rgba(213, 244, 255, 0.18),
+        0 0 64px rgba(2, 14, 28, 0.62);
+    transition: opacity 0.45s ease, filter 0.45s ease;
+}
+
+.drone-stage-video.is-visible {
+    opacity: 1;
+    filter: contrast(1.09) saturate(0.92) brightness(0.98);
+}
+
+/* Matches the restrained blue grade used by the homepage hero. */
+.drone-stage-grade {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    z-index: 3;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 46%, rgba(61, 143, 181, 0.04) 0%, rgba(11, 31, 51, 0.18) 54%, rgba(2, 13, 25, 0.62) 100%),
+        linear-gradient(180deg, rgba(61, 143, 181, 0.2) 0%, rgba(11, 31, 51, 0.34) 100%);
+}
+
+/* Very light dithering breaks up visible block boundaries without another asset. */
+.drone-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0.045;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.62'/%3E%3C/svg%3E");
 }
 
 .rec-badge {
     position: absolute;
     top: 1rem;
     left: 1rem;
+    z-index: 5;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -58,6 +132,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.04em;
+    backdrop-filter: blur(6px);
 }
 
 .rec-badge i {
@@ -72,6 +147,7 @@
     position: absolute;
     bottom: 1rem;
     left: 1rem;
+    z-index: 5;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -86,6 +162,7 @@
     padding: 0.4rem 0.75rem;
     border-radius: 2rem;
     font-size: 0.8rem;
+    backdrop-filter: blur(6px);
 }
 
 .hud-chip .dot {
@@ -99,5 +176,17 @@
 @media (max-width: 768px) {
     .drone-stage {
         min-height: 260px;
+    }
+
+    .drone-stage-video {
+        top: 3%;
+        height: 94%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .drone-stage-backdrop,
+    .drone-stage-video {
+        transition: none;
     }
 }

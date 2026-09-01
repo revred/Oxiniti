@@ -1,11 +1,20 @@
 ﻿@page "/about"
+@page "/{Locale}/about"
 @implements IDisposable
 @inject BusinessInfoService InfoService
 @inject LocalizationService Loc
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@if (_notFound)
+{
+    <NotFoundContent />
+    return;
+}
 
 <PageTitle>@Loc.T("about.pagetitle", "About Oxyniti | Nano-Bubble Aeration")</PageTitle>
 <HeadContent>
-    <link rel="canonical" href="https://www.oxyniti.com/about" />
+    <LocaleHead Slug="about" />
     <meta name="description" content="@Loc.T("about.meta", "Oxyniti designs and manufactures nano-bubble aeration systems for aquaculture, wastewater treatment and hydroponics, with 100+ installations across India.")" />
 </HeadContent>
 
@@ -21,10 +30,45 @@
 </div>
 
 @code {
+    [Parameter] public string? Locale { get; set; }
+
+    private bool _notFound;
+
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
         InfoService.OnChange += OnInfoChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var resolved = LocalizationService.ResolveRouteLocale(Locale, "about");
+
+        switch (resolved.Outcome)
+        {
+            case LocalizationService.RouteLocaleOutcome.NotFound:
+                _notFound = true;
+                return;
+            case LocalizationService.RouteLocaleOutcome.Redirect:
+                Nav.NavigateTo(resolved.RedirectPath!, replace: true);
+                return;
+            case LocalizationService.RouteLocaleOutcome.RenderLocale:
+                await Loc.SetLanguageAsync(resolved.Locale!);
+                await SyncHtmlLangAsync(resolved.Locale!);
+                break;
+        }
+    }
+
+    private async Task SyncHtmlLangAsync(string code)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[About] Error syncing html lang attribute: {ex}");
+        }
     }
 
     private void OnInfoChanged() => InvokeAsync(StateHasChanged);

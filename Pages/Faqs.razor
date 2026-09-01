@@ -1,10 +1,19 @@
 @page "/faqs"
+@page "/{Locale}/faqs"
 @implements IDisposable
 @inject LocalizationService Loc
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@if (_notFound)
+{
+    <NotFoundContent />
+    return;
+}
 
 <PageTitle>@Loc.T("faqspage.title", "Frequently Asked Questions | Oxyniti")</PageTitle>
 <HeadContent>
-    <link rel="canonical" href="https://www.oxyniti.com/faqs" />
+    <LocaleHead Slug="faqs" />
     <meta name="description" content="@Loc.T("faqspage.meta", "Answers to the questions farmers ask most before buying Oxyniti nano-bubble aeration — how it works, what results to expect, and where we currently install.")" />
     <!-- Mirrors FAQSection.razor's questions/answers verbatim -- keep the two
          in sync; a search engine or answer-engine crawler cross-checks the
@@ -86,9 +95,44 @@
 </div>
 
 @code {
+    [Parameter] public string? Locale { get; set; }
+
+    private bool _notFound;
+
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var resolved = LocalizationService.ResolveRouteLocale(Locale, "faqs");
+
+        switch (resolved.Outcome)
+        {
+            case LocalizationService.RouteLocaleOutcome.NotFound:
+                _notFound = true;
+                return;
+            case LocalizationService.RouteLocaleOutcome.Redirect:
+                Nav.NavigateTo(resolved.RedirectPath!, replace: true);
+                return;
+            case LocalizationService.RouteLocaleOutcome.RenderLocale:
+                await Loc.SetLanguageAsync(resolved.Locale!);
+                await SyncHtmlLangAsync(resolved.Locale!);
+                break;
+        }
+    }
+
+    private async Task SyncHtmlLangAsync(string code)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Faqs] Error syncing html lang attribute: {ex}");
+        }
     }
 
     public void Dispose()

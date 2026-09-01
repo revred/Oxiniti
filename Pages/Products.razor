@@ -1,9 +1,18 @@
 ﻿@page "/products"
+@page "/{Locale}/products"
 @inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject LocalizationService Loc
+
+@if (_notFound)
+{
+    <NotFoundContent />
+    return;
+}
 
 <PageTitle>Oxyniti Products | Nano-Bubble Aeration Systems</PageTitle>
 <HeadContent>
-    <link rel="canonical" href="https://www.oxyniti.com/products" />
+    <LocaleHead Slug="products" />
     <meta name="description" content="Browse Oxyniti's nano-bubble aeration products for aquaculture ponds, RAS and biofloc systems." />
     <script type="application/ld+json">
     {
@@ -34,6 +43,39 @@
 </div>
 
 @code {
+    [Parameter] public string? Locale { get; set; }
+
+    private bool _notFound;
     private string? SearchTerm { get; set; }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        var resolved = LocalizationService.ResolveRouteLocale(Locale, "products");
+
+        switch (resolved.Outcome)
+        {
+            case LocalizationService.RouteLocaleOutcome.NotFound:
+                _notFound = true;
+                return;
+            case LocalizationService.RouteLocaleOutcome.Redirect:
+                Nav.NavigateTo(resolved.RedirectPath!, replace: true);
+                return;
+            case LocalizationService.RouteLocaleOutcome.RenderLocale:
+                await Loc.SetLanguageAsync(resolved.Locale!);
+                await SyncHtmlLangAsync(resolved.Locale!);
+                break;
+        }
+    }
+
+    private async Task SyncHtmlLangAsync(string code)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Products] Error syncing html lang attribute: {ex}");
+        }
+    }
 }

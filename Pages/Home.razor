@@ -1,9 +1,18 @@
 @page "/"
+@page "/{Locale}"
 @inject IJSRuntime JS
+@inject NavigationManager Nav
+@inject LocalizationService Loc
+
+@if (_notFound)
+{
+    <NotFoundContent />
+    return;
+}
 
 <PageTitle>Oxyniti - Nano-Bubble Aeration</PageTitle>
 <HeadContent>
-    <link rel="canonical" href="https://www.oxyniti.com/" />
+    <LocaleHead Slug="" />
     <!-- Mirrors FAQSection.razor's questions/answers verbatim -- keep the two
          in sync; a search engine or answer-engine crawler cross-checks the
          JSON-LD text against the visible text and penalizes a mismatch. -->
@@ -147,8 +156,43 @@
 </div>
 
 @code {
+    [Parameter] public string? Locale { get; set; }
+
     [SupplyParameterFromQuery(Name = "scrollTo")]
     public string? ScrollTo { get; set; }
+
+    private bool _notFound;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var resolved = LocalizationService.ResolveRouteLocale(Locale, "");
+
+        switch (resolved.Outcome)
+        {
+            case LocalizationService.RouteLocaleOutcome.NotFound:
+                _notFound = true;
+                return;
+            case LocalizationService.RouteLocaleOutcome.Redirect:
+                Nav.NavigateTo(resolved.RedirectPath!, replace: true);
+                return;
+            case LocalizationService.RouteLocaleOutcome.RenderLocale:
+                await Loc.SetLanguageAsync(resolved.Locale!);
+                await SyncHtmlLangAsync(resolved.Locale!);
+                break;
+        }
+    }
+
+    private async Task SyncHtmlLangAsync(string code)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Home] Error syncing html lang attribute: {ex}");
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

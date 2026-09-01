@@ -245,6 +245,15 @@
 
         Loc.OnChange += StateHasChanged;
 
+        // Captured before anything else is awaited: a locale-prefixed page
+        // that isn't "ready" (LocalizedRoutes) redirects itself client-side
+        // while this method is still awaiting auth/cart below, so reading
+        // Nav.Uri any later can pick up the POST-redirect URL instead of the
+        // one this page load actually arrived on -- which would make an
+        // unrelated saved language preference override that redirect's own
+        // (correct) decision to stay English.
+        var entryPath = Nav.ToBaseRelativePath(Nav.Uri);
+
 
         try
         {
@@ -270,7 +279,12 @@
 
         try
         {
-            await Loc.InitializeAsync();
+            var redirect = await Loc.InitializeAsync(entryPath);
+            if (redirect is not null)
+            {
+                Nav.NavigateTo(redirect, replace: true);
+                return;
+            }
         }
         catch (Exception ex)
         {
@@ -286,19 +300,31 @@
     private async Task OnLanguageChanged(ChangeEventArgs e)
     {
         var code = e.Value?.ToString();
+        if (string.IsNullOrEmpty(code)) return;
 
-        if (!string.IsNullOrEmpty(code))
+        var slug = LocalizationService.StripLocalePrefix(Nav.ToBaseRelativePath(Nav.Uri));
+
+        // A translated URL exists for this page in the chosen language (or
+        // the visitor is switching back to English on one): send them there
+        // -- the URL is the source of truth, issue #67 -- rather than
+        // repainting in place. Everywhere else -- pages with no locale route
+        // at all -- keep the pre-#67 in-place switch.
+        var targetHasUrl = code == "en" || LocalizedRoutes.IsReady(slug, code);
+        if (targetHasUrl && LocalizedRoutes.IsSlugLocalizable(slug))
         {
-            await Loc.SetLanguageAsync(code);
+            Nav.NavigateTo(LocalizationService.BuildLocalizedPath(slug, code));
+            return;
+        }
 
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[MainLayout] Error syncing html lang attribute: {ex}");
-            }
+        await Loc.SetLanguageAsync(code);
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error syncing html lang attribute: {ex}");
         }
     }
 

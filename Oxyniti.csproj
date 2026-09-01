@@ -56,6 +56,20 @@
     <None Include=".github\workflows\azure-static-web-apps-deploy.yml" />
   </ItemGroup>
 
+  <!--
+    tools/ holds the build-time static-product-pages generator (issue #65),
+    its own standalone console project. It is not referenced by this project,
+    but it sits inside this project's directory tree, so the SDK's default
+    "**/*.cs" glob picks up both its Program.cs and (once built) its own
+    obj/ generated sources, which collide on duplicate assembly
+    attributes with this project's own. Exclude the whole tree.
+  -->
+  <ItemGroup>
+    <Compile Remove="tools\**\*.cs" />
+    <Content Remove="tools\**\*" />
+    <None Remove="tools\**\*" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Maker.RampEdgeV1" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />

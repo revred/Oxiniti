@@ -41,6 +41,7 @@
     { "route": "/_framework/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
     { "route": "/appsettings.json", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } },
     { "route": "/images/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
+    { "route": "/product/*", "headers": { "Cache-Control": "public, max-age=3600, must-revalidate" } },
     { "route": "/videos/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
     { "route": "/bootstrap/*", "headers": { "Cache-Control": "public, max-age=2592000" } },
     { "route": "/vendor/*", "headers": { "Cache-Control": "public, max-age=2592000" } },

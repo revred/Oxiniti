@@ -1,0 +1,11 @@
+@* Shared "nothing here" body. Used by App.razor's <NotFound> (an unmatched
+   route) and, inline, by any page whose "/{Locale}/slug" route parameter
+   turned out not to be one of the six supported locale codes -- Blazor's
+   router can't retroactively fall through to <NotFound> once a templated
+   route has already matched, so those pages render this explicitly instead
+   (see LocalizationService.ResolveRouteLocale). *@
+<PageTitle>Not found</PageTitle>
+<HeadContent>
+    <meta name="robots" content="noindex" />
+</HeadContent>
+<p role="alert">Sorry, there's nothing at this address.</p>

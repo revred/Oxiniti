@@ -1,12 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.oxyniti.com/</loc>
     <lastmod>2026-08-17</lastmod>
   </url>
+  <!-- /about and /contact are also live in all six Indic locales (issue #67);
+       every url in each locale group below carries the complete reciprocal
+       hreflang set (itself included) plus x-default, per Google's sitemap
+       hreflang format. The other marketing routes below stay English-only
+       until their own body content is translated; see LocalizedRoutes.cs. -->
   <url>
     <loc>https://www.oxyniti.com/about</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/about" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/about" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/about" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/about" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/about" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/about" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/about" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/ta/about</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/about" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/about" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/about" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/about" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/about" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/about" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/about" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/te/about</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/about" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/about" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/about" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/about" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/about" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/about" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/about" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/kn/about</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/about" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/about" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/about" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/about" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/about" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/about" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/about" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/ml/about</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/about" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/about" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/about" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/about" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/about" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/about" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/about" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/hi/about</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/about" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/about" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/about" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/about" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/about" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/about" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/about" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/bn/about</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/about" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/about" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/about" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/about" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/about" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/about" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/about" />
   </url>
   <url>
     <loc>https://www.oxyniti.com/aquaculture-oxygenation</loc>
@@ -26,7 +111,87 @@
   </url>
   <url>
     <loc>https://www.oxyniti.com/contact</loc>
-    <lastmod>2026-08-25</lastmod>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/contact" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/contact" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/contact" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/contact" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/contact" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/contact" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/contact" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/ta/contact</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/contact" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/contact" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/contact" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/contact" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/contact" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/contact" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/contact" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/te/contact</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/contact" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/contact" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/contact" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/contact" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/contact" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/contact" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/contact" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/kn/contact</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/contact" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/contact" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/contact" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/contact" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/contact" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/contact" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/contact" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/ml/contact</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/contact" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/contact" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/contact" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/contact" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/contact" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/contact" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/contact" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/hi/contact</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/contact" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/contact" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/contact" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/contact" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/contact" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/contact" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/contact" />
+  </url>
+  <url>
+    <loc>https://www.oxyniti.com/bn/contact</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.oxyniti.com/contact" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.oxyniti.com/ta/contact" />
+    <xhtml:link rel="alternate" hreflang="te" href="https://www.oxyniti.com/te/contact" />
+    <xhtml:link rel="alternate" hreflang="kn" href="https://www.oxyniti.com/kn/contact" />
+    <xhtml:link rel="alternate" hreflang="ml" href="https://www.oxyniti.com/ml/contact" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://www.oxyniti.com/hi/contact" />
+    <xhtml:link rel="alternate" hreflang="bn" href="https://www.oxyniti.com/bn/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.oxyniti.com/contact" />
   </url>
   <url>
     <loc>https://www.oxyniti.com/privacy</loc>

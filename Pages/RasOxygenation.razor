@@ -1,9 +1,18 @@
 @page "/ras-oxygenation"
+@page "/{Locale}/ras-oxygenation"
 @inject LocalizationService Loc
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@if (_notFound)
+{
+    <NotFoundContent />
+    return;
+}
 
 <PageTitle>@Loc.T("rasox.pagetitle", "RAS & Biofloc Oxygenation | Oxyniti")</PageTitle>
 <HeadContent>
-    <link rel="canonical" href="https://www.oxyniti.com/ras-oxygenation" />
+    <LocaleHead Slug="ras-oxygenation" />
     <meta name="description" content="@Loc.T("rasox.meta", "Nano-bubble oxygenation for recirculating aquaculture (RAS) and biofloc systems, where maintaining dissolved oxygen at high stocking density is critical.")" />
 </HeadContent>
 
@@ -40,8 +49,43 @@
 </div>
 
 @code {
+    [Parameter] public string? Locale { get; set; }
+
+    private bool _notFound;
+
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var resolved = LocalizationService.ResolveRouteLocale(Locale, "ras-oxygenation");
+
+        switch (resolved.Outcome)
+        {
+            case LocalizationService.RouteLocaleOutcome.NotFound:
+                _notFound = true;
+                return;
+            case LocalizationService.RouteLocaleOutcome.Redirect:
+                Nav.NavigateTo(resolved.RedirectPath!, replace: true);
+                return;
+            case LocalizationService.RouteLocaleOutcome.RenderLocale:
+                await Loc.SetLanguageAsync(resolved.Locale!);
+                await SyncHtmlLangAsync(resolved.Locale!);
+                break;
+        }
+    }
+
+    private async Task SyncHtmlLangAsync(string code)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[RasOxygenation] Error syncing html lang attribute: {ex}");
+        }
     }
 }

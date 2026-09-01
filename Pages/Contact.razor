@@ -1,9 +1,18 @@
 @page "/contact"
+@page "/{Locale}/contact"
 @inject LocalizationService Loc
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@if (_notFound)
+{
+    <NotFoundContent />
+    return;
+}
 
 <PageTitle>@Loc.T("contact.pagetitle", "Contact Oxyniti")</PageTitle>
 <HeadContent>
-    <link rel="canonical" href="https://www.oxyniti.com/contact" />
+    <LocaleHead Slug="contact" />
     <meta name="description" content="@Loc.T("contact.meta", "Get in touch with Oxyniti — call, WhatsApp, or book a free on-pond demo.")" />
 </HeadContent>
 
@@ -49,8 +58,43 @@
 </div>
 
 @code {
+    [Parameter] public string? Locale { get; set; }
+
+    private bool _notFound;
+
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var resolved = LocalizationService.ResolveRouteLocale(Locale, "contact");
+
+        switch (resolved.Outcome)
+        {
+            case LocalizationService.RouteLocaleOutcome.NotFound:
+                _notFound = true;
+                return;
+            case LocalizationService.RouteLocaleOutcome.Redirect:
+                Nav.NavigateTo(resolved.RedirectPath!, replace: true);
+                return;
+            case LocalizationService.RouteLocaleOutcome.RenderLocale:
+                await Loc.SetLanguageAsync(resolved.Locale!);
+                await SyncHtmlLangAsync(resolved.Locale!);
+                break;
+        }
+    }
+
+    private async Task SyncHtmlLangAsync(string code)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Contact] Error syncing html lang attribute: {ex}");
+        }
     }
 }

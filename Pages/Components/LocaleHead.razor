@@ -1,0 +1,29 @@
+@* Reciprocal hreflang (including x-default) for a marketing page available in
+   more than one language (issue #67). Canonical is NOT emitted here --
+   App.razor already puts a self-referencing canonical on every route
+   (derived straight from the browser URL), which is already correct for a
+   locale-prefixed URL; a second one here would just duplicate it. Only emits
+   an alternate for a locale LocalizedRoutes says is actually ready -- never
+   advertises a hreflang link with no real translated content behind it,
+   which is exactly what Search Console's International Targeting report
+   flags as an error. *@
+<link rel="alternate" hreflang="en" href="@EnglishUrl" />
+@foreach (var langCode in ReadyAlternateCodes)
+{
+    <link rel="alternate" hreflang="@langCode" href="@(Origin + LocalizationService.BuildLocalizedPath(Slug, langCode))" />
+}
+<link rel="alternate" hreflang="x-default" href="@EnglishUrl" />
+
+@code {
+    private const string Origin = "https://www.oxyniti.com";
+
+    /// <summary>The page's locale-agnostic slug, e.g. "about" or "" for home.</summary>
+    [Parameter, EditorRequired] public string Slug { get; set; } = "";
+
+    private string EnglishUrl => Origin + LocalizationService.BuildLocalizedPath(Slug, "en");
+
+    private IEnumerable<string> ReadyAlternateCodes =>
+        LocalizationService.Languages
+            .Select(l => l.Code)
+            .Where(langCode => langCode != "en" && LocalizedRoutes.IsReady(Slug, langCode));
+}

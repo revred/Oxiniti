@@ -11,11 +11,20 @@
     <meta property="og:site_name" content="Oxyniti" />
     <meta property="og:title" content="Oxyniti — Infinite Oxygen. Infinite Yield." />
     <meta property="og:description" content="Nano-bubble generators that supercharge dissolved oxygen in fish ponds — healthier fish, faster growth, higher yield." />
-    <meta property="og:image" content="/oxyniti.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:url" content="https://www.oxyniti.com/" />
+    <!-- unit-pondside is a real installed-unit photo, used here as an interim
+         banner (1120x630, 16:9) until a purpose-cropped 1200x630 share asset
+         with the wordmark replaces it. Must stay absolute: WhatsApp and most
+         other scrapers don't resolve relative og:image paths. -->
+    <meta property="og:image" content="https://www.oxyniti.com/images/unit-pondside@2x.jpg" />
+    <meta property="og:image:width" content="1120" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="An Oxyniti nano-bubble unit installed at a fish pond" />
+    <meta property="og:locale" content="en_IN" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Oxyniti — Infinite Oxygen. Infinite Yield." />
     <meta name="twitter:description" content="Nano-bubble generators that supercharge dissolved oxygen in fish ponds — healthier fish, faster growth, higher yield." />
-    <meta name="twitter:image" content="/oxyniti.png" />
+    <meta name="twitter:image" content="https://www.oxyniti.com/images/unit-pondside@2x.jpg" />
     <base href="/" />
 
     <link rel="icon" type="image/png" href="/oxyniti.png?v=2" />
@@ -55,12 +64,20 @@
     {
         "@context": "https://schema.org",
         "@type": ["Organization", "LocalBusiness"],
+        "@id": "https://www.oxyniti.com/#org",
         "name": "Oxyniti",
         "url": "https://www.oxyniti.com/",
         "logo": "https://www.oxyniti.com/oxyniti.png",
         "description": "Oxyniti builds nano-bubble oxygen generators for aquaculture, raising dissolved oxygen in fish and shrimp ponds to improve survival rate, feed conversion, and stocking density.",
         "areaServed": "Tamil Nadu, South India",
-        "telephone": "+91 96597 27477"
+        "telephone": "+91 96597 27477",
+        "contactPoint": [{
+            "@type": "ContactPoint",
+            "telephone": "+91 96597 27477",
+            "contactType": "sales",
+            "areaServed": "IN",
+            "availableLanguage": ["en", "ta", "te", "kn", "ml", "hi", "bn"]
+        }]
     }
     </script>
 </head>
@@ -180,6 +197,7 @@
             document.body.appendChild(el);
         })();
     </script>
+    <script src="./js/i18nHelper.js" defer></script>
     <script src="./js/clickOutsideHelper.js" defer></script>
     <script src="./js/tankBubbles.js" defer></script>
     <script src="./js/scrollHelper.js" defer></script>

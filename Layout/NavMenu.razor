@@ -41,9 +41,12 @@
          onclick="document.getElementById('nav-toggle').checked = false">
 
         <!-- 1. HOME -->
-        <a class="nav-link" 
-           href="#" 
-           data-section="hero" 
+        <!-- Real in-page href so a no-JS fetch or crawler gets a resolvable
+             target instead of a bare "#"; onclick still preventDefaults and
+             drives the smooth-scroll/cross-page logic for real visitors. -->
+        <a class="nav-link"
+           href="/#hero"
+           data-section="hero"
            @onclick='() => GoToHomeSection("hero")'
            @onclick:preventDefault="true">
             @Loc.T("nav.home", "Home")
@@ -54,13 +57,13 @@
              entirely by NavLink's own routing-based active state, not the
              scroll-spy that drives the other (same-page anchor) links. -->
         <NavLink class="nav-link"
-                 href="products">
+                 href="/products">
             @Loc.T("nav.products", "Products")
         </NavLink>
 
         <!-- 3. TECHNOLOGY -->
         <a class="nav-link"
-           href="#"
+           href="/#technology"
            data-section="technology"
            @onclick='() => GoToHomeSection("technology")'
            @onclick:preventDefault="true">
@@ -69,7 +72,7 @@
 
         <!-- 4. RESULTS -->
         <a class="nav-link"
-           href="#"
+           href="/#results"
            data-section="results"
            @onclick='() => GoToHomeSection("results")'
            @onclick:preventDefault="true">
@@ -78,7 +81,7 @@
 
         <!-- 5. FIELD FOOTAGE -->
         <a class="nav-link"
-           href="#"
+           href="/#use-cases"
            data-section="use-cases"
            @onclick='() => GoToHomeSection("use-cases")'
            @onclick:preventDefault="true">
@@ -87,7 +90,7 @@
 
         <!-- 6. CONTACT -->
         <a class="nav-link"
-           href="#"
+           href="/#free-demo"
            data-section="free-demo"
            @onclick='() => GoToHomeSection("free-demo")'
            @onclick:preventDefault="true">

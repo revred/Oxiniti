@@ -27,7 +27,19 @@ namespace Oxyniti.Services
 
         /// <summary>CMS logo once it lands, the shipped brand asset until then — never empty.</summary>
         public string LogoUrl =>
-            !string.IsNullOrWhiteSpace(Asset?.Url) ? Asset!.Url : DefaultLogoUrl;
+            !string.IsNullOrWhiteSpace(Asset?.Url) && !IsTimeLimitedUrl(Asset!.Url)
+                ? Asset!.Url
+                : DefaultLogoUrl;
+
+        /// <summary>
+        /// A Supabase Storage signed URL (".../object/sign/...?token=...") expires
+        /// minutes after issuance — unusable for a public brand asset that has to
+        /// survive prerendering and caching. Treat one as if the CMS supplied
+        /// nothing rather than ship a logo URL that goes dead in the wild.
+        /// See https://github.com/revred/Oxiniti/issues/80.
+        /// </summary>
+        private static bool IsTimeLimitedUrl(string url) =>
+            url.Contains("/object/sign/", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>True once the fetch has settled, whether it succeeded or failed.</summary>
         public bool IsLoaded { get; private set; }

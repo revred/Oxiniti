@@ -1,7 +1,10 @@
 @inject LocalizationService Loc
 
 <div class="faq-section" id="faq">
-    <h2 class="section-title">@Loc.T("faq.kicker", "Frequently asked questions")</h2>
+    @if (ShowHeading)
+    {
+        <h2 class="section-title">@Loc.T("faq.kicker", "Frequently asked questions")</h2>
+    }
 
     <div class="faq-list">
         @for (var i = 0; i < Faqs.Count; i++)
@@ -23,6 +26,8 @@
 </div>
 
 @code {
+    [Parameter] public bool ShowHeading { get; set; } = true;
+
     private int? OpenIndex = 0;
 
     protected override void OnInitialized()
@@ -47,7 +52,7 @@
         new("Can I see it working on my own pond before I commit?",
             "Yes. Our team installs a unit on your pond, measures dissolved oxygen before and after with a calibrated DO meter, and shows you the difference the same day — no obligation."),
         new("How do I estimate the profit impact for my pond?",
-            "Use the profit calculator further up this page, or the Profit Calc button in the top bar — enter your pond size and species to see an estimate of the extra yield and margin."),
+            "Use the profit calculator on the homepage, or the Profit Calc button in the top bar — enter your pond size and species to see an estimate of the extra yield and margin."),
         new("Where do you currently install?",
             "We're currently serving Tamil Nadu and South India."),
     };

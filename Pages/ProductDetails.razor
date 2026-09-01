@@ -1,4 +1,5 @@
 ﻿@page "/product/{Slug}"
+@using System.Text.Json.Serialization
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Nav
 @inject CartService CartService
@@ -7,6 +8,16 @@
 @inject LocalizationService Loc
 
 <PageTitle>@(Detail?.Name ?? "Loading...")</PageTitle>
+
+@if (Detail is not null)
+{
+    <HeadContent>
+        <link rel="canonical" href="@CanonicalUrl" />
+        <meta name="description" content="@MetaDescription" />
+        <script type="application/ld+json">@((MarkupString)BuildProductJsonLd())</script>
+        <script type="application/ld+json">@((MarkupString)BuildBreadcrumbJsonLd())</script>
+    </HeadContent>
+}
 
 @if (Detail is null)
 {
@@ -314,6 +325,95 @@ else
     private string? AddedMessage;
     public IReadOnlyList<Maker.RampEdge.DigitalAsset> SortedAssets => Detail?.Assets.OrderBy(a => a.Is3DFile).ToList() ?? [];
     private IList<ProductData> AlsoLike { get; set; } = [];
+
+    private static readonly JsonSerializerOptions JsonLdOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    private string CanonicalUrl => $"https://www.oxyniti.com/product/{Slug}";
+
+    private string MetaDescription =>
+        Detail is null
+            ? ""
+            : Detail.Description.Length > 155 ? Detail.Description[..155].TrimEnd() + "…" : Detail.Description;
+
+    // Built from the live ProductDetailsAsync response, not static markup --
+    // System.Text.Json escapes both JSON-special and HTML-unsafe characters
+    // (default JavaScriptEncoder), so a product name/description containing
+    // a quote or a literal "</script>" can't break out of the tag the way a
+    // raw @Detail.Name interpolation into the script body could.
+    private string BuildProductJsonLd()
+    {
+        var product = new JsonLdProduct
+        {
+            Name = Detail!.Name,
+            Description = Detail.Description,
+            Image = SortedAssets.FirstOrDefault(a => !a.Is3DFile)?.Url,
+            Offers = new JsonLdOffer
+            {
+                Url = CanonicalUrl,
+                Price = Detail.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            }
+        };
+
+        return JsonSerializer.Serialize(product, JsonLdOptions);
+    }
+
+    private string BuildBreadcrumbJsonLd()
+    {
+        var breadcrumb = new JsonLdBreadcrumbList
+        {
+            ItemListElement =
+            [
+                new JsonLdListItem { Position = 1, Name = "Home", Item = "https://www.oxyniti.com/" },
+                new JsonLdListItem { Position = 2, Name = "Products", Item = "https://www.oxyniti.com/products" },
+                new JsonLdListItem { Position = 3, Name = Detail!.Name, Item = CanonicalUrl }
+            ]
+        };
+
+        return JsonSerializer.Serialize(breadcrumb, JsonLdOptions);
+    }
+
+    private sealed class JsonLdProduct
+    {
+        [JsonPropertyName("@context")] public string Context => "https://schema.org";
+        [JsonPropertyName("@type")] public string Type => "Product";
+        public string Name { get; set; } = "";
+        public string? Description { get; set; }
+        public string? Image { get; set; }
+        public JsonLdBrand Brand { get; set; } = new();
+        public JsonLdOffer Offers { get; set; } = new();
+    }
+
+    private sealed class JsonLdBrand
+    {
+        [JsonPropertyName("@type")] public string Type => "Brand";
+        public string Name => "Oxyniti";
+    }
+
+    private sealed class JsonLdOffer
+    {
+        [JsonPropertyName("@type")] public string Type => "Offer";
+        public string Url { get; set; } = "";
+        public string PriceCurrency => "INR";
+        public string Price { get; set; } = "";
+    }
+
+    private sealed class JsonLdBreadcrumbList
+    {
+        [JsonPropertyName("@context")] public string Context => "https://schema.org";
+        [JsonPropertyName("@type")] public string Type => "BreadcrumbList";
+        public List<JsonLdListItem> ItemListElement { get; set; } = [];
+    }
+
+    private sealed class JsonLdListItem
+    {
+        [JsonPropertyName("@type")] public string Type => "ListItem";
+        public int Position { get; set; }
+        public string Name { get; set; } = "";
+        public string Item { get; set; } = "";
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

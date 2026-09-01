@@ -12,19 +12,22 @@
     <meta property="og:title" content="Oxyniti — Infinite Oxygen. Infinite Yield." />
     <meta property="og:description" content="Nano-bubble generators that supercharge dissolved oxygen in fish ponds — healthier fish, faster growth, higher yield." />
     <meta property="og:url" content="https://www.oxyniti.com/" />
-    <!-- unit-pondside is a real installed-unit photo, used here as an interim
-         banner (1120x630, 16:9) until a purpose-cropped 1200x630 share asset
-         with the wordmark replaces it. Must stay absolute: WhatsApp and most
-         other scrapers don't resolve relative og:image paths. -->
-    <meta property="og:image" content="https://www.oxyniti.com/images/unit-pondside@2x.jpg" />
-    <meta property="og:image:width" content="1120" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="An Oxyniti nano-bubble unit installed at a fish pond" />
+    <!-- unit-pondside@2x.jpg was found to be a generated/composited render, not
+         a real installed-unit photo (see Oxiniti#78) -- do not use it, or its
+         unit-fishfarm@2x.jpg twin, anywhere that implies real installed
+         hardware. hero-poster-wide.jpg is genuine hero-video footage (already
+         the VideoObject thumbnail in Home.razor's JSON-LD), used here as the
+         share banner instead. Must stay absolute: WhatsApp and most other
+         scrapers don't resolve relative og:image paths. -->
+    <meta property="og:image" content="https://www.oxyniti.com/images/hero-poster-wide.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="720" />
+    <meta property="og:image:alt" content="An Oxyniti nano-bubble generator dissolving oxygen into a fish pond" />
     <meta property="og:locale" content="en_IN" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Oxyniti — Infinite Oxygen. Infinite Yield." />
     <meta name="twitter:description" content="Nano-bubble generators that supercharge dissolved oxygen in fish ponds — healthier fish, faster growth, higher yield." />
-    <meta name="twitter:image" content="https://www.oxyniti.com/images/unit-pondside@2x.jpg" />
+    <meta name="twitter:image" content="https://www.oxyniti.com/images/hero-poster-wide.jpg" />
     <base href="/" />
 
     <link rel="icon" type="image/png" href="/oxyniti.png?v=2" />

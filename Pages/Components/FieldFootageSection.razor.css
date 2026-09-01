@@ -26,17 +26,8 @@
 }
 
 .footage-grid {
-    display: grid;
-    grid-template-columns: minmax(280px, 380px) 1fr;
-    gap: 1.25rem;
-    max-width: 960px;
+    max-width: 420px;
     margin: 0 auto;
-}
-
-.footage-photos {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 1.25rem;
 }
 
 .footage-card {
@@ -46,12 +37,8 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* video-card has no aspect-ratio of its own on desktop: it stretches
-   (grid's default align-items) to match the height of the stacked
-   .footage-photos column next to it, instead of a hard-coded 3:4 box that
-   fell out of proportion whenever the photo column grew wider than expected. */
-.footage-card.photo-card {
-    aspect-ratio: 16 / 9;
+.footage-card.video-card {
+    aspect-ratio: 3 / 4;
 }
 
 .footage-card video,
@@ -60,18 +47,6 @@
     height: 100%;
     object-fit: cover;
     display: block;
-}
-
-@media (max-width: 760px) {
-    .footage-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .footage-card.video-card {
-        aspect-ratio: 3 / 4;
-        width: min(420px, 100%);
-        margin: 0 auto;
-    }
 }
 
 .caption {

@@ -11,10 +11,18 @@
     </p>
 
     <div class="drone-stage">
-        <video @ref="_videoElement" muted loop playsinline poster="/images/drone-poster.jpg">
+        <canvas @ref="_backdropCanvas" class="drone-stage-backdrop" aria-hidden="true"></canvas>
+        <video @ref="_videoElement"
+               class="drone-stage-video"
+               muted
+               loop
+               playsinline
+               preload="none"
+               poster="/images/drone-poster.jpg">
             <source data-src="/videos/drone.webm" type="video/webm" />
             <source data-src="/videos/drone.mp4" type="video/mp4" />
         </video>
+        <div class="drone-stage-grade" aria-hidden="true"></div>
         <div class="rec-badge"><i></i><span>@Loc.T("sky.rec", "DRONE · LIVE TRIAL")</span></div>
         <div class="hud-chips">
             <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c1", "Unit 1 · nano-plume active")</div>
@@ -26,8 +34,9 @@
 
 @code {
     private ElementReference _videoElement;
-    private IJSObjectReference? _videoModule;
-    private IJSObjectReference? _videoController;
+    private ElementReference _backdropCanvas;
+    private IJSObjectReference? _droneModule;
+    private IJSObjectReference? _droneController;
 
     protected override void OnInitialized()
     {
@@ -41,19 +50,18 @@
 
         try
         {
-            _videoModule = await JS.InvokeAsync<IJSObjectReference>(
+            _droneModule = await JS.InvokeAsync<IJSObjectReference>(
                 "import",
-                "./js/lazyBackgroundVideo.js");
+                "./js/droneStage.js");
 
-            _videoController = await _videoModule.InvokeAsync<IJSObjectReference>(
+            _droneController = await _droneModule.InvokeAsync<IJSObjectReference>(
                 "init",
                 _videoElement,
-                null,
-                new { eager = false });
+                _backdropCanvas);
         }
         catch (JSException)
         {
-            // Prevent page from breaking if JS is unavailable.
+            // Keep the poster treatment visible if JavaScript is unavailable.
         }
     }
 
@@ -63,20 +71,20 @@
 
         try
         {
-            if (_videoController is not null)
+            if (_droneController is not null)
             {
-                await _videoController.InvokeVoidAsync("dispose");
-                await _videoController.DisposeAsync();
+                await _droneController.InvokeVoidAsync("dispose");
+                await _droneController.DisposeAsync();
             }
 
-            if (_videoModule is not null)
+            if (_droneModule is not null)
             {
-                await _videoModule.DisposeAsync();
+                await _droneModule.DisposeAsync();
             }
         }
         catch (JSDisconnectedException)
         {
-            // Safe to ignore when Blazor circuit disconnects.
+            // Safe to ignore when Blazor disconnects during navigation.
         }
     }
 }

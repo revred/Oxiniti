@@ -6,8 +6,14 @@
 <div class="field-footage-section" id="use-cases">
     <span class="kicker">@Loc.T("gal.kicker", "Use cases")</span>
     <h2 class="section-title">@Loc.T("gal.h2", "No studio. No CGI. Just working ponds.")</h2>
-    <p class="section-lead">@Loc.T("gal.p", "Real footage and photos from a working farm during a live trial.")</p>
+    <p class="section-lead">@Loc.T("gal.p", "Real footage from a working farm during a live trial.")</p>
 
+    <!-- The two "install photo" stills that used to sit beside this video were
+         the same generated unit pair composited onto two different backdrops
+         (see tracked imagery issue) -- pulled rather than shipped next to a
+         "no CGI" claim. Restore a photo column here once real trial photos
+         exist; until then this section leads with the one asset that is
+         genuinely real footage. -->
     <div class="footage-grid">
         <div class="footage-card video-card">
             <video @ref="_videoElement" muted loop playsinline poster="/images/plume-poster.jpg">
@@ -15,24 +21,6 @@
                 <source data-src="/videos/plume-portrait.mp4" type="video/mp4" />
             </video>
             <div class="caption">@Loc.T("ff.cap1", "The nano-plume — oxygen dissolving in real time")</div>
-        </div>
-        <div class="footage-photos">
-            <div class="footage-card photo-card">
-                <picture>
-                    <source type="image/avif" srcset="/images/unit-pondside.avif 1x, /images/unit-pondside@2x.avif 2x" />
-                    <source type="image/webp" srcset="/images/unit-pondside.webp 1x, /images/unit-pondside@2x.webp 2x" />
-                    <img src="/images/unit-pondside.jpg" srcset="/images/unit-pondside.jpg 1x, /images/unit-pondside@2x.jpg 2x" width="560" height="315" loading="lazy" decoding="async" alt="Two Oxyniti units installed beside a fish pond" />
-                </picture>
-                <div class="caption">@Loc.T("ff.cap2", "On-site install — pond edge, ready to run")</div>
-            </div>
-            <div class="footage-card photo-card">
-                <picture>
-                    <source type="image/avif" srcset="/images/unit-fishfarm.avif 1x, /images/unit-fishfarm@2x.avif 2x" />
-                    <source type="image/webp" srcset="/images/unit-fishfarm.webp 1x, /images/unit-fishfarm@2x.webp 2x" />
-                    <img src="/images/unit-fishfarm.jpg" srcset="/images/unit-fishfarm.jpg 1x, /images/unit-fishfarm@2x.jpg 2x" width="560" height="315" loading="lazy" decoding="async" alt="Oxyniti units running at a family fish farm" />
-                </picture>
-                <div class="caption">@Loc.T("ff.cap3", "Family Fish Farm — live trial in progress")</div>
-            </div>
         </div>
     </div>
 </div>

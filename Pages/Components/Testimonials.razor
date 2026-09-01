@@ -1,4 +1,5 @@
-﻿@implements IDisposable
+﻿@using System.Text.RegularExpressions
+@implements IDisposable
 @inject BusinessInfoService InfoService
 @inject LocalizationService Loc
 @inject IJSRuntime JS
@@ -10,12 +11,34 @@
     <section class="testimonials-section" id="testimonials">
         <h2 class="section-title">@Loc.T("testi.h1", "Testimonials")</h2>
         <div>
-            @((MarkupString)InfoService.Testimonials)
+            @((MarkupString)SanitizedTestimonials)
         </div>
     </section>
 }
 
 @code {
+    // The CMS has shipped <img> avatar tags with an empty/missing src, which
+    // the browser resolves to the page's own URL -- a wasted full-document
+    // request per avatar (see https://github.com/revred/Oxiniti/issues/81).
+    // The real fix belongs in the CMS template; this is defense-in-depth so a
+    // future regression there degrades to no image (the .author-avatar circle
+    // still renders from CSS) instead of firing duplicate document requests.
+    private static readonly Regex ImgTagPattern =
+        new(@"<img\b[^>]*>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static readonly Regex SrcAttrPattern =
+        new(@"\bsrc\s*=\s*(['""])(.*?)\1", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private string SanitizedTestimonials =>
+        ImgTagPattern.Replace(InfoService.Testimonials, StripImgWithoutUsableSrc);
+
+    private static string StripImgWithoutUsableSrc(Match imgTag)
+    {
+        var srcAttr = SrcAttrPattern.Match(imgTag.Value);
+        var hasUsableSrc = srcAttr.Success && !string.IsNullOrWhiteSpace(srcAttr.Groups[2].Value);
+        return hasUsableSrc ? imgTag.Value : string.Empty;
+    }
+
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;

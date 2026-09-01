@@ -29,6 +29,7 @@
                 <div class="footer-section">
                     <h4>@Loc.T("foot.explore", "Explore")</h4>
                     <ul>
+                        <li><a href="/products">@Loc.T("nav.products", "Products")</a></li>
                         <li><a href="/technology">@Loc.T("nav.tech", "Technology")</a></li>
                         <li><a href="/aquaculture-oxygenation">@Loc.T("nav.aqox", "Aquaculture Oxygenation")</a></li>
                         <li><a href="/ras-oxygenation">@Loc.T("nav.rasox", "RAS &amp; Biofloc")</a></li>
@@ -47,14 +48,24 @@
                     </ul>
                 </div>
 
+                <div class="footer-section">
+                    <h4>@Loc.T("foot.company", "Company")</h4>
+                    <ul>
+                        <li><a href="/about">@Loc.T("nav.about", "About")</a></li>
+                        <li><a href="/contact">@Loc.T("nav.contact", "Contact")</a></li>
+                        <li><a href="/privacy">@Loc.T("nav.privacy", "Privacy Policy")</a></li>
+                        <li><a href="/terms">@Loc.T("nav.terms", "Terms")</a></li>
+                    </ul>
+                </div>
+
                 <div class="footer-section footer-community">
                     <h4>@Loc.T("foot.community", "Community")</h4>
-                    <div class="footer-whatsapp">
+                    <a class="footer-whatsapp" href="@SiteContact.WhatsAppGroupLink" target="_blank" rel="noopener">
                         <WhatsAppGroupQr Size="96" Caption="@null" />
                         <div class="footer-whatsapp-text">
                             <span class="footer-whatsapp-title"><i class="bi bi-whatsapp"></i> @Loc.T("foot.wa.title", "Join our WhatsApp community")</span>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>

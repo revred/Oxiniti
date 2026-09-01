@@ -115,7 +115,7 @@
                     {
                         <div id="user-menu" class="user-menu">
 
-                            <a href="account"
+                            <a href="/account"
                                class="user-menu-item">
 
                                 <i class="bi bi-person-circle"></i>
@@ -187,7 +187,7 @@
             else
             {
                 <!-- Login -->
-                <a href="login"
+                <a href="/login"
                    class="login-avatar"
                    title="@Loc.T("nav.login", "Login")"
                    aria-label="@Loc.T("nav.login", "Login")">
@@ -213,21 +213,12 @@
 
 </div>
 
-
-<div id="blazor-error-ui" data-nosnippet>
-
-    @Loc.T("err.unhandled", "An unhandled error has occurred.")
-
-    <a href="." class="reload">
-        @Loc.T("err.reload", "Reload")
-    </a>
-
-    <span class="dismiss">
-        🗙
-    </span>
-
-</div>
-
+<!-- #blazor-error-ui lives in wwwroot/index.html, created by inline script
+     before blazor.webassembly.js runs, appended to document.body (outside
+     this component tree). It must NOT be re-declared here: Blazor's runtime
+     finds the id via a live DOM lookup regardless of which document node it
+     lives on, and a second copy inside the app root created a duplicate id
+     in the live DOM. -->
 
 @code {
 
@@ -299,6 +290,15 @@
         if (!string.IsNullOrEmpty(code))
         {
             await Loc.SetLanguageAsync(code);
+
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("oxynitiI18n.setHtmlLang", code);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MainLayout] Error syncing html lang attribute: {ex}");
+            }
         }
     }
 

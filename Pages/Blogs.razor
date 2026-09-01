@@ -1,15 +1,65 @@
-﻿@page "/blogs"
+@page "/blogs"
+@implements IDisposable
 @inject LocalizationService Loc
 
+<PageTitle>@Loc.T("blogs.pagetitle", "Blog | Oxyniti Nano-Bubble Aeration")</PageTitle>
 <HeadContent>
-    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://www.oxyniti.com/blogs" />
+    <meta name="description" content="@Loc.T("blogs.meta", "Field notes, trial data and technical explainers on nano-bubble aeration for aquaculture, wastewater treatment and hydroponics, from the Oxyniti team.")" />
+    @* Nothing indexable exists here yet -- an empty section only hurts crawl
+       quality. Flip automatically the moment BlogRegistry.Posts gets its
+       first real entry; see BlogRegistry for how to add one. *@
+    <meta name="robots" content="@(BlogRegistry.Posts.Count == 0 ? "noindex" : "index, follow")" />
 </HeadContent>
 
-<ComingSoon/>
+@if (BlogRegistry.Posts.Count > 0)
+{
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "Blog",
+        "name": "Oxyniti Blog",
+        "url": "https://www.oxyniti.com/blogs"
+    }
+    </script>
+}
+
+<div class="blogs-section">
+    <span class="kicker">@Loc.T("blogs.kicker", "Field notes")</span>
+    <h2 class="section-title">@Loc.T("blogs.h2", "Blog")</h2>
+    <p class="section-lead">
+        @Loc.T("blogs.lead", "Trial data, technical explainers and field notes on nano-bubble aeration — published as they're ready, not before.")
+    </p>
+
+    @if (BlogRegistry.Posts.Count == 0)
+    {
+        <div class="blogs-empty">
+            <p>@Loc.T("blogs.empty", "The first post is on its way. Check back soon.")</p>
+        </div>
+    }
+    else
+    {
+        <div class="blogs-grid">
+            @foreach (var post in BlogRegistry.Posts.OrderByDescending(p => p.PublishedOn))
+            {
+                <a class="blog-card" href="@($"/blogs/{post.Slug}")">
+                    <span class="blog-date">@post.PublishedOn.ToString("MMMM d, yyyy")</span>
+                    <h3>@post.Title</h3>
+                    <p>@post.Summary</p>
+                </a>
+            }
+        </div>
+    }
+</div>
 
 @code {
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Loc.OnChange -= StateHasChanged;
     }
 }

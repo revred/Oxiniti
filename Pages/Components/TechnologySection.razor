@@ -1,32 +1,11 @@
-@implements IAsyncDisposable
+@implements IDisposable
 @inject IJSRuntime JS
 @inject LocalizationService Loc
 
 <div class="technology-section" id="technology">
     <div class="tech-grid">
-        <div class="tanks" aria-hidden="true">
-            <div class="tank regular">
-                <div class="tank-label">
-                    <b>@Loc.T("tank.reg", "Normal aerator")</b>
-                    <span>@Loc.T("tank.regsub", "mm bubbles")</span>
-                </div>
-                <div class="tank-surface"></div>
-                <div class="tank-bubble-layer"></div>
-                <div class="tank-verdict">
-                    @Loc.T("tank.regv", "Big bubbles rise & burst in seconds — most oxygen escapes to the air.")
-                </div>
-            </div>
-            <div class="tank nano">
-                <div class="tank-label">
-                    <b>@Loc.T("tank.nano", "Oxyniti nano")</b>
-                    <span>&lt;200 nm</span>
-                </div>
-                <div class="tank-surface"></div>
-                <div class="tank-bubble-layer"></div>
-                <div class="tank-verdict">
-                    @Loc.T("tank.nanov", "Nano-bubbles are neutrally buoyant — they hang in the water and keep dissolving for days.")
-                </div>
-            </div>
+        <div class="tech-illustration" style="display: flex; align-items: center;">
+            <img src="/images/nanobubble-vs-hair.png" alt="Nanobubble vs Human Hair" style="width: 100%; height: auto; object-fit: cover; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15);" />
         </div>
 
         <div class="tech-copy">
@@ -57,44 +36,26 @@
                         <p>@Loc.T("tf3.p", "Neutral buoyancy and negative surface charge keep bubbles suspended, buffering your pond through the dangerous night hours.")</p>
                     </div>
                 </div>
+                <div class="tf">
+                    <span class="n">4</span>
+                    <div>
+                        <h4>@Loc.T("tf4.h", "Maximum surface area")</h4>
+                        <p>@Loc.T("tf4.p", "Because nano-bubbles are incredibly small, their massive surface-area-to-volume ratio ensures almost all the air inside is in direct contact with the water, giving it the perfect opportunity to fully dissolve.")</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 @code {
-    private bool _bubblesStarted;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (!firstRender) return;
-
         Loc.OnChange += StateHasChanged;
-
-        try
-        {
-            await JS.InvokeVoidAsync("oxynitiTankBubbles.start");
-            _bubblesStarted = true;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[TechnologySection] Error starting tank bubble animation: {ex}");
-        }
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
         Loc.OnChange -= StateHasChanged;
-
-        if (!_bubblesStarted) return;
-
-        try
-        {
-            await JS.InvokeVoidAsync("oxynitiTankBubbles.stop");
-        }
-        catch (Exception)
-        {
-            // JS runtime may already be torn down during navigation/disposal; safe to ignore.
-        }
     }
 }

@@ -16,7 +16,8 @@
          genuinely real footage. -->
     <div class="footage-grid">
         <div class="footage-card video-card">
-            <video @ref="_videoElement" muted loop playsinline poster="/images/plume-poster.jpg">
+            <video @ref="_videoElement" muted loop playsinline poster="/images/plume-poster.jpg"
+                   data-video-init="lazy">
                 <source data-src="/videos/plume-portrait.webm" type="video/webm" />
                 <source data-src="/videos/plume-portrait.mp4" type="video/mp4" />
             </video>

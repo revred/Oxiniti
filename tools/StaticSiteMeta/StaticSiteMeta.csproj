@@ -1,25 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Build-time generator for issue #69: wwwroot/sitemap.xml was hand-maintained
-    (drifting from the real route table) and every page shared the same
-    site-wide og:title/description/twitter tags from wwwroot/index.html, so a
-    WhatsApp/social share of any two pages previewed identically.
+    Build-time generator, originally for issue #69: wwwroot/sitemap.xml was
+    hand-maintained (drifting from the real route table) and every page
+    shared the same site-wide og:title/description/twitter tags from
+    wwwroot/index.html, so a WhatsApp/social share of any two pages previewed
+    identically.
 
-    This tool runs after `dotnet publish`, before tools/StaticProductPages (issue
-    #65), so that tool's sitemap.xml merge lands on top of what this one writes
-    rather than the other way around. It:
-      - regenerates sitemap.xml from a declarative route table, with each url's
-        <lastmod> sourced from that page's own last git commit (no <priority>,
-        which Google ignores, matching the partial fix already shipped for #69);
-      - for each of those routes, clones the published index.html and swaps in
-        that page's own title/description into <title>, the description meta,
-        og:*, twitter:* and a <link rel="canonical"> (App.razor otherwise only
-        sets canonical after the WASM runtime boots, which is invisible to a
-        share-preview scraper).
+    This tool runs after `dotnet publish`, before tools/Prerender and
+    tools/StaticProductPages (issue #65), so those tools' sitemap.xml merges
+    land on top of what this one writes rather than the other way around. It:
+      - regenerates sitemap.xml from a declarative route table, with each
+        url's <lastmod> sourced from that page's own last git commit (no
+        <priority>, which Google ignores, matching the partial fix already
+        shipped for #69);
+      - emits routes.json (the routesOut command-line argument) listing every
+        marketing URL, plus its ready locale variants, for tools/Prerender
+        to crawl.
+
+    Until issue #63 landed, this tool ALSO cloned the published index.html
+    per route and swapped in that page's own title/description/canonical, a
+    regex-based approximation of what the real Razor components would
+    render. tools/Prerender now captures the real, fully-rendered page
+    (title, description, canonical, JSON-LD, body content) instead, which is
+    strictly more accurate, so that responsibility was removed here rather
+    than left to run and immediately be overwritten.
 
     Deliberately not part of Oxyniti.sln / Oxyniti.csproj, for the same reason
-    as tools/StaticProductPages: the workflow's `dotnet build`/`dotnet publish`
+    as its sibling tools: the workflow's `dotnet build`/`dotnet publish`
     (no explicit project) resolve to the one app project today, and folding a
     second publishable project into that would split publish output between
     two folders.

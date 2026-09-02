@@ -64,30 +64,42 @@ jobs:
         run: dotnet publish -c Release -o ./bin/Release/publish
 
       # Issue #69: sitemap.xml was hand-maintained (drifting from the real
-      # route table) and every page shared one og:title/description/twitter
-      # set from index.html, so a WhatsApp/social share of any two pages
-      # previewed identically. This (re)generates sitemap.xml from the route
-      # table with a real per-page <lastmod>, and clones index.html per
-      # marketing route with that page's own title/description swapped into
-      # <title>, the description meta, og:*/twitter:* and a <link
-      # rel="canonical"> (App.razor otherwise only sets canonical after the
-      # WASM runtime boots -- invisible to a share-preview scraper, which
-      # never runs JS). Must run before the product-pages step below: that
-      # step appends to whatever sitemap.xml already exists, and this step
-      # writes sitemap.xml from scratch.
-      - name: Generate sitemap.xml + per-page social tags
-        run: dotnet run --project tools/StaticSiteMeta/StaticSiteMeta.csproj -c Release -- --wwwroot bin/Release/publish/wwwroot --repo-root .
+      # route table). This (re)generates it from the route table with a real
+      # per-page <lastmod>, and emits routes.json listing every marketing URL
+      # for the prerender step below to crawl. Must run before both of the
+      # next two steps: they each append to (or read) what this one writes.
+      - name: Generate sitemap.xml + prerender route list
+        run: dotnet run --project tools/StaticSiteMeta/StaticSiteMeta.csproj -c Release -- --wwwroot bin/Release/publish/wwwroot --repo-root . --routes-out bin/Release/prerender-routes.json
+
+      # Issue #63: every marketing route shipped nothing but the pre-boot
+      # shell until the 2.7 MB Blazor WASM runtime downloaded and booted --
+      # the LCP ceiling (#46) and the reason nothing but the homepage hero
+      # existed in raw HTML for a crawler. This boots a headless Chromium
+      # against each marketing route (routes.json, from the step above),
+      # captures the fully-rendered page -- title, description, canonical,
+      # JSON-LD and body content all produced by the real Razor components --
+      # and strips the WASM loader out before writing it to disk. See
+      # tools/Prerender/Prerender.csproj for the full rationale.
+      - name: Install Playwright's Chromium (for the prerender step)
+        run: |
+          dotnet build tools/Prerender/Prerender.csproj -c Release
+          pwsh tools/Prerender/bin/Release/net9.0/playwright.ps1 install --with-deps chromium
+
+      - name: Prerender marketing routes
+        run: dotnet run --project tools/Prerender/Prerender.csproj -c Release --no-build -- --wwwroot bin/Release/publish/wwwroot --routes bin/Release/prerender-routes.json
 
       # Issue #65: /product/{slug} shipped nothing but a loading skeleton
       # until the Blazor runtime booted and called MakerClient -- no name,
       # price, spec or image in the HTML, and no product URL in sitemap.xml.
       # This pulls the live catalogue and writes a real
       # product/{slug}/index.html straight into the publish output, plus the
-      # matching sitemap.xml entries. Static Web Apps serves a matching file
-      # before it ever falls back to index.html, so these are what a crawler
-      # (or a browser with JS disabled) sees; the Blazor app then mounts over
-      # the same #app root and hydrates the live, interactive page on top,
-      # same as the homepage's existing static shell.
+      # matching sitemap.xml entries. Product pages keep the WASM loader
+      # (unlike the routes prerendered above) -- MakerClient/auth/Stripe/cart
+      # still need it, per issue #63's own scope. Static Web Apps serves a
+      # matching file before it ever falls back to app-shell.html, so this
+      # static content is what a crawler (or a browser with JS disabled)
+      # sees; the Blazor app then mounts over the same #app root and
+      # hydrates the live, interactive page on top.
       - name: Generate static product pages + sitemap entries
         run: dotnet run --project tools/StaticProductPages/StaticProductPages.csproj -c Release -- --wwwroot bin/Release/publish/wwwroot
 

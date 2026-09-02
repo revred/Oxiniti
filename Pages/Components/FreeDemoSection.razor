@@ -43,31 +43,37 @@
         </div>
 
         <div class="demo-form">
-        <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+        <!-- id/name/data-field on every control: issue #63 replaces Blazor's
+             EditForm two-way binding with a small vanilla-JS submit handler
+             (wwwroot/js/marketingIslands.js) on the prerendered, WASM-free
+             copy of this page. Blazor doesn't render a `name` attribute for
+             @bind-Value inputs, so without these the JS handler would have
+             no reliable way to tell the fields apart. -->
+        <EditForm Model="@model" OnValidSubmit="HandleValidSubmit" id="free-demo-form">
             <DataAnnotationsValidator />
             <div class="form-grid">
                 <div class="field">
-                    <label>@Loc.T("f.name", "Your name")</label>
-                    <InputText @bind-Value="model.Name" placeholder="@Loc.T("f.name.ph", "e.g. Murugan")" />
+                    <label for="demo-name">@Loc.T("f.name", "Your name")</label>
+                    <InputText id="demo-name" name="name" autocomplete="name" data-field="name" @bind-Value="model.Name" placeholder="@Loc.T("f.name.ph", "e.g. Murugan")" />
                     <ValidationMessage For="@(() => model.Name)" />
                 </div>
                 <div class="field">
-                    <label>@Loc.T("f.phone", "Phone / WhatsApp")</label>
-                    <InputText @bind-Value="model.Phone" placeholder="+91 ..." />
+                    <label for="demo-phone">@Loc.T("f.phone", "Phone / WhatsApp")</label>
+                    <InputText id="demo-phone" name="phone" autocomplete="tel" data-field="phone" @bind-Value="model.Phone" placeholder="+91 ..." />
                     <ValidationMessage For="@(() => model.Phone)" />
                 </div>
                 <div class="field">
-                    <label>@Loc.T("f.place", "Village / Town")</label>
-                    <InputText @bind-Value="model.Place" placeholder="@Loc.T("f.place.ph", "e.g. Lalgudi, Trichy")" />
+                    <label for="demo-place">@Loc.T("f.place", "Village / Town")</label>
+                    <InputText id="demo-place" name="place" data-field="place" @bind-Value="model.Place" placeholder="@Loc.T("f.place.ph", "e.g. Lalgudi, Trichy")" />
                     <ValidationMessage For="@(() => model.Place)" />
                 </div>
                 <div class="field full">
                     <label>@Loc.T("f.map", "Pond location (tap the map to mark it — optional)")</label>
-                    <div id="@mapId" class="demo-picker-map"></div>
+                    <div id="@mapId" class="demo-picker-map" data-demo-map="true"></div>
                 </div>
                 <div class="field">
-                    <label>@Loc.T("f.size", "Pond size")</label>
-                    <InputSelect @bind-Value="model.Size">
+                    <label for="demo-size">@Loc.T("f.size", "Pond size")</label>
+                    <InputSelect id="demo-size" name="size" data-field="size" @bind-Value="model.Size">
                         <option>@Loc.T("o.size1", "Under ½ acre")</option>
                         <option selected>@Loc.T("o.size2", "½ – 1 acre")</option>
                         <option>@Loc.T("o.size3", "1 – 3 acres")</option>
@@ -75,8 +81,8 @@
                     </InputSelect>
                 </div>
                 <div class="field full">
-                    <label>@Loc.T("f.species", "What do you farm?")</label>
-                    <InputSelect @bind-Value="model.Species">
+                    <label for="demo-species">@Loc.T("f.species", "What do you farm?")</label>
+                    <InputSelect id="demo-species" name="species" data-field="species" @bind-Value="model.Species">
                         <option selected>@Loc.T("o.sp1", "Tilapia / GIFT")</option>
                         <option>@Loc.T("o.sp2", "Murrel (Viral meen)")</option>
                         <option>@Loc.T("o.sp3", "Pangasius")</option>
@@ -92,7 +98,7 @@
             {
                 <p class="form-status">@statusMessage</p>
             }
-            <p class="form-note">@Loc.T("f.note", "We respect your privacy — no spam, ever.")</p>
+            <p class="form-note" data-field="note">@Loc.T("f.note", "We respect your privacy — no spam, ever.")</p>
         </EditForm>
         </div>
     </div>

@@ -6,6 +6,7 @@
 @inject IJSRuntime JSRuntime
 @inject IMakerClient MakerClient
 @inject LocalizationService Loc
+@inject AuthReadyGate AuthReady
 
 <div class="page">
 
@@ -263,6 +264,13 @@
         {
             Console.WriteLine(
                 $"[MainLayout] Error initializing authentication: {ex}");
+        }
+        finally
+        {
+            // Unblock any guarded page awaiting AuthReady.Ready even if
+            // rehydration threw -- IsAuthenticated is safe to read once this
+            // fires, whether that resolves to true or false.
+            AuthReady.SignalReady();
         }
 
 

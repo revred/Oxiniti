@@ -57,12 +57,12 @@
   </ItemGroup>
 
   <!--
-    tools/ holds the build-time static-product-pages generator (issue #65),
-    its own standalone console project. It is not referenced by this project,
-    but it sits inside this project's directory tree, so the SDK's default
-    "**/*.cs" glob picks up both its Program.cs and (once built) its own
-    obj/ generated sources, which collide on duplicate assembly
-    attributes with this project's own. Exclude the whole tree.
+    tools/ holds the build-time static-site generators for issues #65 and #69,
+    each its own standalone console project. None are referenced by this
+    project, but they sit inside this project's directory tree, so the SDK's
+    default "**/*.cs" glob picks up both their Program.cs files and (once
+    built) their own obj/ generated sources, which collide on duplicate
+    assembly attributes with this project's own. Exclude the whole tree.
   -->
   <ItemGroup>
     <Compile Remove="tools\**\*.cs" />

@@ -57,6 +57,19 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o ./bin/Release/publish
 
+      # Issue #65: /product/{slug} shipped nothing but a loading skeleton
+      # until the Blazor runtime booted and called MakerClient -- no name,
+      # price, spec or image in the HTML, and no product URL in sitemap.xml.
+      # This pulls the live catalogue and writes a real
+      # product/{slug}/index.html straight into the publish output, plus the
+      # matching sitemap.xml entries. Static Web Apps serves a matching file
+      # before it ever falls back to index.html, so these are what a crawler
+      # (or a browser with JS disabled) sees; the Blazor app then mounts over
+      # the same #app root and hydrates the live, interactive page on top,
+      # same as the homepage's existing static shell.
+      - name: Generate static product pages + sitemap entries
+        run: dotnet run --project tools/StaticProductPages/StaticProductPages.csproj -c Release -- --wwwroot bin/Release/publish/wwwroot
+
       # Same idea as the wwwroot/images budget above, for the .NET payload. The
       # ceiling is ~3% over the size achieved by #35, so a regression fails the
       # build rather than quietly costing every first-time visitor.

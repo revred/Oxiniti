@@ -5,10 +5,15 @@
 /bin/Debug/net9.0
 /bin/Release/net9.0/wwwroot/_framework
 /bin/Release/net9.0
+/bin/Release/publish
 /obj
 /.vs/oxyniti
 /.vs/Oxyniti
 /.vs
+# tools/StaticProductPages is its own standalone console project (issue #65),
+# outside Oxyniti.sln, so its build output isn't covered by the roots above.
+/tools/StaticProductPages/bin
+/tools/StaticProductPages/obj
 # Blue Sharc: .sharc/ is a mix of machine-local runtime caches (cracked
 # substrate .rac files, peer/provider configs with this machine's absolute
 # install path, session logs) and derived files (state.json/tree.json/

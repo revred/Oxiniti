@@ -3,6 +3,7 @@
 @inject NavigationManager Nav
 @inject IAuthenticationService AuthenticationService
 @inject LocalizationService Loc
+@inject AuthReadyGate AuthReady
 
 <div class="container-fluid px-4 py-5">
     <h2 class="mb-4">@Loc.T("cart.title", "Your Cart")</h2>
@@ -114,8 +115,13 @@
             ? text
             : text.Substring(0, maxChars) + "...";
     }
-    private void HandleCheckout()
+    private async Task HandleCheckout()
     {
+        // Same rehydration race as Account.razor: guard against reading
+        // IsAuthenticated before MainLayout's token restore from
+        // localStorage has finished.
+        await AuthReady.Ready;
+
         if (!AuthenticationService.IsAuthenticated)
         {
             Nav.NavigateTo("/login");

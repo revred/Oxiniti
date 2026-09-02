@@ -7,6 +7,7 @@
 @inject CartService CartService
 @inject NavigationManager Nav
 @inject LocalizationService Loc
+@inject AuthReadyGate AuthReady
 
 <PageTitle>Your Account - Oxyniti</PageTitle>
 
@@ -157,6 +158,13 @@ else
     protected override async Task OnInitializedAsync()
     {
         Loc.OnChange += StateHasChanged;
+
+        // Wait for MainLayout's token rehydration from localStorage before
+        // trusting IsAuthenticated -- on a hard refresh this page's
+        // OnInitializedAsync can otherwise run first and see the
+        // freshly-constructed "false" default, bouncing a signed-in user to
+        // /login.
+        await AuthReady.Ready;
 
         if (!AuthenticationService.IsAuthenticated)
         {

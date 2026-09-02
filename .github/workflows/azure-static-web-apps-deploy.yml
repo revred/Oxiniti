@@ -68,8 +68,16 @@ jobs:
       # per-page <lastmod>, and emits routes.json listing every marketing URL
       # for the prerender step below to crawl. Must run before both of the
       # next two steps: they each append to (or read) what this one writes.
+      #
+      # Every --wwwroot/--repo-root/--routes(-out) argument below is passed
+      # as an absolute path ($GITHUB_WORKSPACE-rooted), not a path relative
+      # to this job's working directory: `dotnet run --project <dir>` does
+      # not reliably run the launched app from the invoking shell's working
+      # directory -- it can run from <dir> instead, which silently resolved
+      # every relative path here against tools/Prerender/ instead of the
+      # repo root the first time this workflow ran.
       - name: Generate sitemap.xml + prerender route list
-        run: dotnet run --project tools/StaticSiteMeta/StaticSiteMeta.csproj -c Release -- --wwwroot bin/Release/publish/wwwroot --repo-root . --routes-out bin/Release/prerender-routes.json
+        run: dotnet run --project tools/StaticSiteMeta/StaticSiteMeta.csproj -c Release -- --wwwroot "$GITHUB_WORKSPACE/bin/Release/publish/wwwroot" --repo-root "$GITHUB_WORKSPACE" --routes-out "$GITHUB_WORKSPACE/bin/Release/prerender-routes.json"
 
       # Issue #63: every marketing route shipped nothing but the pre-boot
       # shell until the 2.7 MB Blazor WASM runtime downloaded and booted --
@@ -86,7 +94,7 @@ jobs:
           pwsh tools/Prerender/bin/Release/net9.0/playwright.ps1 install --with-deps chromium
 
       - name: Prerender marketing routes
-        run: dotnet run --project tools/Prerender/Prerender.csproj -c Release --no-build -- --wwwroot bin/Release/publish/wwwroot --routes bin/Release/prerender-routes.json
+        run: dotnet run --project tools/Prerender/Prerender.csproj -c Release --no-build -- --wwwroot "$GITHUB_WORKSPACE/bin/Release/publish/wwwroot" --routes "$GITHUB_WORKSPACE/bin/Release/prerender-routes.json"
 
       # Issue #65: /product/{slug} shipped nothing but a loading skeleton
       # until the Blazor runtime booted and called MakerClient -- no name,
@@ -101,7 +109,7 @@ jobs:
       # sees; the Blazor app then mounts over the same #app root and
       # hydrates the live, interactive page on top.
       - name: Generate static product pages + sitemap entries
-        run: dotnet run --project tools/StaticProductPages/StaticProductPages.csproj -c Release -- --wwwroot bin/Release/publish/wwwroot
+        run: dotnet run --project tools/StaticProductPages/StaticProductPages.csproj -c Release -- --wwwroot "$GITHUB_WORKSPACE/bin/Release/publish/wwwroot"
 
       # Same idea as the wwwroot/images budget above, for the .NET payload. The
       # ceiling is ~3% over the size achieved by #35, so a regression fails the

@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -56,7 +57,20 @@ internal static partial class Program
             return 1;
         }
 
-        File.Copy(indexPath, appShellPath, overwrite: true);
+        // `dotnet publish` pre-compresses index.html into index.html.br /
+        // index.html.gz at build time (Blazor's static web asset
+        // compression); Static Web Apps prefers serving those precompressed
+        // siblings over compressing index.html itself on the fly. Every
+        // real browser negotiates Brotli, so if this loop below only ever
+        // overwrites the *uncompressed* index.html (and every other route's
+        // own output file), visitors keep getting served the stale,
+        // Blazor-booting .br file forever -- silently undoing this entire
+        // fix for anyone but a client (like plain curl) that skips
+        // compression negotiation. WriteHtmlFile (below) always regenerates
+        // both compressed siblings alongside the plain file for exactly
+        // this reason, for every file this tool writes -- app-shell.html
+        // included, even though it never had stale siblings to begin with.
+        WriteHtmlFile(appShellPath, await File.ReadAllBytesAsync(indexPath));
 
         // The local server's SPA fallback (below) must serve app-shell.html,
         // not index.html: this loop overwrites index.html (and every other
@@ -79,7 +93,7 @@ internal static partial class Program
                 var html = await CaptureAsync(page, server.BaseAddress, route.Path);
                 var outputPath = Path.Combine(wwwroot, route.OutputRelPath.Replace('/', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
-                File.WriteAllText(outputPath, html, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                WriteHtmlFile(outputPath, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(html));
                 Console.WriteLine($"[prerender] {route.Path} -> {route.OutputRelPath} ({html.Length:N0} chars)");
             }
             catch (Exception ex)
@@ -104,6 +118,25 @@ internal static partial class Program
     {
         var idx = Array.IndexOf(args, name);
         return idx >= 0 && idx + 1 < args.Length ? args[idx + 1] : null;
+    }
+
+    // Writes `path` plus fresh `path.br` / `path.gz` siblings, matching what
+    // `dotnet publish`'s own static web asset compression produces for
+    // everything else in wwwroot -- see the comment where this is first
+    // called for why skipping the compressed siblings is actively wrong,
+    // not just a missed optimisation, for a file this tool overwrites.
+    private static void WriteHtmlFile(string path, byte[] bytes)
+    {
+        File.WriteAllBytes(path, bytes);
+        WriteCompressed(path + ".br", bytes, stream => new BrotliStream(stream, CompressionLevel.Optimal));
+        WriteCompressed(path + ".gz", bytes, stream => new GZipStream(stream, CompressionLevel.Optimal));
+    }
+
+    private static void WriteCompressed(string path, byte[] bytes, Func<Stream, Stream> makeCompressor)
+    {
+        using var fileStream = File.Create(path);
+        using var compressor = makeCompressor(fileStream);
+        compressor.Write(bytes, 0, bytes.Length);
     }
 
     // Boots the real Blazor app for this route (WASM and all -- the only way

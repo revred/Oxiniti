@@ -10,10 +10,13 @@
 /.vs/oxyniti
 /.vs/Oxyniti
 /.vs
-# tools/StaticProductPages is its own standalone console project (issue #65),
-# outside Oxyniti.sln, so its build output isn't covered by the roots above.
+# tools/StaticProductPages (issue #65) and tools/StaticSiteMeta (issue #69)
+# are their own standalone console projects, outside Oxyniti.sln, so their
+# build output isn't covered by the roots above.
 /tools/StaticProductPages/bin
 /tools/StaticProductPages/obj
+/tools/StaticSiteMeta/bin
+/tools/StaticSiteMeta/obj
 # Blue Sharc: .sharc/ is a mix of machine-local runtime caches (cracked
 # substrate .rac files, peer/provider configs with this machine's absolute
 # install path, session logs) and derived files (state.json/tree.json/

@@ -35,6 +35,7 @@
     }
 
     function init() {
+        initAuthHeader();
         initLanguageSelect();
         initNavScrollSpy();
         initProfitCalcScrollButtons();
@@ -46,6 +47,57 @@
         initFreeDemoForm();
         initVideos();
         initOxyNanoClickToPlay();
+    }
+
+    // ---- Header login/account icon -----------------------------------------
+    // This prerendered shell has no live Blazor circuit, so the header always
+    // ships as logged-out (Layout/MainLayout.razor's IsAuthenticated check
+    // never runs here). If a real session token is already sitting in
+    // localStorage (maker_access_token -- Maker.RampEdge's AuthenticationService,
+    // same key it reads on every app boot), swap the login icon for an
+    // account one so a signed-in visitor landing here after login, or after
+    // a refresh, doesn't see a "logged out" header. Only cosmetic: it
+    // doesn't touch storage or auth state, just re-points the link at
+    // /account -- a real Blazor route that verifies the session itself.
+    function initAuthHeader() {
+        var link = document.querySelector(".header-actions .login-avatar");
+        if (!link) return;
+
+        var token = safeGetItem("maker_access_token");
+        if (!token) return;
+
+        var claims = decodeJwtPayload(token);
+        if (!claims || (claims.exp && claims.exp * 1000 <= Date.now())) return;
+
+        // Mirrors MainLayout.razor's UserInitial.
+        var email = claims.email;
+        var initial = email && email.length ? email.charAt(0).toUpperCase() : "O";
+
+        link.href = "/account";
+        link.className = "user-avatar";
+        link.title = email || "Account";
+        link.setAttribute("aria-label", "Account");
+        link.textContent = initial;
+    }
+
+    function safeGetItem(key) {
+        try {
+            return window.localStorage.getItem(key);
+        } catch (err) {
+            return null;
+        }
+    }
+
+    function decodeJwtPayload(token) {
+        try {
+            var parts = token.split(".");
+            if (parts.length < 2) return null;
+            var b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            while (b64.length % 4) b64 += "=";
+            return JSON.parse(atob(b64));
+        } catch (err) {
+            return null;
+        }
     }
 
     // ---- Language switcher -------------------------------------------------

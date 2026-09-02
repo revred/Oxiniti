@@ -1,6 +1,6 @@
 {
   "navigationFallback": {
-    "rewrite": "/index.html",
+    "rewrite": "/app-shell.html",
     "exclude": [
       "/favicon.ico",
       "/robots.txt",
@@ -56,6 +56,7 @@
     { "route": "/robots.txt", "headers": { "Cache-Control": "public, max-age=3600" } },
     { "route": "/sitemap.xml", "headers": { "Cache-Control": "public, max-age=3600" } },
     { "route": "/llms.txt", "headers": { "Cache-Control": "public, max-age=3600" } },
-    { "route": "/index.html", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } }
+    { "route": "/index.html", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } },
+    { "route": "/app-shell.html", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" } }
   ]
 }

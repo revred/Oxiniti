@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    Build-time prerenderer for issue #63: every marketing route shipped
+    nothing but the pre-boot shell until the 2.7 MB Blazor WASM runtime
+    downloaded and booted — the LCP ceiling (#46), the reason nothing but
+    the homepage hero existed in raw HTML for a crawler, and the reason the
+    per-page title/description/canonical tools/StaticSiteMeta wrote (#69)
+    could never be more than a hand-maintained approximation of what the real
+    page would say once Blazor actually rendered it.
+
+    This tool runs after `dotnet publish`, before tools/StaticSiteMeta (which
+    now only regenerates sitemap.xml, see that tool's own comment) and
+    tools/StaticProductPages. It:
+      1. Copies the published wwwroot/index.html (the real WASM-booting
+         shell) to wwwroot/app-shell.html before anything below starts
+         overwriting index.html. staticwebapp.config.json's
+         navigationFallback now rewrites unmatched routes to this file
+         instead of index.html, so every route this tool does not cover
+         (/cart, /account, /checkout, /login; /product/{slug} is handled
+         separately by StaticProductPages and keeps its own copy of the
+         WASM loader) still boots Blazor exactly as before.
+      2. Serves the published wwwroot from a local Kestrel instance, so
+         headless Chromium can boot the real app the same way a live
+         visitor's browser would.
+      3. Boots a headless Chromium (Microsoft.Playwright) against each route
+         named in the routes.json that tools/StaticSiteMeta emits (its own
+         route table, so the two tools can't drift), waits for the page to
+         settle, and captures the fully-rendered DOM: title, meta
+         description, canonical, JSON-LD and all of it produced by the real
+         Razor components, not a regex approximation of them.
+      4. Strips the blazor.webassembly.js script tag (and the blazor-error-ui
+         bootstrap it's paired with) out of the captured HTML before writing
+         it to disk. That's the actual fix: the page a real visitor's
+         browser parses on first paint never requests the WASM runtime at
+         all. The other small vanilla-JS-driven bits these pages need (the
+         profit calculator, the free-demo form, the language switcher,
+         scroll-spy, tank-bubble/testimonial/map decoration; issue #63's
+         "island-sized" components) are wired by
+         wwwroot/js/marketingIslands.js, loaded on every prerendered page;
+         see that file for what it does and why each piece is safe to run
+         without a live Blazor circuit.
+
+    Deliberately not part of Oxyniti.sln / Oxyniti.csproj, for the same
+    reason as its sibling tools: the workflow's `dotnet build`/`dotnet
+    publish` (no explicit project) resolve to the one app project today, and
+    folding a second publishable project into that would split publish
+    output between two folders. Sdk.Web (not the plain Sdk) only because it
+    needs Kestrel and static-file serving to stand up the local server in
+    step 2.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Oxyniti.Prerender</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" Version="1.49.0" />
+  </ItemGroup>
+
+</Project>

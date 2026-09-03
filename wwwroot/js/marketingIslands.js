@@ -28,12 +28,6 @@
 (function () {
     "use strict";
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", init);
-    } else {
-        init();
-    }
-
     function init() {
         initAuthHeader();
         initLanguageSelect();
@@ -104,8 +98,10 @@
     // Mirrors Services/LocalizedRoutes.cs -- keep in sync (also duplicated,
     // with the same rationale, in tools/StaticSiteMeta/Program.cs).
     var READY_LOCALES = {
+        "": ["ta", "te", "kn", "ml", "hi", "bn"],
         about: ["ta", "te", "kn", "ml", "hi", "bn"],
         contact: ["ta", "te", "kn", "ml", "hi", "bn"],
+        products: ["ta", "te", "kn", "ml", "hi", "bn"],
     };
 
     function currentSlug() {
@@ -129,22 +125,31 @@
         if (!select) return;
 
         var slug = currentSlug();
+        var ready = READY_LOCALES[slug] || [];
+
+        // A prerendered page has no Blazor runtime to repaint itself in, so
+        // the only way this control can change language is to navigate to a
+        // locale URL that was actually built. Where one wasn't, say so up
+        // front by disabling the option -- this used to accept the choice and
+        // then silently reset the picker to English, which is indistinguishable
+        // from a dead button (and on most pages it WAS every non-English
+        // option, since only about and contact had locale URLs).
+        Array.prototype.forEach.call(select.options, function (option) {
+            if (option.value === "en" || ready.indexOf(option.value) !== -1) return;
+
+            option.disabled = true;
+            option.title = "This page isn't available in " + option.textContent.trim() + " yet";
+        });
 
         select.addEventListener("change", function () {
             var code = select.value;
             if (!code) return;
 
-            var ready = code === "en" || (READY_LOCALES[slug] || []).indexOf(code) !== -1;
-            if (ready) {
+            // A disabled option can't be selected, so anything arriving here
+            // has a page to go to; the guard is belt-and-braces.
+            if (code === "en" || ready.indexOf(code) !== -1) {
                 location.href = buildLocalizedPath(slug, code);
-                return;
             }
-
-            // No prerendered page exists for this locale+slug combination yet
-            // (Services/LocalizedRoutes.cs isn't "ready" for it either) --
-            // same outcome the live Blazor app gives today: stay on the
-            // English page rather than send the visitor to a 404.
-            select.value = "en";
         });
     }
 
@@ -460,5 +465,19 @@
                 // Autoplay may be blocked; controls are already visible.
             });
         });
+    }
+
+    // Bootstrapped LAST, not first. This file ships `defer`, so by the time it
+    // is parsed the document is already past "loading" and init() runs inline,
+    // right here -- and everything it reads must be assigned by then. Function
+    // declarations hoist; module-scope `var`s (READY_LOCALES) do not. Calling
+    // init() from the top of this IIFE therefore threw a TypeError inside
+    // initLanguageSelect the moment it read READY_LOCALES, which aborted the
+    // whole init chain and left every island after it (scroll-spy, profit
+    // calculator, the free-demo form, the videos) unwired.
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
     }
 })();

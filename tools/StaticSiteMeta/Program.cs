@@ -13,21 +13,23 @@ internal static class Program
 
     // The route table: every URL sitemap.xml (and tools/Prerender) should
     // carry, plus the .razor file whose git history sources <lastmod>, plus
-    // (for the two pages issue #67 brought online in extra locales) the
-    // locale codes whose translation is ready. Mirrors
+    // (for the pages issue #67 brought online in extra locales) the locale
+    // codes whose translation is ready. Mirrors
     // Services/LocalizedRoutes.cs's ReadyLocales map -- duplicated rather
     // than referenced because that type lives in the Blazor WASM app project
     // and this is a separate, plain console project (see the .csproj
-    // comment). If a locale is added there for "about" or "contact", add it
-    // here too.
+    // comment). If a locale is added or removed there, change it here too --
+    // this table is what actually decides which locale URLs get prerendered
+    // and listed in sitemap.xml, and wwwroot/js/marketingIslands.js holds a
+    // third copy for the header language picker.
     private static readonly PageRoute[] Routes =
     [
-        new("", "Pages/Home.razor", []),
+        new("", "Pages/Home.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
         new("about", "Pages/About.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
         new("technology", "Pages/Technology.razor", []),
         new("aquaculture-oxygenation", "Pages/AquacultureOxygenation.razor", []),
         new("ras-oxygenation", "Pages/RasOxygenation.razor", []),
-        new("products", "Pages/Products.razor", []),
+        new("products", "Pages/Products.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
         new("faqs", "Pages/Faqs.razor", []),
         new("contact", "Pages/Contact.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
         new("privacy", "Pages/Privacy.razor", []),

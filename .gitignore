@@ -17,6 +17,10 @@
 /tools/StaticProductPages/obj
 /tools/StaticSiteMeta/bin
 /tools/StaticSiteMeta/obj
+/tools/Prerender/bin
+/tools/Prerender/obj
+# tools/StaticSiteMeta's --routes-out (issue #63); regenerated on every build.
+/bin/Release/prerender-routes.json
 # Blue Sharc: .sharc/ is a mix of machine-local runtime caches (cracked
 # substrate .rac files, peer/provider configs with this machine's absolute
 # install path, session logs) and derived files (state.json/tree.json/

@@ -61,9 +61,16 @@
                         @onchange="OnLanguageChanged"
                         aria-label="@Loc.T("nav.langSelect", "Website language")">
 
+                    @* selected="" as well as the select's own value=: the
+                       marketing routes ship as prerendered HTML with no Blazor
+                       runtime (tools/Prerender), and a <select>'s value is a DOM
+                       property that doesn't survive serialization -- without the
+                       attribute, a captured /bn/about renders Bengali under a
+                       picker reading "English". *@
                     @foreach (var lang in LocalizationService.Languages)
                     {
-                        <option value="@lang.Code">
+                        <option value="@lang.Code"
+                                selected="@(lang.Code == Loc.CurrentLanguage)">
                             @lang.Native
                         </option>
                     }

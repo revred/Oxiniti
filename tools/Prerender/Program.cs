@@ -82,7 +82,6 @@ internal static partial class Program
 
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
-        var page = await browser.NewPageAsync();
 
         var failures = new List<string>();
 
@@ -90,7 +89,7 @@ internal static partial class Program
         {
             try
             {
-                var html = await CaptureAsync(page, server.BaseAddress, route.Path);
+                var html = await CaptureAsync(browser, server.BaseAddress, route.Path);
                 var outputPath = Path.Combine(wwwroot, route.OutputRelPath.Replace('/', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
                 WriteHtmlFile(outputPath, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(html));
@@ -142,9 +141,28 @@ internal static partial class Program
     // Boots the real Blazor app for this route (WASM and all -- the only way
     // to get output that's actually faithful to what the Razor components
     // render, JSON-LD/title/meta included) and captures the settled DOM.
-    private static async Task<string> CaptureAsync(IPage page, string baseAddress, string routePath)
+    private static async Task<string> CaptureAsync(IBrowser browser, string baseAddress, string routePath)
     {
         var url = baseAddress.TrimEnd('/') + routePath;
+
+        // One throwaway browser context -- i.e. one empty localStorage -- per
+        // route, because that is the only visitor these files are ever
+        // rendered for: someone arriving cold at this exact URL.
+        //
+        // The app persists the language picker's choice in localStorage
+        // ("oxyniti-lang"), and LocalizationService.InitializeAsync reads it
+        // back on any *unprefixed* URL: it repaints the page in the saved
+        // language, or -- when LocalizedRoutes says a translated twin is
+        // ready -- redirects to it outright. Sharing one page across every
+        // capture therefore let each locale route poison the ones after it:
+        // /bn/about (the last locale of the first localized slug) left "bn"
+        // in localStorage, so /technology, /aquaculture-oxygenation,
+        // /ras-oxygenation, /products and /faqs were all captured with
+        // Bengali chrome, and /contact was captured as /bn/contact outright
+        // -- English URLs shipping Bengali HTML, which is what a visitor
+        // clicking "Products" from the English homepage actually saw.
+        await using var context = await browser.NewContextAsync();
+        var page = await context.NewPageAsync();
 
         try
         {
@@ -170,9 +188,62 @@ internal static partial class Program
         // fixed settle cost here is the right trade against flakiness.
         await page.WaitForTimeoutAsync(500);
 
+        // Belt-and-braces on the isolation above: a capture that ends up on a
+        // different path than it asked for has rendered someone else's page
+        // into this route's file -- wrong body copy, wrong <html lang>, and a
+        // canonical/hreflang set NormalizeHeadMeta will then happily stamp
+        // with this route's URL. Fail the build instead of shipping it.
+        var landed = new Uri(page.Url).AbsolutePath.TrimEnd('/');
+        var expected = new Uri(url).AbsolutePath.TrimEnd('/');
+        if (!string.Equals(landed, expected, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Capturing '{routePath}' ended up at '{page.Url}' -- refusing to write that page's DOM to this route's file.");
+        }
+
+        // A locale route's body copy arrives as its own fetch
+        // (wwwroot/i18n/{code}.json), and the page only re-renders -- and
+        // only then sets <html lang> -- once it lands. NetworkIdle normally
+        // covers that, but the timeout fallback above does not, and a
+        // capture that settles first writes an ENGLISH body to a Tamil URL:
+        // precisely the hreflang mismatch LocalizedRoutes exists to prevent
+        // (issue #67). Observed flaking one or two locale routes per run
+        // against a cold BusinessInfo API, so wait for the translation to
+        // actually be on the document rather than trusting the settle delay.
+        var expectedLocale = LocaleOf(routePath);
+        if (expectedLocale is not null)
+        {
+            try
+            {
+                await page.WaitForFunctionAsync(
+                    "code => document.documentElement.lang === code",
+                    expectedLocale,
+                    new PageWaitForFunctionOptions { Timeout = 15_000 });
+            }
+            catch (TimeoutException)
+            {
+                var actual = await page.EvaluateAsync<string>("() => document.documentElement.lang");
+                throw new InvalidOperationException(
+                    $"'{routePath}' never applied its '{expectedLocale}' translations (<html lang> was '{actual}') -- refusing to write an untranslated page to a locale URL.");
+            }
+        }
+
         var html = await page.ContentAsync();
         html = StripBlazorLoader(html, routePath);
         return NormalizeHeadMeta(html, routePath);
+    }
+
+    // Mirrors LocalizationService.Languages minus "en" -- the six codes that
+    // are legal URL prefixes. Duplicated here for the same reason
+    // tools/StaticSiteMeta duplicates the ready-locale map: this tool runs
+    // against the published output, not the app's own assemblies.
+    private static readonly string[] LocalePrefixes = ["ta", "kn", "te", "ml", "hi", "bn"];
+
+    /// <summary>The locale a "/ta/about"-shaped route must render in, or null for an unprefixed one.</summary>
+    private static string? LocaleOf(string routePath)
+    {
+        var first = routePath.Trim('/').Split('/')[0];
+        return Array.IndexOf(LocalePrefixes, first) >= 0 ? first : null;
     }
 
     private const string Origin = "https://www.oxyniti.com";

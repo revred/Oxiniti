@@ -19,7 +19,19 @@ namespace Oxyniti.Services;
 /// </para>
 /// <para>
 /// To bring a locale online for a page once its translations land: add the
-/// locale code to that page's set below. No route or component code changes.
+/// locale code to that page's set below, and to the two copies of this map
+/// that can't reference it -- tools/StaticSiteMeta (sitemap + the prerender
+/// route list) and wwwroot/js/marketingIslands.js (the header language
+/// picker on the prerendered, Blazor-free pages). No route or component code
+/// changes.
+/// </para>
+/// <para>
+/// This map is also what the header language picker can offer: a prerendered
+/// marketing page has no Blazor runtime to repaint itself in place, so the
+/// only way it can change language is to navigate to a locale URL that
+/// exists here. A slug missing from this map leaves the picker with nowhere
+/// to go -- see marketingIslands.js, which disables the locales it can't
+/// serve rather than accepting the choice and silently reverting it.
 /// </para>
 /// </summary>
 public static class LocalizedRoutes
@@ -40,14 +52,16 @@ public static class LocalizedRoutes
     /// <summary>slug -> locale codes whose translated content is complete enough to serve.</summary>
     private static readonly Dictionary<string, HashSet<string>> ReadyLocales = new()
     {
+        [""] = ["ta", "te", "kn", "ml", "hi", "bn"],
         ["about"] = ["ta", "te", "kn", "ml", "hi", "bn"],
         ["contact"] = ["ta", "te", "kn", "ml", "hi", "bn"],
+        ["products"] = ["ta", "te", "kn", "ml", "hi", "bn"],
 
-        // Not ready yet -- 0% of the page's own body copy is translated
-        // (shared hero/nav/footer strings don't count). Route exists and
+        // Not ready yet -- 0% of the page's own body copy is translated for
+        // the first three, and faqs has only 2 of its 6 own strings (the Q&A
+        // items are translated, the page header isn't). Route exists and
         // redirects to English until real translations land:
-        //   "", "technology", "aquaculture-oxygenation", "ras-oxygenation",
-        //   "products", "faqs"
+        //   "technology", "aquaculture-oxygenation", "ras-oxygenation", "faqs"
     };
 
     public static bool IsSlugLocalizable(string slug) => Slugs.Contains(slug);

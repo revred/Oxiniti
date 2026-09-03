@@ -21,7 +21,50 @@ namespace Oxyniti.Services
         public string TagLine { get; private set; } = string.Empty;
         public string CopyRightNotice { get; private set; } = $"© {DateTime.Now.Year} {DefaultApplicationName}. All rights reserved.";
         public string SocialMediaLinks { get; private set; } = string.Empty;
-        public string Testimonials { get; private set; } = string.Empty;
+        public string Testimonials { get; private set; } = """
+<div class="testimonials-container">
+    <div class="testimonial-card">
+        <p class="testimonial-quote">நான் ஆக்சிஜனைப் பயன்படுத்த ஆரம்பித்ததில் இருந்து, என் மீன்களின் வளர்ச்சி மிகவும் வேகமாக இருக்கிறது. இரவு நேரங்களில் ஆக்ஸிஜன் பற்றாக்குறை பிரச்சனையே இல்லை.</p>
+        <div class="testimonial-author">
+            <div class="author-avatar"><i class="bi bi-person-fill" style="font-size: 2rem; color: rgba(255, 255, 255, 0.7);"></i></div>
+            <div class="author-info">
+                <span class="author-name">Muthukumar</span>
+                <span class="author-description">Pangasius Farmer, Thanjavur</span>
+            </div>
+        </div>
+    </div>
+    <div class="testimonial-card">
+        <p class="testimonial-quote">Sir, before we had many problem at night. Fish come to top for breathing. Now we installed this machine, morning time fish is very active. Feed is not wasting also. Growth is fast.</p>
+        <div class="testimonial-author">
+            <div class="author-avatar"><i class="bi bi-person-fill" style="font-size: 2rem; color: rgba(255, 255, 255, 0.7);"></i></div>
+            <div class="author-info">
+                <span class="author-name">Venkat Reddy</span>
+                <span class="author-description">Tilapia Farmer, Nellore</span>
+            </div>
+        </div>
+    </div>
+    <div class="testimonial-card">
+        <p class="testimonial-quote">இந்த மிஷின் போட்ட பிறகு மீன்கள் நல்லா சாப்பிடுது. மரண விகிதம் ரொம்ப குறைஞ்சிடுச்சு. மகசூல் நல்லா இருக்கு.</p>
+        <div class="testimonial-author">
+            <div class="author-avatar"><i class="bi bi-person-fill" style="font-size: 2rem; color: rgba(255, 255, 255, 0.7);"></i></div>
+            <div class="author-info">
+                <span class="author-name">Karthikeyan</span>
+                <span class="author-description">Murrel Farmer, Madurai</span>
+            </div>
+        </div>
+    </div>
+    <div class="testimonial-card">
+        <p class="testimonial-quote">Yield is very good this time. Earlier we get only 1.5 ton, now crossing 2 ton easily because oxygen is staying in water. Very happy with the result.</p>
+        <div class="testimonial-author">
+            <div class="author-avatar"><i class="bi bi-person-fill" style="font-size: 2rem; color: rgba(255, 255, 255, 0.7);"></i></div>
+            <div class="author-info">
+                <span class="author-name">Harish</span>
+                <span class="author-description">Fish Farm Owner, Vijayawada</span>
+            </div>
+        </div>
+    </div>
+</div>
+""";
         public DigitalAsset? Asset { get; private set; }
         public IDictionary<string, string> Contents { get; private set; } = new Dictionary<string, string>();
 
@@ -72,7 +115,7 @@ namespace Oxyniti.Services
                 if (!string.IsNullOrWhiteSpace(result.TagLine)) TagLine = result.TagLine;
                 if (!string.IsNullOrWhiteSpace(result.CopyRightNotice)) CopyRightNotice = result.CopyRightNotice;
                 if (!string.IsNullOrWhiteSpace(result.SocialMediaLinks)) SocialMediaLinks = result.SocialMediaLinks;
-                if (!string.IsNullOrWhiteSpace(result.Testimonials)) Testimonials = result.Testimonials;
+                // if (!string.IsNullOrWhiteSpace(result.Testimonials)) Testimonials = result.Testimonials;
                 if (result.Asset != null) Asset = result.Asset;
                 if (result.Contents != null) Contents = result.Contents;
             }

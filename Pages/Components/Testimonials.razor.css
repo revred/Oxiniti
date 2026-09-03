@@ -65,6 +65,10 @@
     overflow: hidden;
     margin-right: 1rem;
     border: 2px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
     ::deep .author-avatar img {

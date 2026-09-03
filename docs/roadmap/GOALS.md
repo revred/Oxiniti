@@ -92,3 +92,30 @@ isn't already a recognized Maker AI user and already logged in.
 **How to apply:** Lower priority than G1–G4 (it extends an already-working
 path rather than fixing something broken), but worth a dedicated epic once the
 core storefront is trustworthy — see [[E5.1]] in EPICS.md.
+
+## G6 — Turn organic + paid search into qualified pond-demo leads
+
+> Source: SEO/growth advisory review, 2026-09-03 — the technical-SEO half of that
+> review (sitemap, robots.txt, prerendering, canonical URLs, hreflang,
+> Organization/Product/Breadcrumb structured data, OpenGraph/Twitter tags) is
+> already solid and is **not** re-scoped here. This goal covers only what the
+> review flagged as missing. The account-level and field-work half of the same
+> review lives in [OWNER_ACTIONS.md](OWNER_ACTIONS.md) under Vivian's name —
+> several stories below are blocked on those actions and vice versa.
+
+**Why:** The site is barely discoverable in search despite the strong technical
+foundation — the review's `site:oxyniti.com` checks didn't reliably surface it.
+The homepage leads with brand slogan ("Infinite Oxygen. Infinite Yield.")
+instead of the buyer-intent language a farmer actually searches, there's no
+low-friction lead offer (every path today asks a visitor to evaluate a capital
+purchase), no case-study content exists to build topical authority, no
+conversion tracking exists to measure the $1/day ad budget, and a
+similarly-named Indian competitor ("Oxynity", note the spelling) competes for
+the same searches.
+
+**How to apply:** Sequence [[E6.1]]–[[E6.4]] (P0/P1, all pure engineering)
+ahead of the paid-search launch in OWNER_ACTIONS.md — the ad campaign has
+nothing to send traffic to or measure until the `/pond-demo` page and
+conversion hooks exist. [[E6.5]]/[[E6.6]] depend on inputs only Vivian can
+supply (real field data, native-language review) and should not block the
+P0/P1 engineering work.

@@ -151,3 +151,69 @@ stories in [STORIES.md](STORIES.md).
   (on `/about` or a new `/enterprise` page) explaining the Maker AI
   integration, distinct from the current logged-in-only dropdown entry in
   `MainLayout.razor`.
+
+## Under E6.1 — Homepage & entity SEO rewrite
+
+- **F6.1.1 — Rewrite homepage `<title>`/H1/subhead for buyer intent**: title
+  `Nano Bubble Generator for Fish Farming & Aquaculture | Oxyniti`, H1
+  `Nano-Bubble Aeration for Fish Ponds`, existing tagline "Infinite Oxygen.
+  Infinite Yield." demoted to a subhead — bring the category clarity already
+  used on `/aquaculture-oxygenation`/`/ras-oxygenation` to the homepage.
+- **F6.1.2 — Consistent entity descriptor across metadata**: append
+  "— Nano-Bubble Aeration Systems for Aquaculture" (or equivalent) to
+  `<title>`/meta description/Organization schema `description` wherever the
+  bare "Oxyniti" name appears, to disambiguate from the similarly-named
+  "Oxynity" competitor.
+
+## Under E6.2 — `/pond-demo` lead-capture funnel
+
+- **F6.2.1 — `/pond-demo` landing page**: dedicated route (not the homepage),
+  headlined "Free Pond Oxygen Test + System Sizing".
+- **F6.2.2 — Lead capture form**: name, phone/WhatsApp, village/location,
+  pond dimensions, fish/shrimp species, stocking density, existing aeration,
+  current problem.
+- **F6.2.3 — Real submission wiring from day one**: share E3.3's fixed
+  contact-submission path (S-3.3.1) once it ships, or wire independently to
+  a real destination — never a decorative form.
+- **F6.2.4 — WhatsApp/call CTAs on the page**, instrumented per E6.4 so each
+  click is a trackable conversion.
+
+## Under E6.3 — Structured-data enrichment
+
+- **F6.3.1 — Expand Product/Offer schema**: `availability`, SKU/MPN (where
+  genuinely applicable), shipping details, return policy — the inputs
+  Merchant Center free listings need (account enrollment itself is a manual
+  action, see OWNER_ACTIONS.md).
+- **F6.3.2 — Enrich Organization/LocalBusiness schema**: `legalName`,
+  physical `address`, `email`, `sameAs` (whichever social accounts are
+  genuinely active), founding info if available. **Blocked on real business
+  data from Vivian** (OWNER_ACTIONS.md) — do not fabricate a legal name or
+  address.
+
+## Under E6.4 — Conversion-tracking scaffolding
+
+- **F6.4.1 — GA4 event hooks**: fire named events for pond-demo form submit,
+  WhatsApp click, call-button click, product enquiry. Code only — the actual
+  GA4 property/Measurement ID is a manual action (OWNER_ACTIONS.md).
+- **F6.4.2 — Google Ads conversion hooks**: same events wired to Ads
+  conversion actions once Vivian supplies real conversion IDs — never
+  hardcode placeholder IDs into a merged build.
+
+## Under E6.5 — Case-study page template
+
+- **F6.5.1 — Reusable case-study page/component**: pond area/depth, water
+  volume, species, stocking density, DO before / after 15 / 30 / 60 min,
+  equipment model, power consumption, farmer comment, photo(s), short video
+  embed. Ships empty/templated — first real entries depend on
+  OWNER_ACTIONS.md field visits.
+- **F6.5.2 — Case-study index page**, replacing/extending the current bare
+  `/blogs` "Coming Soon" stub once at least one real case study exists.
+
+## Under E6.6 — Localise the money pages
+
+- **F6.6.1 — Tamil draft translation** of homepage, `/aquaculture-oxygenation`,
+  `/products`, product pages, `/pond-demo`, 2–3 case studies. AI-assisted
+  first pass only — **not to be published without native-speaker review**
+  (OWNER_ACTIONS.md).
+- **F6.6.2 — Telugu draft translation**, same page set, sequenced after
+  Tamil per the advisory's rollout order.

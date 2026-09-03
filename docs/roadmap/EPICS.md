@@ -91,3 +91,42 @@ dropdown for accounts already flagged `IsMakerAIUser`. Add a discoverable
 "Enterprise / MES customers" entry point (e.g. on `/about` or a dedicated
 `/enterprise` page) so prospective business customers can find this path
 before they're already a recognized account.
+
+## Under G6 — Turn organic + paid search into qualified pond-demo leads
+
+### E6.1 — Homepage & entity SEO rewrite (P0)
+Homepage `<title>`/H1 lead with the brand slogan rather than the buyer-intent
+terms farmers actually search ("nano bubble generator", "fish farming",
+"aquaculture"). A similarly-named Indian competitor ("Oxynity") means Oxyniti
+also needs a consistent category descriptor doing double duty as entity
+disambiguation, not just SEO.
+
+### E6.2 — `/pond-demo` lead-capture funnel (P0)
+No low-friction lead offer exists — every page today asks a visitor to
+evaluate a capital purchase outright. This is the page the paid-search
+campaign (OWNER_ACTIONS.md) sends traffic to; it doesn't exist yet. **Must
+not repeat E3.3's `Contact.razor` failure** (`// TODO: wire up email or API
+call`, `Console.WriteLine`-only submission) — share E3.3's fix once shipped,
+or wire independently to a real destination from the start.
+
+### E6.3 — Structured-data enrichment for Merchant Center & disambiguation (P1)
+Product/Offer schema needs `availability`, SKU/MPN, shipping and return-policy
+fields before Merchant Center free listings are viable. Organization/
+LocalBusiness schema needs `legalName`, `address`, `email`, `sameAs` — the
+exact signals that disambiguate Oxyniti from "Oxynity" in search.
+
+### E6.4 — Conversion-tracking scaffolding (P1)
+No GA4/Ads event tracking exists anywhere in the codebase today. Without it,
+the "cost per qualified pond" measurement the advisory recommends has nothing
+to attach to, however well the $1/day campaign is targeted.
+
+### E6.5 — Case-study page template (P1)
+`/blogs` exists only as a bare "Coming Soon" stub (E1.1). Real field data
+(DO before/after, species, stocking density per installation) needs a
+repeatable page structure — this epic is the template only; real content
+depends on the field visits in OWNER_ACTIONS.md.
+
+### E6.6 — Localise the money pages: Tamil, then Telugu (P2)
+Localized-route infrastructure already exists for 7 languages, but the pages
+that actually drive a sale aren't translated — a local-language searcher
+today lands on a translated nav shell wrapped around English sales copy.

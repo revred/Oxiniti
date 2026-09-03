@@ -449,3 +449,185 @@ can evaluate it as part of my purchase decision.
         Maker AI integration path.
   - [ ] Existing gated SSO behavior for recognized `IsMakerAIUser` accounts
         is unchanged.
+
+---
+
+## E6.1 — Homepage & entity SEO rewrite
+
+### S-6.1.1 — Homepage title/H1/subhead rewritten for buyer intent (P0, XS)
+**As** a farmer searching "nano bubble generator for fish farming", **I
+want** the homepage to speak that language, **so that** I recognize this as
+the site I was looking for.
+- Touches: `Pages/Home.razor` `PageTitle`/H1, `wwwroot/index.html` `<title>`.
+- Acceptance:
+  - [ ] `<title>`/`PageTitle` reads
+        `Nano Bubble Generator for Fish Farming & Aquaculture | Oxyniti`.
+  - [ ] H1 reads `Nano-Bubble Aeration for Fish Ponds`, with "Infinite
+        Oxygen. Infinite Yield." kept as a subhead beneath it, not removed.
+  - [ ] Vivian has approved the copy before merge (brand-voice call, not a
+        mechanical fix — see OWNER_ACTIONS.md item 3).
+
+### S-6.1.2 — Entity descriptor added across metadata (P1, XS)
+**As** someone searching for Oxyniti, **I want** search results to clearly
+distinguish it from the similarly-named "Oxynity", **so that** I land on the
+right company.
+- Touches: `wwwroot/index.html` meta description, Organization schema
+  `description` field, homepage subhead (shares S-6.1.1's copy slot).
+- Acceptance:
+  - [ ] "Nano-Bubble Aeration Systems for Aquaculture" (or equivalent)
+        appears alongside the bare "Oxyniti" name in `<title>`/meta
+        description/Organization schema — not relying on the brand name
+        alone anywhere it matters for search.
+
+---
+
+## E6.2 — `/pond-demo` lead-capture funnel
+
+### S-6.2.1 — `/pond-demo` page exists with a lead form (P0, M)
+**As** a farmer who clicked a paid-search ad, **I want** a simple page
+offering a free pond test, **so that** I can request one without committing
+to a purchase.
+- Touches: new `Pages/PondDemo.razor` (`/pond-demo`).
+- Acceptance:
+  - [ ] Headline reads "Free Pond Oxygen Test + System Sizing" (or approved
+        equivalent).
+  - [ ] Form captures name, phone/WhatsApp, village/location, pond
+        dimensions, species, stocking density, existing aeration, current
+        problem.
+  - [ ] Page has its own `PageTitle`/meta description distinct from the
+        homepage.
+
+### S-6.2.2 — Form submits to a real destination, not a console log (P0, S — depends on E3.3)
+**As** a farmer submitting the pond-demo form, **I want** my request to
+actually reach Oxyniti, **so that** it isn't silently discarded the way
+`Contact.razor`'s submissions are today.
+- Touches: `Pages/PondDemo.razor` — share S-3.3.1's fixed submission path
+  once it ships; if E3.3 hasn't landed yet, wire this form to a real
+  destination independently rather than waiting.
+- Acceptance:
+  - [ ] Submitting the form delivers the lead somewhere real (email/CRM/
+        backend endpoint — whichever E3.3 resolves to).
+  - [ ] Visible success/failure feedback, matching the
+        `success-message`/`error-message` pattern used in `Login.razor`.
+  - [ ] **This story does not ship with a placeholder/console-only handler
+        under any circumstances** — that exact bug already exists once in
+        this codebase (S-3.3.1) and must not be repeated.
+
+### S-6.2.3 — WhatsApp/call CTAs are present and click-trackable (P0, S — depends on E6.4)
+**As** a farmer who'd rather message than fill a form, **I want** direct
+WhatsApp/call buttons on `/pond-demo`, **so that** I can reach Oxyniti the
+way I prefer.
+- Touches: `Pages/PondDemo.razor`; event hooks from F6.4.1.
+- Acceptance:
+  - [ ] WhatsApp deep link and tel: link both present and functional.
+  - [ ] Each click fires the GA4 event from S-6.4.1 (or a documented
+        placeholder event name if S-6.4.1 hasn't landed yet).
+
+---
+
+## E6.3 — Structured-data enrichment
+
+### S-6.3.1 — Product/Offer schema carries Merchant-Center-ready fields (P1, S)
+**As** Google Merchant Center evaluating Oxyniti's feed, **I want**
+complete Offer data, **so that** the products are eligible for free
+listings.
+- Touches: wherever Product/Offer JSON-LD is currently emitted (per the
+  advisory, product pages already have basic Product/Offer schema — locate
+  and extend it rather than adding a second schema block).
+- Acceptance:
+  - [ ] `availability`, shipping details, and return policy are present on
+        every product's Offer schema.
+  - [ ] SKU/MPN added only where a genuine value exists — never invented.
+
+### S-6.3.2 — Organization schema carries real entity data (P1, S — blocked on data from Vivian)
+**As** Google trying to disambiguate Oxyniti from "Oxynity", **I want**
+concrete entity signals, **so that** search correctly attributes results to
+the right company.
+- Touches: existing Organization/LocalBusiness JSON-LD block.
+- Acceptance:
+  - [ ] `legalName`, `address`, `email`, `sameAs` populated with real values
+        supplied by Vivian (OWNER_ACTIONS.md item 6) — **do not fabricate
+        any of these fields**; if a value doesn't exist yet, omit the
+        property rather than inventing one.
+
+---
+
+## E6.4 — Conversion-tracking scaffolding
+
+### S-6.4.1 — GA4 events fire for the four key actions (P1, S)
+**As** whoever is running the $1/day Ads campaign, **I want** pond-demo
+submits, WhatsApp clicks, call clicks, and product enquiries tracked, **so
+that** cost-per-qualified-pond is measurable at all.
+- Touches: `wwwroot/index.html` (gtag.js include), new small JS/C# event-
+  firing helper called from `Pages/PondDemo.razor`, `Pages/Contact.razor`,
+  product enquiry paths.
+- Acceptance:
+  - [ ] Four named events fire on the four actions above.
+  - [ ] GA4 Measurement ID is read from config, not hardcoded — real ID
+        supplied by Vivian once a GA4 property exists (OWNER_ACTIONS.md);
+        code works with a placeholder/env-gated ID until then.
+
+### S-6.4.2 — Ads conversion events wired once IDs exist (P2, XS — blocked on Vivian's Ads account)
+**As** the Ads campaign, **I want** the same four actions counted as
+conversions, **so that** Google can optimize toward qualified leads.
+- Touches: same event-firing helper as S-6.4.1, extended with an Ads
+  conversion-ID call alongside the GA4 event.
+- Acceptance:
+  - [ ] Each event also fires an Ads conversion call once Vivian supplies
+        real conversion action IDs.
+  - [ ] No placeholder Ads conversion ID is ever merged as if it were real.
+
+---
+
+## E6.5 — Case-study page template
+
+### S-6.5.1 — Case-study page template renders from structured data (P1, M)
+**As** a farmer researching whether Oxyniti works for ponds like mine, **I
+want** to read real field results, **so that** I trust the product before
+requesting a demo.
+- Touches: new `Pages/CaseStudy.razor` (or similar) taking a data record
+  with the fields listed in F6.5.1; no real content yet — this story is the
+  template only.
+- Acceptance:
+  - [ ] Renders pond area/depth, water volume, species, stocking density, DO
+        before/after at 15/30/60 min, equipment model, power consumption,
+        farmer comment, photo(s), and an optional video embed.
+  - [ ] Works with a single placeholder/sample record for review before any
+        real case study is entered.
+
+### S-6.5.2 — Case-study index replaces the `/blogs` stub (P1, S — depends on ≥1 real case study)
+**As** a visitor, **I want** a list of Oxyniti's real field results, **so
+that** I can browse proof points instead of hitting the current "Coming
+Soon" stub.
+- Touches: `/blogs` route (currently `ComingSoon.razor` per E1.1).
+- Acceptance:
+  - [ ] `/blogs` lists real case studies once at least one exists (do not
+        ship this story with zero real entries — leave the `ComingSoon`
+        stub in place until then).
+
+---
+
+## E6.6 — Localise the money pages
+
+### S-6.6.1 — Tamil draft of the six money pages, flagged unreviewed (P2, M)
+**As** a Tamil-speaking farmer, **I want** a Tamil sales page, not just a
+translated nav shell, **so that** I can actually evaluate the product in my
+language.
+- Touches: existing localized-route infrastructure; homepage,
+  `/aquaculture-oxygenation`, `/products`, product pages, `/pond-demo`, 2–3
+  case studies.
+- Acceptance:
+  - [ ] All six page types have a Tamil draft in the existing localization
+        system.
+  - [ ] Draft is clearly marked unreviewed/pending native-speaker sign-off
+        (OWNER_ACTIONS.md item 7) and **not linked from primary navigation
+        until reviewed**.
+
+### S-6.6.2 — Telugu draft, same page set (P2, M — sequenced after Tamil)
+**As** a Telugu-speaking farmer, **I want** the same real sales pages in
+Telugu, **so that** I get the same experience Tamil speakers do.
+- Touches: same page set as S-6.6.1.
+- Acceptance:
+  - [ ] Starts only after S-6.6.1 ships and Vivian confirms geography
+        warrants it (per the advisory's rollout order).
+  - [ ] Same unreviewed-until-signed-off treatment as S-6.6.1.

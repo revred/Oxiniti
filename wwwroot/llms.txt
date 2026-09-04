@@ -30,7 +30,7 @@ A: Oxyniti is currently serving Tamil Nadu and South India.
 - [Homepage](https://www.oxyniti.com/): Overview, profit calculator, and full FAQ.
 - [Technology](https://www.oxyniti.com/technology): How nano-bubble oxygenation works.
 - [Aquaculture Oxygenation](https://www.oxyniti.com/aquaculture-oxygenation): Oxygenation for fish ponds.
-- [RAS Oxygenation](https://www.oxyniti.com/ras-oxygenation): Oxygenation for recirculating aquaculture and biofloc systems.
+- [Advanced Aquaculture Systems](https://www.oxyniti.com/ras-oxygenation): Oxygenation for advanced aquaculture systems — recirculating aquaculture (RAS) and biofloc.
 - [Products](https://www.oxyniti.com/products): Nano-bubble generator product range (live catalog).
 - [About](https://www.oxyniti.com/about): Company background.
 

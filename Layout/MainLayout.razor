@@ -319,18 +319,13 @@
 
         var slug = LocalizationService.StripLocalePrefix(Nav.ToBaseRelativePath(Nav.Uri));
 
-        // A translated URL exists for this page in the chosen language (or
-        // the visitor is switching back to English on one): send them there
-        // -- the URL is the source of truth, issue #67 -- rather than
-        // repainting in place. Everywhere else -- pages with no locale route
-        // at all -- keep the pre-#67 in-place switch.
-        var targetHasUrl = code == "en" || LocalizedRoutes.IsReady(slug, code);
-        if (targetHasUrl && LocalizedRoutes.IsSlugLocalizable(slug))
-        {
-            Nav.NavigateTo(LocalizationService.BuildLocalizedPath(slug, code));
-            return;
-        }
-
+        // The service is updated on EVERY path, including the URL one. Landing
+        // on an unprefixed "/about" is not self-describing the way "/ta/about"
+        // is: ResolveRouteLocale answers RenderDefault there and no page acts
+        // on it, so a switch back to English used to navigate without ever
+        // clearing CurrentLanguage -- leaving the header, the footer and every
+        // page without a locale route still rendering the previous language,
+        // and localStorage still holding it for the next visit.
         await Loc.SetLanguageAsync(code);
 
         try
@@ -340,6 +335,17 @@
         catch (Exception ex)
         {
             Console.WriteLine($"[MainLayout] Error syncing html lang attribute: {ex}");
+        }
+
+        // A translated URL exists for this page in the chosen language (or
+        // the visitor is switching back to English on one): send them there
+        // -- the URL is the source of truth, issue #67. Everywhere else --
+        // pages with no locale route at all -- the in-place switch above is
+        // the whole change.
+        var targetHasUrl = code == "en" || LocalizedRoutes.IsReady(slug, code);
+        if (targetHasUrl && LocalizedRoutes.IsSlugLocalizable(slug))
+        {
+            Nav.NavigateTo(LocalizationService.BuildLocalizedPath(slug, code));
         }
     }
 

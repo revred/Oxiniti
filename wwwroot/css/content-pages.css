@@ -302,3 +302,133 @@
         justify-content: center;
     }
 }
+
+/* =========================================================
+   COMPANY PAGES (About, Contact, Privacy, Terms)
+   Same navy/teal/cyan tokens as above; these add the few
+   primitives those four pages need on top of the hero+body.
+   ========================================================= */
+
+/* Proof figures. Lifted into the hero so the page opens on
+   evidence rather than on a bare paragraph. */
+.cp-stats {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2.5rem;
+}
+
+.cp-body > .cp-stats:first-child {
+    margin-top: -4.75rem;
+}
+
+.cp-stat {
+    background: #fff;
+    border: 1px solid #e7ebf0;
+    border-radius: 1rem;
+    padding: 1.35rem 1.5rem;
+    box-shadow: 0 14px 34px -20px rgba(11, 31, 51, 0.55);
+}
+
+.cp-stat-n {
+    display: block;
+    color: #1A2C54;
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+}
+
+.cp-stat-l {
+    display: block;
+    margin-top: 0.35rem;
+    color: #5a6b7d;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Advisory notice — used for the pending-legal-review banner. */
+.cp-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    background: linear-gradient(160deg, #FFFBF0 0%, #FDF3DC 100%);
+    border: 1px solid rgba(191, 141, 26, 0.26);
+    border-left: 3px solid #E0A526;
+    border-radius: 0.9rem;
+    padding: 1.1rem 1.35rem;
+    margin-bottom: 2.25rem;
+}
+
+.cp-notice i {
+    flex-shrink: 0;
+    color: #C98A16;
+    font-size: 1.2rem;
+    line-height: 1.45;
+}
+
+.cp-notice strong {
+    display: block;
+    color: #4A3607;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+}
+
+.cp-notice p {
+    margin: 0;
+    color: #6B5320;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Legal clauses get a quiet numeral so long documents stay navigable. */
+.cp-legal {
+    counter-reset: cp-clause;
+}
+
+.cp-legal .cp-section h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.cp-legal .cp-section h2::before {
+    counter-increment: cp-clause;
+    content: counter(cp-clause, decimal-leading-zero);
+    flex-shrink: 0;
+    color: #3D8FB5;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+}
+
+.cp-legal .cp-section p a {
+    color: #2b6f92;
+    font-weight: 600;
+    text-underline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+    .cp-body > .cp-stats:first-child {
+        margin-top: 0;
+    }
+
+    .cp-stat {
+        padding: 1.15rem 1.25rem;
+    }
+
+    .cp-stat-n {
+        font-size: 1.6rem;
+    }
+}

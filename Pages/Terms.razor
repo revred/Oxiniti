@@ -8,37 +8,54 @@
     <link rel="canonical" href="https://www.oxyniti.com/terms" />
 </HeadContent>
 
-<h2 class="section-title">@Loc.T("terms.title", "Terms & Conditions")</h2>
+<section class="cp-hero">
+    <div class="cp-hero-inner">
+        <span class="cp-kicker">@Loc.T("terms.kicker", "Legal")</span>
+        <h1 class="cp-title">@Loc.T("terms.title", "Terms & Conditions")</h1>
+        <p class="cp-lead">
+            @Loc.T("terms.lead", "The terms that apply when you browse this site or buy an Oxyniti system.")
+        </p>
+    </div>
+</section>
 
-<div class="content-section">
-    <p class="text-muted">
-        <em>@string.Format(Loc.T("terms.disclaimer", "Draft placeholder — pending final legal review and sign-off by {0} before this page is treated as binding."), InfoService.ApplicationName)</em>
-    </p>
+<div class="cp-body cp-legal">
+    <div class="cp-notice">
+        <i class="bi bi-exclamation-circle"></i>
+        <div>
+            <strong>@Loc.T("legal.notice.label", "Draft document")</strong>
+            <p>@string.Format(Loc.T("terms.disclaimer", "Draft placeholder — pending final legal review and sign-off by {0} before this page is treated as binding."), InfoService.ApplicationName)</p>
+        </div>
+    </div>
 
-    <h5>@Loc.T("terms.use_title", "Use of this site")</h5>
-    <p>
-        @Loc.T("terms.use_body", "By browsing or purchasing through this site you agree to use it only for lawful purposes and in accordance with these terms.")
-    </p>
+    <div class="cp-section">
+        <h2>@Loc.T("terms.use_title", "Use of this site")</h2>
+        <p>@Loc.T("terms.use_body", "By browsing or purchasing through this site you agree to use it only for lawful purposes and in accordance with these terms.")</p>
+    </div>
 
-    <h5>@Loc.T("terms.orders_title", "Orders and pricing")</h5>
-    <p>
-        @Loc.T("terms.orders_body", "Product prices and availability are subject to change without notice. We reserve the right to refuse or cancel any order for any reason, including pricing errors or suspected fraud.")
-    </p>
+    <div class="cp-section">
+        <h2>@Loc.T("terms.orders_title", "Orders and pricing")</h2>
+        <p>@Loc.T("terms.orders_body", "Product prices and availability are subject to change without notice. We reserve the right to refuse or cancel any order for any reason, including pricing errors or suspected fraud.")</p>
+    </div>
 
-    <h5>@Loc.T("terms.ip_title", "Intellectual property")</h5>
-    <p>
-        @string.Format(Loc.T("terms.ip_body", "All content on this site, including product designs, images, and text, is the property of {0} and may not be reproduced without permission."), InfoService.ApplicationName)
-    </p>
+    <div class="cp-section">
+        <h2>@Loc.T("terms.ip_title", "Intellectual property")</h2>
+        <p>@string.Format(Loc.T("terms.ip_body", "All content on this site, including product designs, images, and text, is the property of {0} and may not be reproduced without permission."), InfoService.ApplicationName)</p>
+    </div>
 
-    <h5>@Loc.T("terms.liability_title", "Limitation of liability")</h5>
-    <p>
-        @string.Format(Loc.T("terms.liability_body", "{0} is not liable for indirect, incidental, or consequential damages arising from the use of this site or its products, to the extent permitted by applicable law."), InfoService.ApplicationName)
-    </p>
+    <div class="cp-section">
+        <h2>@Loc.T("terms.liability_title", "Limitation of liability")</h2>
+        <p>@string.Format(Loc.T("terms.liability_body", "{0} is not liable for indirect, incidental, or consequential damages arising from the use of this site or its products, to the extent permitted by applicable law."), InfoService.ApplicationName)</p>
+    </div>
 
-    <h5>@Loc.T("terms.contact_title", "Contact")</h5>
-    <p>
-        @((MarkupString)Loc.T("terms.contact_body", "Questions about these terms can be sent through our <a href=\"/contact\">Contact page</a>."))
-    </p>
+    <div class="cp-section">
+        <h2>@Loc.T("terms.contact_title", "Contact")</h2>
+        <p>@((MarkupString)Loc.T("terms.contact_body", "Questions about these terms can be sent through our <a href=\"/contact\">Contact page</a>."))</p>
+    </div>
+
+    <div class="cp-links-row">
+        <a href="/privacy"><i class="bi bi-shield-check"></i>@Loc.T("legal.link.privacy", "Privacy Policy")</a>
+        <a href="/contact"><i class="bi bi-envelope"></i>@Loc.T("legal.link.contact", "Contact us")</a>
+    </div>
 </div>
 
 @code {

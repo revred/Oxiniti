@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- The site ships its own translations for seven languages and sets
+         <html lang> to match, which is exactly what makes Chrome offer to
+         machine-translate a locale page (e.g. /ta) back to the visitor's
+         browser language. That offer replaces professionally written copy
+         with a rough rendering -- "pond" came back as "pool", the brand
+         name as "Oxynity". Suppress it; the language picker in the header
+         is how visitors change language here. -->
+    <meta name="google" content="notranslate" />
     <title>Oxyniti</title>
     <meta name="description" content="Oxyniti nano-bubble generators supercharge dissolved oxygen in fish ponds — healthier fish, faster growth, higher yield." />
     <meta name="theme-color" content="#0B1F33" />

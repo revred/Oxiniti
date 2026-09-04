@@ -5,6 +5,14 @@
 // translation as a styled floating tooltip -- no CMS field, no API key.
 window.testimonialHoverTranslate = window.testimonialHoverTranslate || (function () {
     const translationCache = new Map();
+
+    // Membership lives in memory, never in the DOM. tools/Prerender captures
+    // the live DOM *after* this script has run, so a data-attribute guard
+    // shipped inside the static HTML: every quote arrived already flagged as
+    // wired, wireElement bailed on the first line, and no listener was ever
+    // attached -- the hover translation was dead on the prerendered pages
+    // while working locally, where Blazor renders the markup fresh.
+    const wiredElements = new WeakSet();
     let tooltipEl = null;
     let stylesInjected = false;
 
@@ -155,8 +163,8 @@ window.testimonialHoverTranslate = window.testimonialHoverTranslate || (function
     }
 
     function wireElement(el) {
-        if (el.dataset.ttWired) return;
-        el.dataset.ttWired = "true";
+        if (wiredElements.has(el)) return;
+        wiredElements.add(el);
 
         const original = el.textContent.trim();
         if (!original || !looksNonLatin(original)) return;

@@ -18,15 +18,52 @@
     <meta name="description" content="@Loc.T("about.meta", "Oxyniti designs and manufactures nano-bubble aeration systems for aquaculture, wastewater treatment and hydroponics, with 100+ installations across India.")" />
 </HeadContent>
 
-<h2 class="section-title">@Loc.T("about.title", "About") @InfoService.ApplicationName</h2>
+<section class="cp-hero">
+    <div class="cp-hero-inner">
+        <span class="cp-kicker">@Loc.T("nav.about", "About")</span>
+        <h1 class="cp-title">@Loc.T("about.title", "About") @InfoService.ApplicationName</h1>
+        <p class="cp-lead">
+            @Loc.T("about.lead", "We design and build nano-bubble oxygenation systems in India — engineered in stainless steel, sized to the site, and proven on working farms.")
+        </p>
+    </div>
+</section>
 
-<div class="content-section">
-    <p>
-        @Loc.T("about.p1", "Oxyniti designs and manufactures high-efficiency nanobubble generators for aquaculture, wastewater treatment, and hydroponics. Built with robust stainless-steel engineering, our systems deliver superior oxygen dissolution, low maintenance, and long-term reliability.")
-    </p>
-    <p>
-        @Loc.T("about.p2", "With 100+ installations across India, we provide scalable, energy-efficient oxygenation solutions that enhance water quality and support sustainable operations.")
-    </p>
+<div class="cp-body">
+    <ul class="cp-stats">
+        <li class="cp-stat">
+            <span class="cp-stat-n">100+</span>
+            <span class="cp-stat-l">@Loc.T("about.stat1.l", "Installations across India")</span>
+        </li>
+        <li class="cp-stat">
+            <span class="cp-stat-n">&lt;200 nm</span>
+            <span class="cp-stat-l">@Loc.T("about.stat2.l", "Nano-bubble size")</span>
+        </li>
+        <li class="cp-stat">
+            <span class="cp-stat-n">3</span>
+            <span class="cp-stat-l">@Loc.T("about.stat3.l", "Sectors served")</span>
+        </li>
+    </ul>
+
+    <div class="cp-section">
+        <h2>@Loc.T("about.build.h", "What we build")</h2>
+        <p>@Loc.T("about.p1", "Oxyniti designs and manufactures high-efficiency nanobubble generators for aquaculture, wastewater treatment, and hydroponics. Built with robust stainless-steel engineering, our systems deliver superior oxygen dissolution, low maintenance, and long-term reliability.")</p>
+    </div>
+
+    <div class="cp-callout">
+        <h2>@Loc.T("about.reach.h", "Proven across India")</h2>
+        <p>@Loc.T("about.p2", "With 100+ installations across India, we provide scalable, energy-efficient oxygenation solutions that enhance water quality and support sustainable operations.")</p>
+    </div>
+
+    <div class="cp-cta">
+        <p>@Loc.T("about.cta", "Tell us about your pond or facility and we'll help size a system.")</p>
+        <a class="cp-cta-btn" href="/contact">@Loc.T("nav.contact", "Contact")<i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="cp-links-row">
+        <a href="/technology"><i class="bi bi-lightning-charge"></i>@Loc.T("nav.tech", "Technology")</a>
+        <a href="/aquaculture-oxygenation"><i class="bi bi-water"></i>@Loc.T("nav.aqox", "Aquaculture Oxygenation")</a>
+        <a href="/products"><i class="bi bi-box-seam"></i>@Loc.T("nav.products", "Products")</a>
+    </div>
 </div>
 
 @code {

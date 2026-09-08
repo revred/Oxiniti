@@ -6,26 +6,14 @@
    navy #1A2C54 / #0B1F33, teal #3D8FB5, cyan accent #2de0e5.
    ========================================================= */
 
-/* Same treatment as the homepage hero (Pages/Components/Hero.razor.css):
-   the pond poster under the teal-to-navy overlay at 82 % -- so every
-   page opens on the one look the site leads with, rather than a second,
-   navy-only palette. Kept as background layers (no extra elements): the
-   overlay's rgba stops are the hero's #3D8FB5 -> #0B1F33 at its opacity. */
+/* The homepage hero's colours (Pages/Components/Hero.razor.css
+   .gradient-overlay: #3D8FB5 -> #0B1F33, top to bottom), so every page
+   opens on the one palette the site leads with rather than a second,
+   navy-only one. Colour only -- no imagery -- by request. */
 .cp-hero {
     position: relative;
     overflow: hidden;
-    background-color: #0B1F33;
-    background-image:
-        linear-gradient(180deg, rgba(61, 143, 181, 0.82) 0%, rgba(11, 31, 51, 0.82) 100%),
-        url("/images/hero-poster-wide.jpg");
-    background-image:
-        linear-gradient(180deg, rgba(61, 143, 181, 0.82) 0%, rgba(11, 31, 51, 0.82) 100%),
-        image-set(
-            url("/images/hero-poster-wide.avif") type("image/avif"),
-            url("/images/hero-poster-wide.jpg") type("image/jpeg"));
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
+    background: linear-gradient(180deg, #3D8FB5 0%, #0B1F33 100%);
     color: #fff;
     padding: 3.5rem 1.5rem 3.25rem;
     margin-bottom: 3rem;

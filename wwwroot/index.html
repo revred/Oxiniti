@@ -56,8 +56,8 @@
          hero for the second or two Blazor takes to boot. Runs in <head>,
          before the body is parsed, so the wrong shell never paints: on any
          path that is not the home route the hero and the homepage copy are
-         hidden (app.css: html.shell-app-route) and a neutral loading state
-         shows instead. Locale roots (/ta, /hi, ...) are home routes too. -->
+         hidden (app.css: html.shell-app-route), leaving only the header band
+         and the top progress line. Locale roots (/ta, /hi, ...) are home. -->
     <script>
         (function () {
             var p = location.pathname.replace(/\/index\.html$/, "").replace(/\/+$/, "");
@@ -121,12 +121,6 @@
              invisible, and a transition would just be another way for a
              stuck element to hide the site. -->
         <div class="shell-header-spacer" aria-hidden="true"></div>
-
-        <!-- What app routes see while Blazor boots (see the <head> script). -->
-        <div class="shell-route-loading" aria-hidden="true">
-            <span class="shell-route-loading-brand">Oxyniti</span>
-            <span class="shell-route-loading-text">Loading&hellip;</span>
-        </div>
 
         <div class="shell-hero-wrap">
             <div class="shell-hero-container">

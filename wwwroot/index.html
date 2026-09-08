@@ -49,6 +49,23 @@
          delay first paint. -->
     <link rel="stylesheet" href="app.css" />
 
+    <!-- The pre-boot shell below is a clone of the HOMEPAGE hero, but this
+         same file also serves every app route (/products, /cart, /account,
+         ...) via app-shell.html and staticwebapp.config.json's
+         navigationFallback -- so clicking "Products" showed the homepage
+         hero for the second or two Blazor takes to boot. Runs in <head>,
+         before the body is parsed, so the wrong shell never paints: on any
+         path that is not the home route the hero and the homepage copy are
+         hidden (app.css: html.shell-app-route) and a neutral loading state
+         shows instead. Locale roots (/ta, /hi, ...) are home routes too. -->
+    <script>
+        (function () {
+            var p = location.pathname.replace(/\/index\.html$/, "").replace(/\/+$/, "");
+            if (p === "" || /^\/(ta|te|kn|ml|hi|bn)$/.test(p)) return;
+            document.documentElement.classList.add("shell-app-route");
+        })();
+    </script>
+
     <!-- The other four stylesheets (~450KB combined: bootstrap.min.css,
          bootstrap-icons.min.css, content-pages.css, and the ~100KB Blazor
          scoped-CSS bundle) are not needed by the shell and were previously
@@ -104,6 +121,13 @@
              invisible, and a transition would just be another way for a
              stuck element to hide the site. -->
         <div class="shell-header-spacer" aria-hidden="true"></div>
+
+        <!-- What app routes see while Blazor boots (see the <head> script). -->
+        <div class="shell-route-loading" aria-hidden="true">
+            <span class="shell-route-loading-brand">Oxyniti</span>
+            <span class="shell-route-loading-text">Loading&hellip;</span>
+        </div>
+
         <div class="shell-hero-wrap">
             <div class="shell-hero-container">
                 <img src="/images/hero-poster-wide.avif" width="1280" height="720" fetchpriority="high" decoding="async" alt="" class="shell-hero-poster" />

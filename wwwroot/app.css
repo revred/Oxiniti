@@ -403,6 +403,40 @@ code {
     animation: shellBarPulse 1.2s ease-in-out infinite;
 }
 
+/* App routes (/products, /cart, ...) are served by the same shell via
+   app-shell.html. The <head> script in index.html tags <html> with
+   .shell-app-route on any non-home path, and these rules swap the
+   homepage hero + copy for a neutral loading state until Blazor boots. */
+html.shell-app-route .shell-hero-wrap,
+html.shell-app-route .static-shell {
+    display: none;
+}
+
+.shell-route-loading {
+    display: none;
+}
+
+html.shell-app-route .shell-route-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 60vh;
+    color: #1A2C54;
+}
+
+.shell-route-loading-brand {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.shell-route-loading-text {
+    font-size: 0.95rem;
+    color: #6B7A8F;
+}
+
 @keyframes shellBarPulse {
     0%, 100% {
         opacity: 0.35;

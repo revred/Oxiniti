@@ -1,91 +1,101 @@
-@using Microsoft.JSInterop
-@implements IAsyncDisposable
-@inject IJSRuntime JS
 @inject LocalizationService Loc
+@implements IDisposable
 
 <div class="sky-view-section" id="sky-view">
-    <span class="kicker">@Loc.T("sky.kicker", "See it from the sky")</span>
-    <h2 class="section-title">@Loc.T("sky.h2", "Watch a pond come alive — from the sky.")</h2>
-    <p class="section-lead">
-        @Loc.T("sky.p", "Real footage from a live Oxyniti trial. Two units, one working pond — the milky plumes you see are pure oxygen going into solution.")
-    </p>
+    <div class="sky-grid">
+        <div class="sky-copy">
+            <span class="kicker">@Loc.T("sky.kicker", "See it from the sky")</span>
+            <h2 class="section-title">@Loc.T("sky.h2", "Watch a pond come alive")<span class="title-stop">.</span></h2>
+            <p class="section-lead">
+                @Loc.T("sky.p", "Real footage from a live Oxyniti trial. Two units, one working pond — the milky plumes you see are pure oxygen going into solution.")
+            </p>
 
-    <div class="drone-stage">
-        <canvas @ref="_backdropCanvas" class="drone-stage-backdrop" aria-hidden="true"></canvas>
-        <video @ref="_videoElement"
-               class="drone-stage-video"
-               muted
-               loop
-               playsinline
-               preload="none"
-               poster="/images/drone-poster.jpg"
-               data-video-init="drone-stage">
-            <source data-src="/videos/drone.webm" type="video/webm" />
-            <source data-src="/videos/drone.mp4" type="video/mp4" />
-        </video>
-        <div class="drone-stage-grade" aria-hidden="true"></div>
-        <div class="rec-badge"><i></i><span>@Loc.T("sky.rec", "DRONE · LIVE TRIAL")</span></div>
-        <div class="hud-chips">
-            <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c1", "Unit 1 · nano-plume active")</div>
-            <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c2", "DO rising across pond")</div>
-            <div class="hud-chip"><span class="dot"></span>@Loc.T("sky.c3", "Field trial · South India")</div>
+            @* What the clip shows, read as three instrument readings. *@
+            <dl class="sky-readout">
+                <div class="readout-row">
+                    <dt><span class="readout-dot"></span>@Loc.T("sky.l1", "In frame")</dt>
+                    <dd>@Loc.T("sky.c1", "Unit 1 · nano-plume active")</dd>
+                </div>
+                <div class="readout-row is-live">
+                    <dt><span class="readout-dot"></span>@Loc.T("sky.l2", "Measured")</dt>
+                    <dd>
+                        @Loc.T("sky.c2", "DO rising across pond")
+                        <svg class="trend" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 19V5M6 11l6-6 6 6" />
+                        </svg>
+                    </dd>
+                </div>
+                <div class="readout-row">
+                    <dt><span class="readout-dot"></span>@Loc.T("sky.l3", "Site")</dt>
+                    <dd>@Loc.T("sky.site", "Aquaculture pond · 1.2 ha")</dd>
+                </div>
+            </dl>
+
+            @*
+                The clip lives on YouTube rather than on the homepage: streaming it
+                inline cost every visitor a video download for footage most of them
+                scrolled past. The hero's "Watch it work" button and the footer both
+                scroll here, so this section keeps its #sky-view anchor.
+            *@
+            <div class="sky-actions">
+                <a class="sky-cta"
+                   href="@ShortUrl"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="@Loc.T("sky.aria", "Watch the drone trial footage on YouTube (opens in a new tab)")">
+                    <span class="yt-mark">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M21.6 7.2a2.5 2.5 0 0 0-1.75-1.77C18.28 5 12 5 12 5s-6.28 0-7.85.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.75 1.77C5.72 19 12 19 12 19s6.28 0 7.85-.43a2.5 2.5 0 0 0 1.75-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8z" />
+                            <path class="yt-tri" d="M10.15 15.1V8.9L15.5 12z" />
+                        </svg>
+                    </span>
+                    <span>@Loc.T("sky.cta", "Watch on YouTube")</span>
+                    <svg class="cta-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 17 17 7M9 7h8v8" />
+                    </svg>
+                </a>
+                <span class="sky-note">@Loc.T("sky.note", "drone capture · unedited")</span>
+            </div>
         </div>
+
+        @* A single unedited frame from the drone clip, framed as a field card. *@
+        <figure class="sky-still">
+            <figcaption class="still-head">
+                <i class="rec-dot" aria-hidden="true"></i>
+                <span>@Loc.T("sky.c3", "Field trial · South India")</span>
+            </figcaption>
+            <picture>
+                <source type="image/avif"
+                        srcset="/images/pond-still-frame.avif 1x, /images/pond-still-frame@2x.avif 2x" />
+                <source type="image/webp"
+                        srcset="/images/pond-still-frame.webp 1x, /images/pond-still-frame@2x.webp 2x" />
+                <img src="/images/pond-still-frame.jpg"
+                     srcset="/images/pond-still-frame.jpg 1x, /images/pond-still-frame@2x.jpg 2x"
+                     width="400"
+                     height="660"
+                     loading="lazy"
+                     decoding="async"
+                     alt="@Loc.T("sky.alt", "Drone view of the trial pond: two Oxyniti units on the bank, hoses running into the water, and a milky plume of dissolved oxygen at the diffuser.")" />
+            </picture>
+            <div class="still-foot">
+                <span class="still-caption">@Loc.T("sky.cap", "Two units, one working pond")</span>
+                <span class="still-tag">@Loc.T("sky.still", "Still frame")</span>
+            </div>
+        </figure>
     </div>
 </div>
 
 @code {
-    private ElementReference _videoElement;
-    private ElementReference _backdropCanvas;
-    private IJSObjectReference? _droneModule;
-    private IJSObjectReference? _droneController;
+    /// <summary>The drone trial clip, published as a YouTube Short.</summary>
+    private const string ShortUrl = "https://www.youtube.com/shorts/E4ZpHNTNn10";
 
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-
-        try
-        {
-            _droneModule = await JS.InvokeAsync<IJSObjectReference>(
-                "import",
-                "./js/droneStage.js");
-
-            _droneController = await _droneModule.InvokeAsync<IJSObjectReference>(
-                "init",
-                _videoElement,
-                _backdropCanvas);
-        }
-        catch (JSException)
-        {
-            // Keep the poster treatment visible if JavaScript is unavailable.
-        }
-    }
-
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
         Loc.OnChange -= StateHasChanged;
-
-        try
-        {
-            if (_droneController is not null)
-            {
-                await _droneController.InvokeVoidAsync("dispose");
-                await _droneController.DisposeAsync();
-            }
-
-            if (_droneModule is not null)
-            {
-                await _droneModule.DisposeAsync();
-            }
-        }
-        catch (JSDisconnectedException)
-        {
-            // Safe to ignore when Blazor disconnects during navigation.
-        }
     }
 }

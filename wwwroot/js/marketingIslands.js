@@ -11,7 +11,7 @@
 //
 // Everything below is either a direct call into a JS module the app
 // *already* ships (scrollHelper.js, tankBubbles.js, testimonialTranslate.js,
-// mapLoader.js/mapHelper.js, qrLoader.js/qrHelper.js, droneStage.js,
+// mapLoader.js/mapHelper.js, qrLoader.js/qrHelper.js,
 // lazyBackgroundVideo.js -- none of them have ever depended on a live
 // Blazor circuit, only on JS interop calling into them) or a small,
 // deliberately-scoped port of a Razor @code block's own logic (the profit
@@ -399,20 +399,8 @@
     // ---- Lazy background video attach ----------------------------------------
     // Dispatches on data-video-init, set alongside this file on each
     // component's <video> tag: "lazy-eager" (Hero -- attaches immediately),
-    // "lazy" (below-the-fold background loops), "drone-stage" (the sky-view
-    // canvas-backdrop treatment, its own module).
+    // "lazy" (below-the-fold background loops).
     function initVideos() {
-        var droneVideo = document.querySelector('[data-video-init="drone-stage"]');
-        if (droneVideo) {
-            var canvas = droneVideo.closest(".drone-stage");
-            canvas = canvas ? canvas.querySelector(".drone-stage-backdrop") : null;
-            import("./droneStage.js").then(function (droneStage) {
-                droneStage.init(droneVideo, canvas);
-            }).catch(function (err) {
-                console.error("[marketingIslands] Error starting drone stage video:", err);
-            });
-        }
-
         var lazyVideos = document.querySelectorAll(
             '[data-video-init="lazy-eager"], [data-video-init="lazy"]'
         );

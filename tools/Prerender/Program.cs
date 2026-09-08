@@ -228,6 +228,33 @@ internal static partial class Program
             }
         }
 
+        // A page that is still showing a loading state has not finished
+        // rendering, whatever the network-idle heuristic above concluded.
+        // Shipping it is worse than failing: StripBlazorLoader removes the
+        // only thing that could ever complete the render, so the skeleton
+        // becomes permanent for every visitor (this is how /products once
+        // shipped as six grey placeholder cards -- its product grid is a
+        // live API call that outran the 20 s network-idle budget on a cold
+        // backend). Refuse the capture; the fix is either to wait for that
+        // route's real content or, for a page that needs runtime data, to
+        // mark it Prerender: false in tools/StaticSiteMeta so it boots the
+        // app instead.
+        var stillLoading = await page.EvaluateAsync<string?>(
+            """
+            () => {
+                const sel = '.placeholder-wave, .placeholder, [aria-busy="true"], [role="status"]';
+                const hit = document.querySelector(sel);
+                if (!hit) return null;
+                return hit.className || hit.getAttribute('role') || hit.tagName;
+            }
+            """);
+        if (stillLoading is not null)
+        {
+            throw new InvalidOperationException(
+                $"'{routePath}' was still showing a loading state ('{stillLoading}') when captured -- refusing to freeze a skeleton into a static page. " +
+                "Either this route needs a longer/more specific ready wait, or it depends on runtime data and must be marked Prerender: false in tools/StaticSiteMeta.");
+        }
+
         var html = await page.ContentAsync();
         html = StripBlazorLoader(html, routePath);
         return NormalizeHeadMeta(html, routePath);

@@ -29,7 +29,19 @@ internal static class Program
         new("technology", "Pages/Technology.razor", []),
         new("aquaculture-oxygenation", "Pages/AquacultureOxygenation.razor", []),
         new("ras-oxygenation", "Pages/RasOxygenation.razor", []),
-        new("products", "Pages/Products.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
+        // Listed in sitemap.xml but NOT prerendered: the product-type grid is a
+        // live MakerClient call (Pages/Components/DiscoverProductTypes.razor),
+        // and a capture that lands before that call returns freezes the
+        // loading skeleton into the static file forever -- the Blazor loader
+        // is stripped from every prerendered page, so nothing on the shipped
+        // page can ever finish the fetch. That is exactly what shipped once:
+        // /products showed six grey placeholder cards to every visitor. The
+        // route now falls through to app-shell.html and boots the real app.
+        // Rule: a route is prerenderable only when it renders completely
+        // with no runtime API call; tools/Prerender refuses a capture that
+        // still shows a skeleton, so re-adding this without a data-free
+        // render fails the build instead of the live site.
+        new("products", "Pages/Products.razor", ["ta", "te", "kn", "ml", "hi", "bn"], Prerender: false),
         new("faqs", "Pages/Faqs.razor", []),
         new("contact", "Pages/Contact.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
         new("privacy", "Pages/Privacy.razor", []),
@@ -66,7 +78,10 @@ internal static class Program
             var enLastMod = GitLastModifiedDate(repoRoot, route.SourceRelPath);
 
             var urls = new List<SitemapUrl> { new(enUrl, enLastMod) };
-            prerenderRoutes.Add(new PrerenderRoute(enPath, route.Slug.Length == 0 ? "index.html" : $"{route.Slug}/index.html"));
+            if (route.Prerender)
+            {
+                prerenderRoutes.Add(new PrerenderRoute(enPath, route.Slug.Length == 0 ? "index.html" : $"{route.Slug}/index.html"));
+            }
 
             foreach (var locale in route.ReadyLocales)
             {
@@ -74,9 +89,12 @@ internal static class Program
                 var localeLastMod = MaxDate(enLastMod, GitLastModifiedDate(repoRoot, localeJson));
                 urls.Add(new($"{Origin}/{locale}/{route.Slug}", localeLastMod));
 
-                var localePath = route.Slug.Length == 0 ? $"/{locale}" : $"/{locale}/{route.Slug}";
-                var localeOutput = route.Slug.Length == 0 ? $"{locale}/index.html" : $"{locale}/{route.Slug}/index.html";
-                prerenderRoutes.Add(new PrerenderRoute(localePath, localeOutput));
+                if (route.Prerender)
+                {
+                    var localePath = route.Slug.Length == 0 ? $"/{locale}" : $"/{locale}/{route.Slug}";
+                    var localeOutput = route.Slug.Length == 0 ? $"{locale}/index.html" : $"{locale}/{route.Slug}/index.html";
+                    prerenderRoutes.Add(new PrerenderRoute(localePath, localeOutput));
+                }
             }
 
             var group = new SitemapGroup(urls, route.ReadyLocales.Length > 0 ? [.. route.ReadyLocales] : []);
@@ -170,7 +188,10 @@ internal static class Program
     }
 }
 
-internal sealed record PageRoute(string Slug, string SourceRelPath, string[] ReadyLocales);
+// Prerender: false keeps the route (and its ready locales) in sitemap.xml but
+// leaves it to app-shell.html at request time -- for pages whose content is a
+// runtime API call and so cannot be captured faithfully at build time.
+internal sealed record PageRoute(string Slug, string SourceRelPath, string[] ReadyLocales, bool Prerender = true);
 
 internal sealed record SitemapUrl(string Loc, string LastMod);
 

@@ -6,23 +6,29 @@
    navy #1A2C54 / #0B1F33, teal #3D8FB5, cyan accent #2de0e5.
    ========================================================= */
 
+/* Same treatment as the homepage hero (Pages/Components/Hero.razor.css):
+   the pond poster under the teal-to-navy overlay at 82 % -- so every
+   page opens on the one look the site leads with, rather than a second,
+   navy-only palette. Kept as background layers (no extra elements): the
+   overlay's rgba stops are the hero's #3D8FB5 -> #0B1F33 at its opacity. */
 .cp-hero {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #0B1F33 0%, #1A2C54 60%, #3D8FB5 150%);
+    background-color: #0B1F33;
+    background-image:
+        linear-gradient(180deg, rgba(61, 143, 181, 0.82) 0%, rgba(11, 31, 51, 0.82) 100%),
+        url("/images/hero-poster-wide.jpg");
+    background-image:
+        linear-gradient(180deg, rgba(61, 143, 181, 0.82) 0%, rgba(11, 31, 51, 0.82) 100%),
+        image-set(
+            url("/images/hero-poster-wide.avif") type("image/avif"),
+            url("/images/hero-poster-wide.jpg") type("image/jpeg"));
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     color: #fff;
     padding: 3.5rem 1.5rem 3.25rem;
     margin-bottom: 3rem;
-}
-
-.cp-hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(circle at 88% 12%, rgba(45, 224, 229, 0.20), transparent 42%),
-        radial-gradient(circle at 6% 95%, rgba(61, 143, 181, 0.28), transparent 45%);
-    pointer-events: none;
 }
 
 .cp-hero-inner {

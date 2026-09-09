@@ -2,6 +2,7 @@
 @inject NavigationManager Nav
 @inject CartService CartService
 @inject IMakerClient MakerClient
+@inject ProductCatalogService Catalog
 @inject LocalizationService Loc
 
 <PageTitle>Search Results | Oxyniti</PageTitle>
@@ -113,9 +114,10 @@
 
         try
         {
-            var groups = await MakerClient.ProductGroupsAsync();
+            // Shared, cached catalogue call (see ProductCatalogService).
+            var groups = await Catalog.GetGroupsAsync();
 
-            var perGroup = await Task.WhenAll(groups.Products.Select(async g =>
+            var perGroup = await Task.WhenAll(groups.Select(async g =>
             {
                 try
                 {

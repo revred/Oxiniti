@@ -1,6 +1,7 @@
-﻿@inject NavigationManager NavigationManager
+﻿@implements IDisposable
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-@inject IMakerClient MakerClient
+@inject ProductCatalogService Catalog
 
 <div class="featured-section">
     <h2 class="section-title">Designed for Oxygen Excellence</h2>
@@ -45,7 +46,21 @@
             {
                 <div class="product-card" @onclick="@(() => GoToProductPage(p.Slug))">
                     <div class="product-image">
-                        <img src="@p.Asset?.Url" alt="@p.Name" />
+                        @if (Catalog.ImagesUsable && !string.IsNullOrEmpty(p.Asset?.Url))
+                        {
+                            <img src="@p.Asset.Url" alt="@p.Name" />
+                        }
+                        else
+                        {
+                            @* The stored copy's signed image URL has expired
+                               (see ProductCatalogService): a plain tile until
+                               the live answer lands, never a broken-image
+                               icon. Marked incomplete so the prerender never
+                               freezes this state into the static homepage. *@
+                            <div class="product-image-pending"
+                                 data-prerender-incomplete="@(Catalog.ImagesUsable ? null : "")"
+                                 aria-hidden="true"></div>
+                        }
                     </div>
                     <h3 class="product-title">@p.Name</h3>
                     <p class="product-description">
@@ -63,23 +78,27 @@
 @code {
     private List<ProductData>? ProductTypes;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        try
-        {
-            // Fetch all product types
-            var result = await MakerClient.ProductGroupsAsync();
+        // One shared catalogue call per boot (started in Program.cs), with the
+        // last answer stored for the next visit -- see ProductCatalogService.
+        Catalog.OnChange += OnCatalogChanged;
+        ProductTypes = HomeTypes();
+        _ = Catalog.EnsureLoadedAsync();
+    }
 
-            // Only keep the ones marked as Home
-            ProductTypes = result.Products
-                .Where(p => p.Home is true)
-                .ToList();
-        }
-        catch (Exception ex)
-        {
-            await JSRuntime.InvokeVoidAsync("console.error", $"[ProductGroups] Error fetching product groups: {ex}");
-            ProductTypes = new List<ProductData>(); // fallback to empty list
-        }
+    // Only keep the ones marked as Home
+    private List<ProductData>? HomeTypes() => Catalog.Groups?.Where(p => p.Home is true).ToList();
+
+    private void OnCatalogChanged()
+    {
+        ProductTypes = HomeTypes();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Catalog.OnChange -= OnCatalogChanged;
     }
 
     private void GoToProductPage(string productType)

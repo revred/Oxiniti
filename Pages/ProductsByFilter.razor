@@ -2,6 +2,7 @@
 @inject NavigationManager Nav
 @inject CartService CartService
 @inject IMakerClient MakerClient
+@inject ProductCatalogService Catalog
 @inject IAuthenticationService AuthenticationService
 @inject IJSRuntime JS
 @inject LocalizationService Loc
@@ -187,16 +188,8 @@
         Loc.OnChange += StateHasChanged;
 
         // fetch all types so the “Filter Product Types” dropdown can be populated
-        try
-        {
-            var response = await MakerClient.ProductGroupsAsync();
-            AllTypes = response.Products.ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[Products] Error loading product groups: {ex}");
-            AllTypes = [];
-        }
+        // -- the shared, cached catalogue call (see ProductCatalogService); never throws.
+        AllTypes = (await Catalog.GetGroupsAsync()).ToList();
 
         // initial load
         try

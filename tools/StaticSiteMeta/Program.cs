@@ -29,19 +29,18 @@ internal static class Program
         new("technology", "Pages/Technology.razor", []),
         new("aquaculture-oxygenation", "Pages/AquacultureOxygenation.razor", []),
         new("ras-oxygenation", "Pages/RasOxygenation.razor", []),
-        // Listed in sitemap.xml but NOT prerendered: the product-type grid is a
-        // live MakerClient call (Pages/Components/DiscoverProductTypes.razor),
-        // and a capture that lands before that call returns freezes the
-        // loading skeleton into the static file forever -- the Blazor loader
-        // is stripped from every prerendered page, so nothing on the shipped
-        // page can ever finish the fetch. That is exactly what shipped once:
-        // /products showed six grey placeholder cards to every visitor. The
-        // route now falls through to app-shell.html and boots the real app.
-        // Rule: a route is prerenderable only when it renders completely
-        // with no runtime API call; tools/Prerender refuses a capture that
-        // still shows a skeleton, so re-adding this without a data-free
-        // render fails the build instead of the live site.
-        new("products", "Pages/Products.razor", ["ta", "te", "kn", "ml", "hi", "bn"], Prerender: false),
+        // The product-type grid is a live MakerClient call
+        // (Pages/Components/DiscoverProductTypes.razor). Once shipped as six
+        // grey placeholder cards when the capture landed before that call
+        // returned; then briefly dropped from the prerender list, which made
+        // "Products" the one nav link that booted the whole WASM runtime from
+        // the static homepage (several seconds on a blank shell). Now
+        // tools/Prerender waits for the grid to finish (up to two minutes,
+        // for a cold backend) and refuses the capture if it never does, so
+        // this route is safe to prerender again: the cards are frozen at
+        // build time (like /product/{slug} via tools/StaticProductPages) and
+        // are plain links, so they work without Blazor.
+        new("products", "Pages/Products.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
         new("faqs", "Pages/Faqs.razor", []),
         new("contact", "Pages/Contact.razor", ["ta", "te", "kn", "ml", "hi", "bn"]),
         new("privacy", "Pages/Privacy.razor", []),

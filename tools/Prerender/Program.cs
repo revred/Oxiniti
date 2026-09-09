@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -83,6 +84,7 @@ internal static partial class Program
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
 
+        using var downloader = new HttpClient();
         var failures = new List<string>();
 
         foreach (var route in routes)
@@ -90,6 +92,7 @@ internal static partial class Program
             try
             {
                 var html = await CaptureAsync(browser, server.BaseAddress, route.Path);
+                html = await RehostSignedImagesAsync(downloader, browser, wwwroot, route.Path, html);
                 var outputPath = Path.Combine(wwwroot, route.OutputRelPath.Replace('/', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
                 WriteHtmlFile(outputPath, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(html));
@@ -235,23 +238,39 @@ internal static partial class Program
         // becomes permanent for every visitor (this is how /products once
         // shipped as six grey placeholder cards -- its product grid is a
         // live API call that outran the 20 s network-idle budget on a cold
-        // backend). Refuse the capture; the fix is either to wait for that
-        // route's real content or, for a page that needs runtime data, to
-        // mark it Prerender: false in tools/StaticSiteMeta so it boots the
-        // app instead.
-        var stillLoading = await page.EvaluateAsync<string?>(
-            """
-            () => {
-                const sel = '.placeholder-wave, .placeholder, [aria-busy="true"], [role="status"]';
-                const hit = document.querySelector(sel);
-                if (!hit) return null;
-                return hit.className || hit.getAttribute('role') || hit.tagName;
-            }
-            """);
-        if (stillLoading is not null)
+        // backend). So WAIT for the loading state to clear -- a build step
+        // can afford a cold backend's warm-up, and the alternative (not
+        // prerendering the route at all) made "Products" the one nav link
+        // that booted the whole 2.7 MB WASM runtime from the static
+        // homepage. Only if it never clears is the capture refused.
+        //
+        // [data-prerender-incomplete] is the app's own opt-in marker for a
+        // rendered state that must not be frozen into a static file (e.g.
+        // DiscoverProductTypes' "no product types" fallback, which at build
+        // time means the catalogue call failed, not that the catalogue is
+        // empty).
+        const string loadingSelector =
+            ".placeholder-wave, .placeholder, [aria-busy=\"true\"], [role=\"status\"], [data-prerender-incomplete]";
+        try
         {
+            await page.WaitForFunctionAsync(
+                "sel => document.querySelector(sel) === null",
+                loadingSelector,
+                new PageWaitForFunctionOptions { Timeout = LoadingStateTimeoutMs });
+        }
+        catch (TimeoutException)
+        {
+            var stillLoading = await page.EvaluateAsync<string?>(
+                """
+                sel => {
+                    const hit = document.querySelector(sel);
+                    if (!hit) return null;
+                    return hit.className || hit.getAttribute('role') || hit.tagName;
+                }
+                """,
+                loadingSelector);
             throw new InvalidOperationException(
-                $"'{routePath}' was still showing a loading state ('{stillLoading}') when captured -- refusing to freeze a skeleton into a static page. " +
+                $"'{routePath}' was still showing a loading state ('{stillLoading}') after {LoadingStateTimeoutMs / 1000} s -- refusing to freeze a skeleton into a static page. " +
                 "Either this route needs a longer/more specific ready wait, or it depends on runtime data and must be marked Prerender: false in tools/StaticSiteMeta.");
         }
 
@@ -260,11 +279,150 @@ internal static partial class Program
         return NormalizeHeadMeta(html, routePath);
     }
 
+    // The CMS serves product images as Supabase Storage *signed* URLs
+    // (".../object/sign/...?token=<JWT>") that expire five minutes after
+    // issuance -- see issue #80 (the site logo) and tools/StaticProductPages
+    // (the /product/{slug} gallery), which hit the identical problem. The
+    // live Blazor app gets away with it because it re-fetches a fresh token
+    // on every page load; a static page captured once at build time and
+    // served for days cannot, so /products' product-type cards would show a
+    // broken image within minutes of the deploy. Download each such image
+    // now, while its token is still good, and point the <img> at a
+    // same-origin copy under wwwroot/images/prerendered. The file name is a
+    // hash of the storage object path (not the token), so the same image
+    // referenced from /products and its six locale twins is written once.
+    // A failed download fails the build: a permanently broken image on the
+    // live page is exactly the kind of defect this tool exists to keep out.
+    //
+    // The CMS originals are also far too big for a card (the first one seen
+    // was a 2.6 MB 1536x1024 PNG for a 340 px-tall tile -- more bytes than
+    // the whole WASM runtime this tool exists to avoid). Each is re-encoded
+    // through the already-running Chromium (canvas -> WebP, capped at
+    // RehostedImageMaxWidth, so no image library dependency) before it is
+    // written, which keeps it inside the same 500 KB per-file budget the
+    // workflow enforces on wwwroot/images.
+    private static async Task<string> RehostSignedImagesAsync(HttpClient http, IBrowser browser, string wwwroot, string routePath, string html)
+    {
+        var rewritten = html;
+        foreach (Match match in ImgSrcRegex().Matches(html))
+        {
+            var encodedUrl = match.Groups[1].Value;
+            var url = WebUtility.HtmlDecode(encodedUrl);
+            if (!url.Contains("/object/sign/", StringComparison.OrdinalIgnoreCase)) continue;
+
+            var objectPath = url.Split('?')[0];
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(objectPath)))[..16].ToLowerInvariant();
+            var fileName = hash + ".webp";
+            var dir = Path.Combine(wwwroot, "images", "prerendered");
+            var filePath = Path.Combine(dir, fileName);
+
+            if (!File.Exists(filePath))
+            {
+                byte[] original;
+                try
+                {
+                    original = await http.GetByteArrayAsync(url);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"'{routePath}' references a time-limited image that could not be downloaded for re-hosting ({objectPath}): {ex.Message}", ex);
+                }
+
+                var webp = await ReencodeAsWebpAsync(browser, original, GuessImageExtension(objectPath), routePath, objectPath);
+                Directory.CreateDirectory(dir);
+                await File.WriteAllBytesAsync(filePath, webp);
+                Console.WriteLine($"[prerender] {routePath}: {objectPath.Split('/')[^1]} {original.Length:N0} -> {webp.Length:N0} bytes as WebP");
+            }
+
+            var localUrl = "/images/prerendered/" + fileName;
+            rewritten = rewritten.Replace(match.Value, match.Value.Replace(encodedUrl, localUrl));
+            Console.WriteLine($"[prerender] {routePath}: re-hosted signed image -> {localUrl}");
+        }
+
+        return rewritten;
+    }
+
+    // Wide enough for a col-lg-4 card at 2x device pixel ratio; the CMS
+    // originals are decorative photos, not spec diagrams, so this loses
+    // nothing a visitor can see.
+    private const int RehostedImageMaxWidth = 800;
+    private const double RehostedImageQuality = 0.82;
+
+    private static async Task<byte[]> ReencodeAsWebpAsync(IBrowser browser, byte[] original, string extension, string routePath, string objectPath)
+    {
+        var mime = extension switch
+        {
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".gif" => "image/gif",
+            ".avif" => "image/avif",
+            _ => "image/jpeg",
+        };
+        var dataUrl = $"data:{mime};base64,{Convert.ToBase64String(original)}";
+
+        await using var context = await browser.NewContextAsync();
+        var page = await context.NewPageAsync();
+        string result;
+        try
+        {
+            result = await page.EvaluateAsync<string>(
+                """
+                async ([src, maxWidth, quality]) => {
+                    const img = new Image();
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = () => reject(new Error('image failed to decode'));
+                        img.src = src;
+                    });
+                    const scale = Math.min(1, maxWidth / img.naturalWidth);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.naturalWidth * scale);
+                    canvas.height = Math.round(img.naturalHeight * scale);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    return canvas.toDataURL('image/webp', quality);
+                }
+                """,
+                new object[] { dataUrl, RehostedImageMaxWidth, RehostedImageQuality });
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"'{routePath}' image {objectPath} could not be re-encoded as WebP: {ex.Message}", ex);
+        }
+
+        const string prefix = "data:image/webp;base64,";
+        if (!result.StartsWith(prefix, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"'{routePath}' image {objectPath}: Chromium returned '{result[..Math.Min(result.Length, 30)]}' instead of a WebP data URL.");
+        }
+
+        return Convert.FromBase64String(result[prefix.Length..]);
+    }
+
+    private static string GuessImageExtension(string objectPath)
+    {
+        var dot = objectPath.LastIndexOf('.');
+        var ext = dot >= 0 ? objectPath[dot..] : "";
+        return ext.Length is > 1 and <= 5 && ext.All(c => char.IsAsciiLetterOrDigit(c) || c == '.') ? ext.ToLowerInvariant() : ".jpg";
+    }
+
+    [GeneratedRegex("""<img\b[^>]*\ssrc="([^"]+)"[^>]*>""", RegexOptions.IgnoreCase)]
+    private static partial Regex ImgSrcRegex();
+
     // Mirrors LocalizationService.Languages minus "en" -- the six codes that
     // are legal URL prefixes. Duplicated here for the same reason
     // tools/StaticSiteMeta duplicates the ready-locale map: this tool runs
     // against the published output, not the app's own assemblies.
     private static readonly string[] LocalePrefixes = ["ta", "kn", "te", "ml", "hi", "bn"];
+
+    // How long a route may keep showing a loading state before its capture
+    // is refused. Sized for a cold-starting external API (the product grid's
+    // maker-rest-api call has been observed to outrun the 20 s network-idle
+    // budget), not for a page's normal render -- every other route clears
+    // this instantly.
+    private const int LoadingStateTimeoutMs = 120_000;
 
     /// <summary>The locale a "/ta/about"-shaped route must render in, or null for an unprefixed one.</summary>
     private static string? LocaleOf(string routePath)

@@ -84,6 +84,19 @@ internal static partial class Program
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
 
+        // Runs BEFORE the capture loop below, and that ordering is the whole
+        // reason it can work: the loop overwrites index.html with the
+        // prerendered homepage, so this is the only moment at which BOTH
+        // pre-boot files exist on disk in their shipped form -- index.html
+        // still the WASM shell, app-shell.html the copy every app route
+        // falls back to.
+        var shellError = await VerifyPreBootShellAsync(browser, server.BaseAddress);
+        if (shellError is not null)
+        {
+            Console.Error.WriteLine($"[prerender] {shellError}");
+            return 1;
+        }
+
         using var downloader = new HttpClient();
         var failures = new List<string>();
 
@@ -114,6 +127,73 @@ internal static partial class Program
 
         Console.WriteLine($"[prerender] Wrote {routes.Count} prerendered page(s).");
         return 0;
+    }
+
+    // Guards the pre-boot shell -- what every visitor stares at until the
+    // 2.7 MB WASM payload boots.
+    //
+    // One file does two very different jobs: index.html paints the homepage
+    // hero, and its app-shell.html copy paints /login, /cart, /account and
+    // /orders through staticwebapp.config.json's navigationFallback. Hiding
+    // the hero on app routes is a CSS-only move (app.css:
+    // html.shell-app-route), so an edit that hides it WITHOUT supplying a
+    // replacement leaves those routes painting nothing at all: an 88px header
+    // band over an empty white page, indistinguishable from a dead site, for
+    // the whole boot.
+    //
+    // That shipped once already. 8d754d2 hid the hero and added a neutral
+    // placeholder; dd572ea deleted the placeholder twelve minutes later; and
+    // nothing caught that the result was a blank page, because every other
+    // gate in this pipeline measures bytes or the POST-boot DOM. This is the
+    // check that would have caught it on the day.
+    //
+    // Returns null when both shells are fine, or the failure message.
+    private static async Task<string?> VerifyPreBootShellAsync(IBrowser browser, string baseAddress)
+    {
+        // "/" is answered by index.html; "/login" has no file of its own, so
+        // the local server's SPA fallback answers it with app-shell.html --
+        // the same two files, reached the same two ways, that Static Web Apps
+        // serves in production.
+        foreach (var routePath in new[] { "/", "/login" })
+        {
+            await using var context = await browser.NewContextAsync();
+            var page = await context.NewPageAsync();
+
+            // The whole point: hold Blazor back, so what this measures is the
+            // FIRST frame rather than the booted app that replaces it.
+            await page.RouteAsync("**/_framework/**", route => route.AbortAsync());
+
+            var url = baseAddress.TrimEnd('/') + routePath;
+
+            // Load, not DOMContentLoaded: app.css carries both the shell's own
+            // styling and the html.shell-app-route rules that hide the hero,
+            // and the innerText probe below is only meaningful once they apply.
+            await page.GotoAsync(url, new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.Load,
+                Timeout = 20_000,
+            });
+
+            var text = await page.EvalOnSelectorAsync<string?>(
+                "#app",
+                "el => el.innerText.trim()");
+
+            // innerText (not textContent) is the correct probe precisely
+            // because it honours the display:none that the app-route CSS
+            // applies -- textContent would happily "pass" on a shell whose
+            // every element is hidden, which is the exact bug this guards.
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return $"Pre-boot shell for '{routePath}' paints nothing: with _framework/* blocked, #app has no "
+                     + "visible text, so a visitor sees an empty page for the entire WASM boot. Give app routes a "
+                     + "visible placeholder (wwwroot/index.html .shell-route-loading, shown by app.css under "
+                     + "html.shell-app-route) before shipping this.";
+            }
+
+            Console.WriteLine($"[prerender] pre-boot shell OK for '{routePath}' ({text!.Length} visible chars)");
+        }
+
+        return null;
     }
 
     private static string? GetArg(string[] args, string name)

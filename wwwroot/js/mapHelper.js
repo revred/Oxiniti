@@ -16,10 +16,12 @@ window.oxynitiMap = {
     _defaultLng: 78.7,
     _defaultZoom: 7,
 
+    // Hide Leaflet's default "Leaflet | © OpenStreetMap contributors" box in the map corner.
+    _mapOptions: { attributionControl: false },
+
     _addTiles: function (map) {
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
+            maxZoom: 19
         }).addTo(map);
     },
 
@@ -30,7 +32,7 @@ window.oxynitiMap = {
         const startLat = hasStart ? lat : this._defaultLat;
         const startLng = hasStart ? lng : this._defaultLng;
 
-        const map = L.map(elementId).setView([startLat, startLng], hasStart ? 13 : this._defaultZoom);
+        const map = L.map(elementId, this._mapOptions).setView([startLat, startLng], hasStart ? 13 : this._defaultZoom);
         this._addTiles(map);
 
         let marker = hasStart ? L.marker([startLat, startLng], { draggable: true }).addTo(map) : null;
@@ -59,7 +61,7 @@ window.oxynitiMap = {
     initDisplay: function (elementId, points) {
         this._destroy(elementId);
 
-        const map = L.map(elementId);
+        const map = L.map(elementId, this._mapOptions);
         this._addTiles(map);
 
         if (!points || !points.length) {

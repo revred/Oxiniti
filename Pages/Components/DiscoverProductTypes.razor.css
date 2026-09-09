@@ -14,6 +14,21 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
+/* The card is an <a>: keep it looking like the block it always was. */
+.type-card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.type-card:hover,
+.type-card:focus-visible {
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+}
+
 .card-img-top {
     height: 340px;
     object-fit: cover;
@@ -40,4 +55,10 @@
 .row {
     --bs-gutter-y: 70px;
     padding-bottom: 60px;
+}
+
+/* Stand-in for a card image whose stored URL has expired (see
+   ProductCatalogService): same box as the real image, no broken-image icon. */
+.type-card-img-pending {
+    background-color: #EEF7FB;
 }

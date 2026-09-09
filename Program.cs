@@ -19,6 +19,7 @@ builder.Services.AddSingleton<CartService>();
 builder.Services.AddSingleton<AuthReadyGate>();
 builder.Services.AddSingleton<DemoService>();
 builder.Services.AddSingleton<BusinessInfoService>();
+builder.Services.AddSingleton<ProductCatalogService>();
 builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddSingleton<IDemoAccountService, DemoAccountService>();
 builder.Services.AddOptions<StripeSettings>()
@@ -45,5 +46,11 @@ var host = builder.Build();
 // alongside the first render instead of gating it. Components subscribe to
 // BusinessInfoService.OnChange and re-render if/when it lands.
 _ = host.Services.GetRequiredService<BusinessInfoService>().EnsureLoadedAsync();
+
+// Same for the product-type catalogue: every product page needs it, so start
+// the (one) call now rather than when the visitor first clicks "Products".
+// See ProductCatalogService for the stored-copy fallback that makes that
+// page paint in the first frame on a refresh.
+_ = host.Services.GetRequiredService<ProductCatalogService>().EnsureLoadedAsync();
 
 await host.RunAsync();

@@ -46,6 +46,14 @@
         display: block;
     }
 
+    /* Stand-in for a featured image whose stored URL has expired (see
+       ProductCatalogService): fills the same box, no broken-image icon. */
+    .product-image .product-image-pending {
+        width: 100%;
+        height: 100%;
+        background-color: #EEF7FB;
+    }
+
 /* Optional: subtle background for placeholder blocks inside your light theme */
 .placeholder {
     min-height: 1rem;

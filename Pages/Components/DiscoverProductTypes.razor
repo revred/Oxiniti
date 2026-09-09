@@ -1,6 +1,5 @@
-﻿@inject NavigationManager Nav
-@inject IJSRuntime JSRuntime
-@inject IMakerClient MakerClient
+@implements IDisposable
+@inject ProductCatalogService Catalog
 @inject LocalizationService Loc
 
 <section class="types-section p-4 rounded-3 mb-5">
@@ -8,7 +7,13 @@
     <div class="row g-4" >
         @if(ProductTypes is null)
         {
-            @foreach (var _ in Enumerable.Range(0, 6))  // show 6 skeleton cards while loading
+            @* Only ever seen on a device's very first visit, before the live
+               catalogue call has answered: ProductCatalogService starts that
+               call at boot and keeps the last answer in localStorage, so a
+               repeat visit (or a refresh) paints the real cards in the first
+               frame. One row of placeholders, not two: the catalogue is a
+               handful of types, and a wall of grey cards reads as broken. *@
+            @foreach (var _ in Enumerable.Range(0, 3))
             {
                 <div class="col-12 col-sm-6 col-lg-4">
                     <div class="card h-100" aria-hidden="true">
@@ -35,7 +40,10 @@
         }
         else if (ProductTypes.Count == 0)
         {
-            <div class="col-12 text-center">
+            @* data-prerender-incomplete: at build time an empty grid means the
+               catalogue call failed, so tools/Prerender must not freeze this
+               into the static /products page. *@
+            <div class="col-12 text-center" data-prerender-incomplete>
                 <p class="text-muted">@Loc.T("discover.empty", "No product types available.")</p>
             </div>
         }
@@ -43,16 +51,34 @@
         {
             @foreach (var p in ProductTypes)
             {
-                <div class="col-12 col-sm-6 col-lg-4" @onclick="() => GoToProducts(p.Slug)">
-                    <div class="card h-100">
-                        <img src="@p.Asset?.Url" 
-                        class="card-img-top" 
-                        alt="@p.Name" />
+                @* A real link, not an @onclick: /products is prerendered
+                   without the Blazor runtime (tools/Prerender), so the card
+                   must navigate on its own. Inside the running app Blazor
+                   intercepts the anchor and routes client-side as before. *@
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a class="card h-100 type-card" href="/products/type/@Uri.EscapeDataString(p.Slug)">
+                        @if (Catalog.ImagesUsable && !string.IsNullOrEmpty(p.Asset?.Url))
+                        {
+                            <img src="@p.Asset.Url"
+                            class="card-img-top"
+                            alt="@p.Name" />
+                        }
+                        else
+                        {
+                            @* The stored copy's signed image URL has expired
+                               (see ProductCatalogService): a plain tile until
+                               the live answer brings a fresh one, rather than
+                               a broken-image icon. Marked incomplete so the
+                               prerender never freezes this state. *@
+                            <div class="card-img-top type-card-img-pending"
+                                 data-prerender-incomplete="@(Catalog.ImagesUsable ? null : "")"
+                                 aria-hidden="true"></div>
+                        }
                         <div class="card-body">
                             <h5 class="card-title">@p.Name</h5>
                             <p class="card-text text-muted">@p.Description</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
             }
         }
@@ -60,34 +86,29 @@
 </section>
 
 @code {
-    [Parameter] public ICollection<ProductData>? ProductTypes { get; set; }
+    private IReadOnlyList<ProductData>? ProductTypes;
 
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+        Catalog.OnChange += OnCatalogChanged;
+
+        // Whatever the service already has (the live answer from an earlier
+        // page, or the stored copy from the last visit) renders right away;
+        // the live call it started at boot fills in or refreshes the rest.
+        ProductTypes = Catalog.Groups;
+        _ = Catalog.EnsureLoadedAsync();
     }
 
-    protected override async Task OnInitializedAsync()
+    private void OnCatalogChanged()
     {
-        try
-        {
-            var result = await MakerClient.ProductGroupsAsync();
-            ProductTypes = result.Products.ToList();
-        }
-        catch (Exception ex)
-        {
-            await JSRuntime.InvokeVoidAsync("console.error", $"[ProductGroups] Error fetching product groups: {ex}");
-            ProductTypes = new List<ProductData>(); // fallback to empty list
-        }
+        ProductTypes = Catalog.Groups;
+        StateHasChanged();
     }
 
-    private void LogToConsole(string message)
+    public void Dispose()
     {
-        JSRuntime.InvokeVoidAsync("console.log", message);
-    }
-
-    private void GoToProducts(string slug)
-    {
-        Nav.NavigateTo($"/products/type/{slug}");
+        Loc.OnChange -= StateHasChanged;
+        Catalog.OnChange -= OnCatalogChanged;
     }
 }

@@ -403,14 +403,112 @@ code {
     animation: shellBarPulse 1.2s ease-in-out infinite;
 }
 
-/* App routes (/products, /cart, ...) are served by the same shell via
-   app-shell.html. The <head> script in index.html tags <html> with
+/* App routes (/login, /cart, /account, ...) are served by the same shell
+   via app-shell.html. The <head> script in index.html tags <html> with
    .shell-app-route on any non-home path; hide the homepage hero + copy
-   there so only the header band and the progress line show until Blazor
-   renders the real page. */
+   there and show a neutral brand placeholder instead until Blazor renders
+   the real page.
+
+   The placeholder is not decoration. With the hero and the homepage copy
+   hidden, the only thing left in the shell is the 88px .shell-header-spacer
+   band -- so /login, /cart, /account and /orders painted a black bar over an
+   empty white page for the entire 2.7 MB WASM boot. On the rural-mobile
+   connections this app is built for that is seconds of what reads as a dead
+   site, on every hard refresh. The 2px .shell-loading-bar is too thin to
+   carry that signal on its own. */
 html.shell-app-route .shell-hero-wrap,
 html.shell-app-route .static-shell {
     display: none;
+}
+
+.shell-route-loading {
+    display: none;
+}
+
+html.shell-app-route .shell-route-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+
+    /* Fills the void the hidden hero leaves behind, so the boot state is
+       centred in the viewport rather than pinned under the header band. */
+    min-height: 60vh;
+
+    color: #1A2C54;
+}
+
+.shell-route-loading-mark {
+    width: 56px;
+    height: 56px;
+    animation: shellMarkBreathe 1.6s ease-in-out infinite;
+}
+
+.shell-route-loading-brand {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+/* Indeterminate: nothing here knows how far the WASM download has got. It
+   only has to say "still working", which a static bar cannot. */
+.shell-route-loading-track {
+    width: 160px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(26, 44, 84, 0.12);
+    overflow: hidden;
+}
+
+    .shell-route-loading-track span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 2px;
+        background: #2DE0E5;
+        animation: shellTrackSlide 1.2s ease-in-out infinite;
+    }
+
+@keyframes shellMarkBreathe {
+    0%, 100% {
+        opacity: 0.55;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* -100% .. 250% keeps the fill touching the 160px track for the whole
+   cycle: at 250% its left edge is exactly the track's right edge. Running
+   further (350%) parks it fully outside for ~a third of every cycle, which
+   reads as a dead grey line rather than progress. */
+@keyframes shellTrackSlide {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(250%);
+    }
+}
+
+/* Reduced motion: the placeholder still has to READ as "loading", so the
+   moving parts settle to their visible resting state rather than vanishing. */
+@media (prefers-reduced-motion: reduce) {
+    .shell-route-loading-mark,
+    .shell-route-loading-track span {
+        animation: none;
+    }
+
+    .shell-route-loading-mark {
+        opacity: 1;
+    }
+
+    .shell-route-loading-track span {
+        width: 100%;
+    }
 }
 
 @keyframes shellBarPulse {

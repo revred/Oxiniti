@@ -56,8 +56,9 @@
          hero for the second or two Blazor takes to boot. Runs in <head>,
          before the body is parsed, so the wrong shell never paints: on any
          path that is not the home route the hero and the homepage copy are
-         hidden (app.css: html.shell-app-route), leaving only the header band
-         and the top progress line. Locale roots (/ta, /hi, ...) are home. -->
+         hidden (app.css: html.shell-app-route) and the neutral
+         .shell-route-loading placeholder in the body shows in their place.
+         Locale roots (/ta, /hi, ...) are home routes too. -->
     <script>
         (function () {
             var p = location.pathname.replace(/\/index\.html$/, "").replace(/\/+$/, "");
@@ -121,6 +122,27 @@
              invisible, and a transition would just be another way for a
              stuck element to hide the site. -->
         <div class="shell-header-spacer" aria-hidden="true"></div>
+
+        <!-- What app routes (/login, /cart, /account, /orders) see while
+             Blazor boots. Hidden by default; app.css reveals it only under
+             html.shell-app-route, so home + the locale roots still get the
+             hero clone above.
+
+             Restores the placeholder dd572ea removed. Dropping it left the
+             app-route shell with nothing to paint but the 88px header band,
+             so a refresh on /login showed a black bar over an empty white
+             page for the whole 2.7 MB WASM boot -- indistinguishable from a
+             dead site on the rural-mobile connections this app targets. The
+             2px progress line alone was not a readable signal.
+
+             aria-hidden + data-nosnippet: this is boot chrome, not content.
+             It must never be what a crawler or a screen reader reads as the
+             page. -->
+        <div class="shell-route-loading" aria-hidden="true" data-nosnippet>
+            <img src="/oxyniti.png" width="56" height="56" alt="" decoding="async" class="shell-route-loading-mark" />
+            <div class="shell-route-loading-brand">Oxyniti</div>
+            <div class="shell-route-loading-track"><span></span></div>
+        </div>
 
         <div class="shell-hero-wrap">
             <div class="shell-hero-container">

@@ -7,6 +7,9 @@
 }
 
 .wa-group-qr-code {
+    /* The element carries an inline width/height (Size px). Cap it so a
+       narrow column can never be forced open by it. */
+    max-width: 100%;
     background: #fff;
     border-radius: 8px;
     padding: 6px;

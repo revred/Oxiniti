@@ -1,7 +1,10 @@
 ﻿.help-banner {
     background-color: #D4F3FF;
     border-radius: 0.75rem;
-    height: 330px;
+    /* min-height, not height: at narrow widths and at high browser zoom the
+       title + copy + button row grow past 330px, and a hard height made them
+       spill out of the tinted panel instead of the panel growing. */
+    min-height: 330px;
     align-content: center;
 }
 

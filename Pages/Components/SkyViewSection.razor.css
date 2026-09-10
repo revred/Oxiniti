@@ -40,7 +40,9 @@
 
 .section-title {
     color: var(--sky-navy);
-    font-size: clamp(2.4rem, 4.2vw, 3.6rem);
+    /* Floor lowered from 2.4rem to the 2.3rem the 768px override used to
+       force, so the clamp lands there by itself rather than snapping. */
+    font-size: clamp(2.3rem, 4.2vw, 3.6rem);
     font-weight: 800;
     line-height: 1.05;
     letter-spacing: -0.02em;
@@ -323,10 +325,6 @@
 }
 
 @media (max-width: 768px) {
-    .section-title {
-        font-size: 2.3rem;
-    }
-
     .section-lead {
         margin-bottom: 1.5rem;
     }

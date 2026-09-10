@@ -56,7 +56,7 @@
     justify-content: center;
     height: 100%;
     min-height: 560px;
-    padding: 3rem 2.5rem;
+    padding: clamp(2rem, 3.5vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
     text-align: left;
     color: #fff;
 }
@@ -74,7 +74,12 @@
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    /* Was a flat 3.5rem down to 768px and then a hard drop to 2.25rem. At
+       ~800-1000px a 3.5rem headline broke across three ragged lines and the
+       whole hero block jumped when the breakpoint was crossed. Same two end
+       values, reached continuously.
+       Keep in sync with .shell-hero-title in wwwroot/app.css. */
+    font-size: clamp(2.25rem, 4.6vw, 3.5rem);
     font-weight: 700;
     line-height: 1.15;
     margin: 0 0 1.25rem;
@@ -150,17 +155,14 @@
 }
 
 @media (max-width: 768px) {
-    .hero-title {
-        font-size: 2.25rem;
-    }
-
     .hero-container {
         min-height: 480px;
     }
 
     .hero-content {
         min-height: 480px;
-        padding: 2rem 1.25rem;
+        /* padding is governed by the clamp on the base rule — restating it
+           here would reintroduce the step this change removed. */
     }
 
     .hero-stats {

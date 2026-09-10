@@ -21,7 +21,11 @@
 
 .results-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* minmax(0, 1fr), not 1fr: a bare 1fr floors each track at its min-content
+       width, and "+15%" set at 2.5rem is wide enough that two such cards plus
+       the gap could not fit a 320px phone -- the row pushed 8px of horizontal
+       scroll onto the whole page. */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1.25rem;
     margin-bottom: 1.5rem;
 }
@@ -42,7 +46,9 @@
     }
 
 .result-card .big {
-    font-size: 2.5rem;
+    /* The figure is one unbreakable token, so it has to shrink itself rather
+       than rely on wrapping when the card gets narrow. */
+    font-size: clamp(1.9rem, 7vw, 2.5rem);
     font-weight: 700;
     margin-bottom: 0.4rem;
 }
@@ -61,6 +67,6 @@
 
 @media (max-width: 900px) {
     .results-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }

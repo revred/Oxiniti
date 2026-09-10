@@ -21,22 +21,25 @@
     align-items: center;
     gap: 10px;
     padding: 0;
-    margin-right: 32px;
+    /* Fluid instead of stepped (was 32 -> 24 -> 25px across three media
+       queries): the steps made the whole nav row jump sideways the moment a
+       resize or a zoom step crossed a breakpoint. */
+    margin-right: clamp(14px, 1.8vw, 32px);
     color: #ffffff;
     text-decoration: none;
     flex-shrink: 0;
 }
 
 .logo {
-    width: 50px;
-    height: 50px;
+    width: clamp(42px, 3.4vw, 50px);
+    height: clamp(42px, 3.4vw, 50px);
     object-fit: contain;
     flex-shrink: 0;
 }
 
 .brand-name {
     color: #ffffff;
-    font-size: 23px;
+    font-size: clamp(19px, 1.55vw, 23px);
     font-weight: 750;
     letter-spacing: -0.4px;
     white-space: nowrap;
@@ -67,8 +70,8 @@
     height: 100%;
     display: flex;
     align-items: center;
-    gap: 32px;
-    margin-right: 32px;
+    gap: clamp(14px, 1.7vw, 32px);
+    margin-right: clamp(14px, 1.8vw, 32px);
     flex-shrink: 1; /* Allow container to scale smoothly */
     min-width: 0; /* Required for a flex item to actually shrink below content size */
 
@@ -100,15 +103,23 @@
     justify-content: center;
     padding: 0;
     color: #e5ebf0;
-    font-size: 17px;
+    /* Fluid instead of stepped 17 -> 16 -> 15px: a stepped size re-wraps and
+       re-centres every label the instant a breakpoint is crossed. */
+    font-size: clamp(14px, 1.15vw, 17px);
     font-weight: 500;
     text-decoration: none;
 
-    /* Enabled multi-line text wrapping */
-    white-space: normal;
+    /*
+        Every label stays on ONE line. The previous "white-space: normal +
+        max-width: 95px" let the longer labels ("Use Cases", "Contact Us")
+        wrap to two lines while the short ones stayed on one -- so their text
+        sat on a different baseline from their neighbours and visibly shifted
+        up/down as the window was resized or zoomed. The row is now sized to
+        fit unwrapped at every width it is shown at (see RESPONSIVE below).
+    */
+    white-space: nowrap;
     text-align: center;
     line-height: 1.2;
-    max-width: 95px;
 
     transition: color 0.2s ease, transform 0.2s ease;
 }
@@ -176,54 +187,28 @@
 
 /* =========================================================
    RESPONSIVE
+
+   Budget (measured, English labels): the six nav labels need 420px unwrapped
+   at 17px, the brand block ~194px and the right-hand actions 552px -- 1446px
+   in total with the old fixed 32px gaps. That is why the row already wrapped
+   and clipped at 1440px and why three links were invisible at 992px.
+
+   The clamps above shrink type/gaps smoothly instead of in steps, and the
+   hamburger now takes over at 1024px -- while the row still fits unwrapped
+   -- rather than at 860px, long after links had silently scrolled out of
+   view. MainLayout drops the search field at 1200px to fund the same budget.
    ========================================================= */
 
-@media (max-width: 1350px) {
-    .navbar-brand {
-        margin-right: 24px;
-    }
-
-    .nav-links {
-        gap: 26px;
-        margin-right: 24px;
-    }
-
-    ::deep .nav-link {
-        font-size: 16px;
-    }
-}
-
 @media (max-width: 1150px) {
-    .navbar-brand {
-        margin-right: 25px;
-    }
-
-    .logo {
-        width: 46px;
-        height: 46px;
-    }
-
-    .brand-name {
-        font-size: 21px;
-    }
-
     .brand-tag {
-        font-size: 0.55rem;
         letter-spacing: 0.06em;
     }
-
-    .nav-links {
-        gap: 22px;
-        margin-right: 20px;
-    }
-
-    ::deep .nav-link {
-        font-size: 15px;
-        max-width: 85px; /* Adjust max-width on tighter screens */
-    }
 }
 
-@media (max-width: 860px) {
+/* Hamburger takes over here (was 860px). Above this width the full row is
+   measured to fit without wrapping; below it there is no honest way to show
+   six labels plus the actions, so the menu collapses instead of clipping. */
+@media (max-width: 1024px) {
     .nav-bar {
         flex: 1;
         position: relative;
@@ -241,7 +226,14 @@
         display: none;
         position: absolute;
         top: 100%;
-        left: -16px;
+        /*
+            Pulls the panel out to the viewport's left edge by cancelling the
+            header's own side padding. That padding used to be a flat 16px
+            here, so a flat -16px matched it; it is now a clamp, so this has
+            to be the same clamp or the panel hangs a few px past the edge
+            (and can add a horizontal scrollbar on a phone).
+        */
+        left: calc(-1 * clamp(12px, 1.8vw, 28px));
         right: -16px;
         height: auto;
         flex-direction: column;
@@ -253,6 +245,14 @@
         border-top: 1px solid rgba(255, 255, 255, 0.06);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         z-index: 1000;
+
+        /* The panel is a vertical list, so a horizontal scroll box here would
+           only ever hide content. Let it scroll VERTICALLY instead when the
+           viewport is short (landscape phones, or a desktop at 200% zoom). */
+        overflow-x: visible;
+        overflow-y: auto;
+        max-height: calc(100vh - var(--oxy-header-h, 76px) - 16px);
+        overscroll-behavior: contain;
     }
 
     .navbar-toggler:checked ~ .nav-links {
@@ -261,12 +261,18 @@
 
     ::deep .nav-link {
         height: 48px;
+        flex-shrink: 0;
         justify-content: flex-start;
         padding: 0 15px;
         border-radius: 8px;
         font-size: 16px;
-        max-width: 100%; /* Reset max-width for mobile menu list */
         text-align: left;
+
+        /* Free to wrap again here: the panel is full-width, so a long label
+           (or a longer translation) should use a second line rather than be
+           cut off. Every item is its own row, so wrapping cannot misalign a
+           neighbour the way it did in the horizontal row. */
+        white-space: normal;
     }
 
     ::deep .nav-link:hover {
@@ -284,15 +290,6 @@
 }
 
 @media (max-width: 520px) {
-    .logo {
-        width: 42px;
-        height: 42px;
-    }
-
-    .brand-name {
-        font-size: 19px;
-    }
-
     .brand-tag {
         display: none; /* No room for the tagline once the logo/name itself is shrinking */
     }

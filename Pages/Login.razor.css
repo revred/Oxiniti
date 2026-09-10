@@ -1,6 +1,8 @@
 ﻿.login-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* minmax(0, ...) so a track can shrink past its min-content width
+       instead of forcing the row wider than the viewport. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     background-color: #D4F3FF;
     border-radius: 16px;
     overflow: hidden;

@@ -41,12 +41,11 @@ These are icons, illustrations, or generic textures used as UI chrome, not as
 evidence of a real installation or trial — no provenance claim is made about
 them and none require captioning:
 
-- `efficiency.png/.webp`, `maintenance.png/.webp`, `precision.png/.webp`, `performance.png/.webp` — line-art icons next to feature copy on `About.razor` / `TechnologySection.razor` / `ExploreProductRange.razor`.
+- `maintenance.webp`, `performance.webp` — line-art icons next to feature copy on `About.razor` / `TechnologySection.razor` / `ExploreProductRange.razor`. (The `efficiency.*` and `precision.*` icons, plus the `.png` fallbacks for these two, were unreferenced and have been deleted.)
 - `login.jpg/.avif/.webp`, `login-right.jpg` — generic underwater-texture background on auth pages (`Login.razor`, `Register.razor`, etc.).
 - `placeholder.png` — Bootstrap-style loading placeholder used across product/search/account pages.
 - `avatar.png` — fallback author avatar styling target for CMS-driven `Testimonials.razor` content; the actual testimonial photos/names come from the CMS (`InfoService.Testimonials`) and are out of this repo's scope — audit them where the CMS content is authored.
 - `arun.png` — a named individual's headshot; not currently referenced in any `.razor` file in this repo (check CMS/About content if it is meant to be in use).
-- `retrofit-kits.jpg` — not currently referenced in any `.razor` file in this repo.
 - `oxyniti.png` — favicon/wordmark.
 
 ## Product imagery (out of this repo's scope)

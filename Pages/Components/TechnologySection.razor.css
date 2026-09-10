@@ -4,7 +4,9 @@
 
 .tech-grid {
     display: grid;
-    grid-template-columns: 1fr 1.2fr;
+    /* minmax(0, ...) so a track can shrink past its min-content width
+       instead of forcing the row wider than the viewport. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     gap: 2.5rem;
     align-items: stretch;
 }

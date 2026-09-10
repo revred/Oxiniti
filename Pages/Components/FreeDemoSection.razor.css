@@ -39,7 +39,9 @@
 
 .demo-grid {
     display: grid;
-    grid-template-columns: 1fr 1.15fr;
+    /* minmax(0, ...) so a track can shrink past its min-content width
+       instead of forcing the row wider than the viewport. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
     gap: 2.5rem;
 }
 
@@ -121,7 +123,9 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* minmax(0, ...) so a track can shrink past its min-content width
+       instead of forcing the row wider than the viewport. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 1.1rem;
     margin-bottom: 1.5rem;
 }

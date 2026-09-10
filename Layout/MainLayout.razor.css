@@ -19,12 +19,15 @@
     z-index: 1000;
 
     width: 100%;
-    height: 88px;
+    /* Single source of truth: app.css :root owns --oxy-header-h so the
+       pre-boot shell spacer and [id] scroll-margin-top track it exactly.
+       They used to be three hand-copied ladders that drifted apart. */
+    height: var(--oxy-header-h, 88px);
 
     display: flex;
     align-items: center;
 
-    padding: 0 28px;
+    padding: 0 clamp(12px, 1.8vw, 28px);
 
     box-sizing: border-box;
     overflow-x: clip; /* Safety net only — nav/actions are sized to always fit within bounds now */
@@ -52,7 +55,8 @@
     display: flex;
     align-items: center;
 
-    gap: 18px;
+    /* Fluid, so the action row never steps sideways at a breakpoint. */
+    gap: clamp(8px, 1vw, 18px);
 
     flex-shrink: 0; /* Ensures controls never overflow off-screen */
 }
@@ -114,7 +118,10 @@
 .profit-btn {
     background: linear-gradient(135deg, #1A2C54, #3D8FB5);
 
-    margin-left: 8px; /* extra breathing room after the search box */
+    /* Fluid: this was a 8/6/4/0px ladder across four media queries, and the
+       WhatsApp pull below was a matching -8/-6/-4/-3px one. Each step nudged
+       both buttons sideways at a breakpoint. */
+    margin-left: clamp(0px, 0.6vw, 8px);
 }
 
 
@@ -123,7 +130,7 @@
 .whatsapp-btn {
     background: #25D366;
 
-    margin-left: -8px; /* pulls it closer to the profit button */
+    margin-left: clamp(-8px, -0.6vw, 0px); /* pulls it closer to the profit button */
 }
 
 
@@ -132,7 +139,7 @@
    ========================================================= */
 
 .header-search {
-    width: 220px;
+    width: clamp(150px, 13vw, 220px);
     height: 46px;
 
     display: flex;
@@ -148,7 +155,9 @@
 
 .header-search ::deep .search-input,
 .header-search .search-input {
-    width: 220px !important;
+    /* Follows the wrapper rather than restating a fixed px width, so the
+       field and its box can never disagree mid-resize. */
+    width: 100% !important;
     height: 46px !important;
 
     box-sizing: border-box;
@@ -191,7 +200,7 @@
 
     height: 46px;
 
-    min-width: 118px;
+    min-width: clamp(96px, 8.2vw, 118px);
 
     display: flex;
     align-items: center;
@@ -602,68 +611,33 @@ main {
 
 /* =========================================================
    RESPONSIVE
+
+   The 1350 / 1150 ladders that used to live here (header height, action gap,
+   search width, language width) are gone: each was a step change, and a step
+   change is exactly what makes a heading or a control jump sideways when the
+   window is dragged or the zoom level ticks over. Those four are now clamp()
+   values on the base rules above, so they scale continuously instead.
+
+   The header height ladder moved to :root --oxy-header-h in app.css, which is
+   also what the pre-boot shell spacer and [id] scroll-margin-top read.
+
+   What is left here is genuinely discrete: a control either fits or it does
+   not.
    ========================================================= */
 
-@media (max-width: 1350px) {
+/*
+    The search field is dropped here rather than at 980px.
 
-    .site-header {
-        padding: 0 22px;
-    }
-
-    .header-actions {
-        gap: 14px;
-    }
-
-    .profit-btn {
-        margin-left: 6px;
-    }
-
-    .whatsapp-btn {
-        margin-left: -6px;
-    }
-
-    .header-search,
-    .header-search ::deep .search-input,
-    .header-search .search-input {
-        width: 190px !important;
-    }
-}
-
-
-@media (max-width: 1150px) {
-
-    .site-header {
-        height: 82px;
-    }
-
-    .header-actions {
-        gap: 11px;
-    }
-
-    .profit-btn {
-        margin-left: 4px;
-    }
-
-    .whatsapp-btn {
-        margin-left: -4px;
-    }
-
-    .header-search {
-        width: 165px;
-    }
-
-    .header-search ::deep .search-input,
-    .header-search .search-input {
-        width: 165px !important;
-    }
-
-    .language-control {
-        min-width: 96px;
-    }
-}
-
-
-@media (max-width: 980px) {
+    Measured, the six nav labels need 420px unwrapped, the brand ~194px and
+    the actions 552px. Holding the search box down to 980px left the nav row
+    ~200px short between 1000 and 1400px, and because .nav-links scrolls with
+    a hidden scrollbar the shortfall was spent silently: at 1100px "Contact
+    Us" was entirely gone, at 992px only three of six links were left. The
+    field is the cheapest thing in that budget to give up -- search is still
+    reachable from the page itself -- and giving it up here is what lets every
+    nav label stay visible and unwrapped down to the 1024px hamburger point.
+*/
+@media (max-width: 1200px) {
 
     .header-search {
         display: none;
@@ -672,24 +646,6 @@ main {
 
 
 @media (max-width: 860px) {
-
-    .site-header {
-        height: 76px;
-
-        padding: 0 16px;
-    }
-
-    .header-actions {
-        gap: 9px;
-    }
-
-    .profit-btn {
-        margin-left: 0;
-    }
-
-    .whatsapp-btn {
-        margin-left: -3px;
-    }
 
     .language-control {
         min-width: 42px;
@@ -727,12 +683,6 @@ main {
 
 
 @media (max-width: 640px) {
-
-    .site-header {
-        height: 70px;
-
-        padding: 0 12px;
-    }
 
     .header-icon-btn {
         width: 32px;

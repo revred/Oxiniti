@@ -6,7 +6,9 @@
 
 .account-shell {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    /* minmax(0, ...) so a track can shrink past its min-content width
+       instead of forcing the row wider than the viewport. */
+    grid-template-columns: 240px minmax(0, 1fr);
     gap: 1.75rem;
     max-width: 1180px;
     margin: 0 auto;
@@ -177,7 +179,9 @@
 
 .profile-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* minmax(0, ...) so a track can shrink past its min-content width
+       instead of forcing the row wider than the viewport. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 1.15rem 1.5rem;
     margin-bottom: 1.25rem;
 }

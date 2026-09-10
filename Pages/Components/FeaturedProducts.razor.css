@@ -4,7 +4,9 @@
 
 .section-title {
     color: #417893;
-    font-size: 2.5rem;
+    /* clamp() reaches the old mobile value on its own, so the size glides
+       instead of snapping at 768px. Both end values are unchanged. */
+    font-size: clamp(2rem, 3.6vw, 2.5rem);
     margin-bottom: 3rem;
     font-weight: 600;
 }
@@ -106,7 +108,6 @@
     }
 
     .section-title {
-        font-size: 2rem;
         margin-bottom: 2rem;
     }
 }

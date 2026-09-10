@@ -29,7 +29,9 @@
 
 .problem-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    /* minmax(0, ...) so a track can shrink past its min-content width
+       instead of forcing the row wider than the viewport. */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.5rem;
 }
 

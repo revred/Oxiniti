@@ -425,14 +425,23 @@ code {
    the real page.
 
    The placeholder is not decoration. With the hero and the homepage copy
-   hidden, the only thing left in the shell is the 88px .shell-header-spacer
-   band -- so /login, /cart, /account and /orders painted a black bar over an
-   empty white page for the entire 2.7 MB WASM boot. On the rural-mobile
-   connections this app is built for that is seconds of what reads as a dead
-   site, on every hard refresh. The 2px .shell-loading-bar is too thin to
-   carry that signal on its own. */
+   hidden, the only thing left in the shell would be the 88px
+   .shell-header-spacer band -- so /login, /cart, /account and /orders painted
+   a black bar over an empty white page for the entire 2.7 MB WASM boot. On the
+   rural-mobile connections this app is built for that is seconds of what reads
+   as a dead site, on every hard refresh. The 2px .shell-loading-bar is too thin
+   to carry that signal on its own.
+
+   .shell-header-spacer is hidden here too. It exists only to reserve the real
+   sticky header's height so the HOMEPAGE hero clone below it lands on the same
+   pixel row after Blazor's swap. On an app route there is no hero clone to keep
+   aligned -- the brand placeholder centres itself in the viewport -- so the
+   spacer reserves space for a header that is not painted yet and shows up as a
+   bare dark band across the top of an otherwise empty page. Hiding it here costs
+   the home-route alignment it was built for nothing, and removes the band. */
 html.shell-app-route .shell-hero-wrap,
-html.shell-app-route .static-shell {
+html.shell-app-route .static-shell,
+html.shell-app-route .shell-header-spacer {
     display: none;
 }
 
@@ -448,8 +457,14 @@ html.shell-app-route .shell-route-loading {
     gap: 0.75rem;
 
     /* Fills the void the hidden hero leaves behind, so the boot state is
-       centred in the viewport rather than pinned under the header band. */
-    min-height: 60vh;
+       centred in the viewport rather than pinned under the header band.
+       80vh, not 100vh: bootstrap.min.css (which zeroes the UA's default 8px
+       body margin) loads non-blocking here, so during the pre-boot shell the
+       body can still carry that margin and a full-viewport block would add a
+       scrollbar to a page that has nothing to scroll. 80vh also absorbs the
+       88px .shell-header-spacer hidden above, keeping the mark on roughly the
+       same pixel row it sat on before. */
+    min-height: 80vh;
 
     color: #1A2C54;
 }

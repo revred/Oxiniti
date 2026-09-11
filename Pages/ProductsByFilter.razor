@@ -2,6 +2,7 @@
 @inject NavigationManager Nav
 @inject CartService CartService
 @inject IMakerClient MakerClient
+@inject ProductApiClient ProductApi
 @inject ProductCatalogService Catalog
 @inject IAuthenticationService AuthenticationService
 @inject IJSRuntime JS
@@ -187,19 +188,40 @@
     {
         Loc.OnChange += StateHasChanged;
 
-        // fetch all types so the “Filter Product Types” dropdown can be populated
-        // -- the shared, cached catalogue call (see ProductCatalogService); never throws.
-        AllTypes = (await Catalog.GetGroupsAsync()).ToList();
+        // The products grid is what this page is FOR, and it does not depend on
+        // the type list -- LoadProducts sends the slug from the route. Awaiting
+        // the catalogue first meant that on a cold boot (before Program.cs's
+        // preload had landed) the grid did not even start loading until a whole
+        // extra round trip had come back: ~0.65 s of pure network, South India to
+        // UK South, added to a page showing two products. Start both, await both.
+        //
+        // GetGroupsAsync is the shared, cached catalogue call (see
+        // ProductCatalogService) and never throws; LoadProducts handles its own
+        // failures, so the only reason for the try here is an unexpected one.
+        var typesTask = Catalog.GetGroupsAsync();
 
-        // initial load
+        Task productsTask;
         try
         {
-            await LoadProducts();
+            productsTask = LoadProducts();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Products] Initial LoadProducts failed: {ex}");
+            productsTask = Task.CompletedTask;
+        }
+
+        try
+        {
+            await productsTask;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Products] Initial LoadProducts failed: {ex}");
         }
+
+        // Only the filter dropdown waits on this, so it is awaited last.
+        AllTypes = (await typesTask).ToList();
     }
 
     private async Task LoadProducts()
@@ -218,7 +240,7 @@
 
         try
         {
-            var result = await MakerClient.ProductsBySlugAsync(body: request);
+            var result = await ProductApi.ProductsBySlugAsync(request);
             FilteredProducts = result.Products.ToList();
             TotalPages = result.TotalPages;
         }

@@ -20,6 +20,10 @@ builder.Services.AddSingleton<AuthReadyGate>();
 builder.Services.AddSingleton<DemoService>();
 builder.Services.AddSingleton<BusinessInfoService>();
 builder.Services.AddSingleton<ProductCatalogService>();
+// Reads ProductsBySlug/ProductDetails over GET so the browser can cache them,
+// falling back to the generated client's POST. Registered after AddMakerClient
+// resolves IMakerClient at first use, not here, so ordering does not matter.
+builder.Services.AddSingleton<ProductApiClient>();
 builder.Services.AddSingleton<LocalizationService>();
 builder.Services.AddSingleton<IDemoAccountService, DemoAccountService>();
 builder.Services.AddOptions<StripeSettings>()

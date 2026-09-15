@@ -16,12 +16,16 @@ window.oxynitiMap = {
     _defaultLng: 78.7,
     _defaultZoom: 7,
 
-    // Hide Leaflet's default "Leaflet | © OpenStreetMap contributors" box in the map corner.
-    _mapOptions: { attributionControl: false },
+    _mapOptions: {},
 
+    // tile.openstreetmap.org serves an "Access blocked" tile to requests with no Referer,
+    // so send one explicitly. The OSM tile policy also requires the visible credit line.
     _addTiles: function (map) {
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
+        map.attributionControl.setPrefix(false);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            referrerPolicy: 'strict-origin-when-cross-origin',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
         }).addTo(map);
     },
 
@@ -37,17 +41,85 @@ window.oxynitiMap = {
 
         let marker = hasStart ? L.marker([startLat, startLng], { draggable: true }).addTo(map) : null;
 
+        const fillPlace = this._placeFiller(elementId);
+
         const placeMarker = (latlng) => {
             if (marker) {
                 marker.setLatLng(latlng);
             } else {
                 marker = L.marker(latlng, { draggable: true }).addTo(map);
+                marker.on('dragend', () => fillPlace(marker.getLatLng()));
             }
+            fillPlace(latlng);
         };
 
+        if (marker) marker.on('dragend', () => fillPlace(marker.getLatLng()));
         map.on('click', (e) => placeMarker(e.latlng));
 
         this._maps[elementId] = { map, getMarker: () => marker };
+    },
+
+    // Returns fn(latlng) that looks up the tapped spot's village via OSM Nominatim and
+    // writes it into the form's Village / Town box. It never overwrites text the user
+    // typed: only an empty box, or one this function filled last, is replaced.
+    _placeFiller: function (elementId) {
+        const mapEl = document.getElementById(elementId);
+        const form = mapEl && mapEl.closest('form');
+        const input = form && form.querySelector('[data-field="place"]');
+        if (!input) return () => {};
+
+        let lastFilled = null;
+        let timer = null;
+        let pending = null;
+
+        return (latlng) => {
+            clearTimeout(timer);
+            // Debounce so repeated taps / drags make one lookup (Nominatim allows 1 req/s).
+            timer = setTimeout(async () => {
+                const current = input.value.trim();
+                if (current && current !== lastFilled) return;
+
+                if (pending) pending.abort();
+                pending = new AbortController();
+
+                const lang = document.documentElement.lang || 'en';
+                const url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&addressdetails=1' +
+                    `&lat=${latlng.lat}&lon=${latlng.lng}&accept-language=${encodeURIComponent(lang)}`;
+
+                try {
+                    const res = await fetch(url, {
+                        signal: pending.signal,
+                        referrerPolicy: 'strict-origin-when-cross-origin'
+                    });
+                    if (!res.ok) return;
+                    const label = this._placeLabel((await res.json()).address);
+                    if (!label) return;
+
+                    // Re-check: the user may have typed while the lookup was in flight.
+                    const now = input.value.trim();
+                    if (now && now !== lastFilled) return;
+
+                    input.value = label;
+                    lastFilled = label;
+                    // Blazor's InputText binds on 'change'; the static island reads .value.
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch (err) {
+                    if (err.name !== 'AbortError') console.warn('[oxynitiMap] Place lookup failed:', err);
+                }
+            }, 600);
+        };
+    },
+
+    // "Village, Taluk" (e.g. "Mettutteruvu, Lalgudi"), falling back to town/city and district.
+    _placeLabel: function (address) {
+        if (!address) return '';
+        const primary = address.village || address.hamlet || address.town || address.city || address.county;
+        if (!primary) return '';
+        const secondary = address.county && address.county !== primary
+            ? address.county
+            : address.state_district;
+        return secondary && secondary !== primary ? `${primary}, ${secondary}` : primary;
     },
 
     getPickerLocation: function (elementId) {

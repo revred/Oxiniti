@@ -41,6 +41,44 @@
         initFreeDemoForm();
         initVideos();
         initOxyNanoClickToPlay();
+        initFaqAccordion();
+    }
+
+    // ---- FAQ accordion -----------------------------------------------------
+    // Port of Pages/Components/FAQSection.razor's Toggle(): one item open at a
+    // time, clicking the open one closes it. Keeps the same classes/aria/icon
+    // the Razor markup renders so FAQSection.razor.css applies unchanged.
+    function initFaqAccordion() {
+        var lists = document.querySelectorAll(".faq-list");
+        lists.forEach(function (list) {
+            list.addEventListener("click", function (e) {
+                var button = e.target.closest(".faq-question");
+                if (!button || !list.contains(button)) return;
+
+                var item = button.closest(".faq-item");
+                var opening = !item.classList.contains("open");
+
+                list.querySelectorAll(".faq-item").forEach(function (other) {
+                    setFaqItemOpen(other, opening && other === item);
+                });
+            });
+        });
+    }
+
+    function setFaqItemOpen(item, open) {
+        item.classList.toggle("open", open);
+
+        var button = item.querySelector(".faq-question");
+        if (button) button.setAttribute("aria-expanded", open ? "true" : "false");
+
+        var answer = item.querySelector(".faq-answer");
+        if (answer) answer.setAttribute("aria-hidden", open ? "false" : "true");
+
+        var icon = item.querySelector(".faq-question i");
+        if (icon) {
+            icon.classList.toggle("bi-dash-lg", open);
+            icon.classList.toggle("bi-plus-lg", !open);
+        }
     }
 
     // ---- Header login/account icon -----------------------------------------

@@ -12,11 +12,11 @@
 
             @* What the clip shows, read as two instrument readings. *@
             <dl class="sky-readout">
-                <div class="readout-row">
+                <div class="readout-item">
                     <dt><span class="readout-dot"></span>@Loc.T("sky.l1", "In frame")</dt>
                     <dd>@Loc.T("sky.c1", "Unit 1 · nano-plume active")</dd>
                 </div>
-                <div class="readout-row is-live">
+                <div class="readout-item is-live">
                     <dt><span class="readout-dot"></span>@Loc.T("sky.l2", "Measured")</dt>
                     <dd>
                         @Loc.T("sky.c2", "DO rising across pond")
@@ -50,32 +50,50 @@
                         <path d="M7 17 17 7M9 7h8v8" />
                     </svg>
                 </a>
-                <span class="sky-note">@Loc.T("sky.note", "drone capture · unedited")</span>
+                <span class="sky-note">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="m8.5 12.2 2.4 2.4 4.6-4.9" />
+                    </svg>
+                    @Loc.T("sky.note", "drone capture · unedited")
+                </span>
             </div>
         </div>
 
-        @* A single unedited frame from the drone clip, framed as a field card. *@
+        @*
+            A landscape crop of one unedited drone frame (units, hoses and the
+            plume). Deliberately not a link and no play overlay: the
+            "Watch on YouTube" button is the one way to the clip.
+        *@
         <figure class="sky-still">
-            <figcaption class="still-head">
-                <i class="rec-dot" aria-hidden="true"></i>
-                <span>@Loc.T("sky.c3", "Field trial · South India")</span>
-            </figcaption>
-            <picture>
-                <source type="image/avif"
-                        srcset="/images/pond-still-frame.avif 1x, /images/pond-still-frame@2x.avif 2x" />
-                <source type="image/webp"
-                        srcset="/images/pond-still-frame.webp 1x, /images/pond-still-frame@2x.webp 2x" />
-                <img src="/images/pond-still-frame.jpg"
-                     srcset="/images/pond-still-frame.jpg 1x, /images/pond-still-frame@2x.jpg 2x"
-                     width="400"
-                     height="660"
-                     loading="lazy"
-                     decoding="async"
-                     alt="@Loc.T("sky.alt", "Drone view of the trial pond: two Oxyniti units on the bank, hoses running into the water, and a milky plume of dissolved oxygen at the diffuser.")" />
-            </picture>
-            <div class="still-foot">
-                <span class="still-caption">@Loc.T("sky.cap", "Two units, one working pond")</span>
+            <div class="still-media">
+                <picture>
+                    <source type="image/avif"
+                            srcset="/images/pond-aerial-wide.avif 480w, /images/pond-aerial-wide@2x.avif 800w"
+                            sizes="(max-width: 900px) 92vw, 560px" />
+                    <source type="image/webp"
+                            srcset="/images/pond-aerial-wide.webp 480w, /images/pond-aerial-wide@2x.webp 800w"
+                            sizes="(max-width: 900px) 92vw, 560px" />
+                    <img src="/images/pond-aerial-wide.jpg"
+                         srcset="/images/pond-aerial-wide.jpg 480w, /images/pond-aerial-wide@2x.jpg 800w"
+                         sizes="(max-width: 900px) 92vw, 560px"
+                         width="800"
+                         height="600"
+                         loading="lazy"
+                         decoding="async"
+                         alt="@Loc.T("sky.alt", "Drone view of the trial pond: two Oxyniti units on the bank, hoses running into the water, and a milky plume of dissolved oxygen at the diffuser.")" />
+                </picture>
+
+                <span class="still-chip">
+                    <i class="rec-dot"></i>
+                    @Loc.T("sky.c3", "Field trial · South India")
+                </span>
+
                 <span class="still-tag">@Loc.T("sky.still", "Still frame")</span>
+
+                <figcaption class="still-foot">
+                    <span class="still-caption">@Loc.T("sky.cap", "Two units, one working pond")</span>
+                </figcaption>
             </div>
         </figure>
     </div>

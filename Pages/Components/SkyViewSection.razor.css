@@ -5,15 +5,22 @@
     --sky-muted: #6B7A8F;
     --sky-teal: #0FBFAE;
     --sky-blue: #3D8FB5;
+    --sky-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
     padding: 3rem 0;
 }
 
-/* Copy on the left, the still-frame card on the right. */
+/* Copy on the left, a landscape poster on the right -- both columns end up
+   roughly the same height, so the section no longer grows around a tall
+   portrait frame. */
 .sky-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     gap: clamp(2rem, 5vw, 4.5rem);
     align-items: center;
+    /* On very wide screens keep copy and photo as one group (left-aligned
+       with the sections around it) instead of pushing the photo to the far
+       edge with an empty gulf in between. */
+    max-width: 1320px;
 }
 
 .kicker {
@@ -26,7 +33,7 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--sky-blue);
-    margin-bottom: 1.1rem;
+    margin-bottom: 1rem;
 }
 
 .kicker::before {
@@ -40,13 +47,15 @@
 
 .section-title {
     color: var(--sky-navy);
-    /* Floor lowered from 2.4rem to the 2.3rem the 768px override used to
-       force, so the clamp lands there by itself rather than snapping. */
-    font-size: clamp(2.3rem, 4.2vw, 3.6rem);
+    font-size: clamp(2.2rem, 3.6vw, 3.1rem);
     font-weight: 800;
     line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin: 0 0 1.25rem;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.1rem;
+    /* app.css pads every .section-title by 1.5rem, which pushed this one out of
+       line with the kicker and lead above and below it. */
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .title-stop {
@@ -54,47 +63,43 @@
 }
 
 .section-lead {
-    max-width: 620px;
+    max-width: 34rem;
     color: var(--sky-ink);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     line-height: 1.65;
     margin-bottom: 1.75rem;
 }
 
-/* ---- What the clip shows, read as two instrument readings ------------- */
+/* ---- What the clip shows: two readings side by side, hairline-divided --- */
 
 .sky-readout {
-    margin: 0 0 1.75rem;
-    overflow: hidden;
-    border: 1px solid rgba(26, 44, 84, 0.1);
-    border-radius: 1rem;
-    background: #FFFFFF;
-    box-shadow: 0 18px 40px -30px rgba(11, 31, 51, 0.55);
-}
-
-.readout-row {
     display: grid;
-    grid-template-columns: 9.5rem minmax(0, 1fr);
-    align-items: center;
-    padding: 1.05rem 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 34rem;
+    margin: 0 0 2rem;
+    padding: 1.1rem 0;
+    border-top: 1px solid rgba(26, 44, 84, 0.1);
+    border-bottom: 1px solid rgba(26, 44, 84, 0.1);
 }
 
-.readout-row + .readout-row {
-    border-top: 1px solid rgba(26, 44, 84, 0.08);
+.readout-item {
+    display: grid;
+    gap: 0.45rem;
+    align-content: start;
 }
 
-/* The live reading sits on a faint wash so the eye lands on the number that moves. */
-.readout-row.is-live {
-    background: #F6FAFC;
+.readout-item + .readout-item {
+    padding-left: 1.5rem;
+    border-left: 1px solid rgba(26, 44, 84, 0.1);
 }
 
-.readout-row dt {
+.readout-item dt {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.55rem;
     margin: 0;
     font-family: var(--sky-mono);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -114,15 +119,15 @@
     box-shadow: 0 0 0 3px rgba(15, 191, 174, 0.18);
 }
 
-.readout-row dd {
+.readout-item dd {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     margin: 0;
     color: var(--sky-navy);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 .trend {
@@ -149,18 +154,18 @@
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.85rem 1.6rem 0.85rem 1.1rem;
+    padding: 0.8rem 1.5rem 0.8rem 0.95rem;
     border-radius: 2rem;
     border: 1px solid rgba(26, 44, 84, 0.08);
     background: linear-gradient(135deg, #1A2C54 0%, #24406F 100%);
     color: #F2FAFF;
-    font-size: 1.02rem;
+    font-size: 1rem;
     font-weight: 600;
     text-decoration: none;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.16),
         0 14px 30px -16px rgba(11, 31, 51, 0.85);
-    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transition: transform 0.35s var(--sky-ease),
                 box-shadow 0.35s ease;
 }
 
@@ -211,7 +216,7 @@
     stroke-linecap: round;
     stroke-linejoin: round;
     opacity: 0.7;
-    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transition: transform 0.35s var(--sky-ease),
                 opacity 0.35s ease;
 }
 
@@ -221,82 +226,138 @@
     opacity: 1;
 }
 
+/* A quiet "verified footage" label beside the button. */
 .sky-note {
-    font-family: var(--sky-mono);
-    font-size: 0.85rem;
-    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--sky-muted);
+    text-transform: capitalize;
 }
 
-/* ---- The still-frame card ----------------------------------------------- */
+.sky-note svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    fill: rgba(15, 191, 174, 0.12);
+    stroke: var(--sky-teal);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---- The poster: landscape crop, overlays sit on the image -------------- */
 
 .sky-still {
+    position: relative;
+    /* Capped so the 800px-wide source never upscales (and the section stays
+       short) on wide screens; sits against the right edge of its column. */
+    width: 100%;
+    max-width: 620px;
+    justify-self: end;
     margin: 0;
-    padding: 1.5rem 1.5rem 1.4rem;
-    border-radius: 1.25rem;
-    background: #0F2540;
-    color: #EAF2F8;
-    box-shadow: 0 30px 60px -30px rgba(11, 31, 51, 0.75);
 }
 
-.still-head {
-    display: flex;
+.still-media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-radius: 1.25rem;
+    background: #0F2540;
+    color: #FFFFFF;
+    text-decoration: none;
+    box-shadow: 0 0 0 1px rgba(26, 44, 84, 0.08);
+}
+
+.still-media picture,
+.still-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.still-media img {
+    object-fit: cover;
+}
+
+/* Legibility scrim: darker at the bottom where the caption sits. */
+.still-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(8, 20, 38, 0.35) 0%, rgba(8, 20, 38, 0) 26%),
+        linear-gradient(0deg, rgba(8, 20, 38, 0.78) 0%, rgba(8, 20, 38, 0) 42%);
+    pointer-events: none;
+}
+
+.still-chip {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1;
+    display: inline-flex;
     align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 1.1rem;
+    gap: 0.55rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(8, 20, 38, 0.45);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     font-family: var(--sky-mono);
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #EAF2F8;
 }
 
 .rec-dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     flex: none;
     border-radius: 50%;
-    background: #E2452C;
-    box-shadow: 0 0 0 3px rgba(226, 69, 44, 0.22);
+    background: #FF4D3A;
+    box-shadow: 0 0 0 3px rgba(255, 77, 58, 0.25);
     animation: rec-blink 2s ease-in-out infinite;
 }
 
-.sky-still picture,
-.sky-still img {
-    display: block;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.sky-still img {
-    height: auto;
-    aspect-ratio: 400 / 660;
-    object-fit: cover;
-    border-radius: 0.6rem;
-    box-shadow: 0 0 0 1px rgba(213, 244, 255, 0.12);
-}
-
+/* Caption sits bottom-left; the plume is on the right, so nothing covers it. */
 .still-foot {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 1.1rem;
+    position: absolute;
+    right: 45%;
+    bottom: 1.1rem;
+    left: 1.25rem;
+    z-index: 1;
 }
 
 .still-caption {
-    font-size: 0.95rem;
+    display: block;
+    font-size: 1.05rem;
     font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+    text-shadow: 0 1px 12px rgba(2, 13, 25, 0.5);
 }
 
 .still-tag {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+    padding: 0.45rem 0.75rem;
+    border-radius: 2rem;
+    background: rgba(8, 20, 38, 0.35);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     font-family: var(--sky-mono);
-    font-size: 0.72rem;
+    font-size: 0.64rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(234, 242, 248, 0.55);
+    color: rgba(255, 255, 255, 0.8);
     white-space: nowrap;
 }
 
@@ -314,43 +375,47 @@
 @media (max-width: 900px) {
     .sky-grid {
         grid-template-columns: 1fr;
-        gap: 2.5rem;
+        gap: 3rem;
     }
 
     .sky-still {
         width: 100%;
-        max-width: 520px;
+        max-width: 640px;
+        justify-self: center;
         margin: 0 auto;
     }
 }
 
 @media (max-width: 768px) {
     .section-lead {
+        font-size: 1.05rem;
         margin-bottom: 1.5rem;
     }
 
-    .readout-row {
-        grid-template-columns: 1fr;
-        gap: 0.35rem;
-        padding: 0.9rem 1.1rem;
-    }
-
-    .readout-row dd {
-        font-size: 1rem;
+    .readout-item dd {
+        font-size: 0.95rem;
     }
 
     .sky-cta {
         font-size: 0.96rem;
-        padding: 0.75rem 1.35rem 0.75rem 0.95rem;
+        padding: 0.75rem 1.35rem 0.75rem 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .sky-readout {
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
     }
 
-    .sky-still {
-        padding: 1.1rem 1.1rem 1rem;
+    .readout-item + .readout-item {
+        padding: 0.9rem 0 0;
+        border-left: 0;
+        border-top: 1px solid rgba(26, 44, 84, 0.1);
     }
 
-    .still-foot {
-        flex-direction: column;
-        gap: 0.35rem;
+    .still-tag {
+        display: none;
     }
 }
 

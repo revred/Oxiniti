@@ -16,12 +16,16 @@ window.oxynitiMap = {
     _defaultLng: 78.7,
     _defaultZoom: 7,
 
-    // Hide Leaflet's default "Leaflet | © OpenStreetMap contributors" box in the map corner.
-    _mapOptions: { attributionControl: false },
+    _mapOptions: {},
 
+    // tile.openstreetmap.org serves an "Access blocked" tile to requests with no Referer,
+    // so send one explicitly. The OSM tile policy also requires the visible credit line.
     _addTiles: function (map) {
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
+        map.attributionControl.setPrefix(false);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            referrerPolicy: 'strict-origin-when-cross-origin',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
         }).addTo(map);
     },
 

@@ -1,52 +1,88 @@
 .field-footage-section {
-    padding: 1rem 0 3rem;
+    --ff-mono: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    --ff-navy: #1A2C54;
+    --ff-ink: #364354;
+    --ff-teal: #0FBFAE;
+    --ff-blue: #3D8FB5;
+    padding: 3rem 0;
+}
+
+/* Copy + link on the left, a square still on the right -- the same shape as
+   the Sky View section, so the section stays short instead of growing
+   around a tall portrait frame. */
+.footage-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+    max-width: 1320px;
 }
 
 .kicker {
-    display: inline-block;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--ff-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #3D8FB5;
-    margin-bottom: 0.75rem;
+    color: var(--ff-blue);
+    margin-bottom: 1rem;
+}
+
+.kicker::before {
+    content: "";
+    width: 28px;
+    height: 2px;
+    flex: none;
+    border-radius: 2px;
+    background: var(--ff-teal);
 }
 
 .section-title {
-    color: #1A2C54;
-    font-size: 2.25rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
+    color: var(--ff-navy);
+    font-size: clamp(2.2rem, 3.6vw, 3.1rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.1rem;
+    /* app.css pads every .section-title by 1.5rem; keep it in line with the
+       kicker and lead. */
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .section-lead {
-    color: #3a3a3a;
-    font-size: 1.02rem;
-    margin-bottom: 1.75rem;
+    max-width: 34rem;
+    color: var(--ff-ink);
+    font-size: 1.1rem;
+    line-height: 1.65;
+    margin-bottom: 2rem;
 }
 
-.footage-grid {
-    max-width: 420px;
-    margin: 0 auto;
-}
+/* ---- The still: square crop, overlays sit on the image ------------------ */
 
 .footage-card {
     position: relative;
-    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 460px;
+    justify-self: end;
+    aspect-ratio: 1 / 1;
+    margin: 0;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 1.25rem;
+    background: #0F2540;
+    box-shadow: 0 0 0 1px rgba(26, 44, 84, 0.08);
 }
 
-.footage-card.video-card {
-    aspect-ratio: 3 / 4;
-}
-
-.footage-card video,
 .footage-card img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
+    /* The plume sits in the lower-middle of the portrait frame. */
+    object-position: 50% 62%;
 }
 
 .caption {
@@ -54,8 +90,147 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.75), transparent);
+    background: linear-gradient(0deg, rgba(8, 20, 38, 0.78), transparent);
     color: #fff;
-    font-size: 0.85rem;
-    padding: 1.5rem 0.75rem 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 2rem 1.1rem 0.9rem;
+}
+
+.still-tag {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 2rem;
+    background: rgba(8, 20, 38, 0.4);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+}
+
+/* ---- The outbound call to action (matches the Sky View button) ---------- */
+
+.footage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+}
+
+.footage-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.5rem 0.8rem 0.95rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(26, 44, 84, 0.08);
+    background: linear-gradient(135deg, #1A2C54 0%, #24406F 100%);
+    color: #F2FAFF;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 14px 30px -16px rgba(11, 31, 51, 0.85);
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                box-shadow 0.35s ease;
+}
+
+.footage-cta:hover,
+.footage-cta:focus-visible {
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 20px 38px -16px rgba(11, 31, 51, 0.9);
+}
+
+.footage-cta:focus-visible {
+    outline: 2px solid #3D8FB5;
+    outline-offset: 3px;
+}
+
+/* The red mark sits on its own light plate so it reads against the navy. */
+.yt-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px -2px rgba(2, 13, 25, 0.6);
+}
+
+.yt-mark svg {
+    width: 21px;
+    height: 21px;
+    fill: #FF0033;
+}
+
+.yt-mark .yt-tri {
+    fill: #FFFFFF;
+}
+
+.cta-arrow {
+    width: 15px;
+    height: 15px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.7;
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                opacity 0.35s ease;
+}
+
+.footage-cta:hover .cta-arrow,
+.footage-cta:focus-visible .cta-arrow {
+    transform: translate(2px, -2px);
+    opacity: 1;
+}
+
+@media (max-width: 900px) {
+    .footage-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .footage-card {
+        max-width: 460px;
+        justify-self: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-lead {
+        font-size: 1.05rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .footage-cta {
+        font-size: 0.96rem;
+        padding: 0.75rem 1.35rem 0.75rem 0.9rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .footage-cta,
+    .cta-arrow {
+        transition: none;
+    }
+
+    .footage-cta:hover,
+    .footage-cta:focus-visible {
+        transform: none;
+    }
 }

@@ -1,13 +1,7 @@
-@using Microsoft.JSInterop
-@implements IAsyncDisposable
-@inject IJSRuntime JS
 @inject LocalizationService Loc
+@implements IDisposable
 
 <div class="field-footage-section" id="use-cases">
-    <span class="kicker">@Loc.T("gal.kicker", "Use cases")</span>
-    <h2 class="section-title">@Loc.T("gal.h2", "No studio. No CGI. Just working ponds.")</h2>
-    <p class="section-lead">@Loc.T("gal.p", "Real footage from a working farm during a live trial.")</p>
-
     <!-- The two "install photo" stills that used to sit beside this video were
          the same generated unit pair composited onto two different backdrops
          (see tracked imagery issue) -- pulled rather than shipped next to a
@@ -15,70 +9,65 @@
          exist; until then this section leads with the one asset that is
          genuinely real footage. -->
     <div class="footage-grid">
-        <div class="footage-card video-card">
-            <video @ref="_videoElement" muted loop playsinline poster="/images/plume-poster.jpg"
-                   data-video-init="lazy">
-                <source data-src="/videos/plume-portrait.webm" type="video/webm" />
-                <source data-src="/videos/plume-portrait.mp4" type="video/mp4" />
-            </video>
-            <div class="caption">@Loc.T("ff.cap1", "The nano-plume — oxygen dissolving in real time")</div>
+        <div class="footage-copy">
+            <span class="kicker">@Loc.T("gal.kicker", "Use cases")</span>
+            <h2 class="section-title">@Loc.T("gal.h2", "No studio. No CGI. Just working ponds.")</h2>
+            <p class="section-lead">@Loc.T("gal.p", "Real footage from a working farm during a live trial.")</p>
+
+            @*
+                The clip lives on YouTube rather than on the homepage, the same as
+                the Sky View section: streaming it inline cost every visitor a
+                video download for footage most of them scrolled past.
+            *@
+            <div class="footage-actions">
+                <a class="footage-cta"
+                   href="@ShortUrl"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="@Loc.T("ff.aria", "Watch the live trial footage on YouTube (opens in a new tab)")">
+                    <span class="yt-mark">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M21.6 7.2a2.5 2.5 0 0 0-1.75-1.77C18.28 5 12 5 12 5s-6.28 0-7.85.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.75 1.77C5.72 19 12 19 12 19s6.28 0 7.85-.43a2.5 2.5 0 0 0 1.75-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8z" />
+                            <path class="yt-tri" d="M10.15 15.1V8.9L15.5 12z" />
+                        </svg>
+                    </span>
+                    <span>@Loc.T("sky.cta", "Watch on YouTube")</span>
+                    <svg class="cta-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 17 17 7M9 7h8v8" />
+                    </svg>
+                </a>
+            </div>
         </div>
+
+        @*
+            A square crop of one real frame of the footage (the plume). Deliberately
+            not a link and no play overlay: the "Watch on YouTube" button is the one
+            way to the clip.
+        *@
+        <figure class="footage-card">
+            <img src="/images/plume-poster.jpg"
+                 width="480"
+                 height="854"
+                 loading="lazy"
+                 decoding="async"
+                 alt="@Loc.T("ff.alt", "Still frame from the trial footage: the nano-plume of dissolved oxygen churning the pond water.")" />
+            <span class="still-tag">@Loc.T("sky.still", "Still frame")</span>
+            <figcaption class="caption">@Loc.T("ff.cap1", "The nano-plume — oxygen dissolving in real time")</figcaption>
+        </figure>
     </div>
 </div>
 
 @code {
-    private ElementReference _videoElement;
-    private IJSObjectReference? _videoModule;
-    private IJSObjectReference? _videoController;
+    /// <summary>The live trial clip, published as a YouTube Short.</summary>
+    private const string ShortUrl = "https://www.youtube.com/shorts/eqVV7t_qtNQ";
 
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-
-        try
-        {
-            _videoModule = await JS.InvokeAsync<IJSObjectReference>(
-                "import",
-                "./js/lazyBackgroundVideo.js");
-
-            _videoController = await _videoModule.InvokeAsync<IJSObjectReference>(
-                "init",
-                _videoElement,
-                null,
-                new { eager = false });
-        }
-        catch (JSException)
-        {
-            // Prevent page from breaking if JS is unavailable.
-        }
-    }
-
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
         Loc.OnChange -= StateHasChanged;
-
-        try
-        {
-            if (_videoController is not null)
-            {
-                await _videoController.InvokeVoidAsync("dispose");
-                await _videoController.DisposeAsync();
-            }
-
-            if (_videoModule is not null)
-            {
-                await _videoModule.DisposeAsync();
-            }
-        }
-        catch (JSDisconnectedException)
-        {
-            // Safe to ignore when Blazor circuit disconnects.
-        }
     }
 }

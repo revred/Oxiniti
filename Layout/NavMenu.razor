@@ -62,13 +62,14 @@
         </NavLink>
 
         <!-- 3. TECHNOLOGY -->
-        <a class="nav-link"
-           href="/#technology"
-           data-section="technology"
-           @onclick='() => GoToHomeSection("technology")'
-           @onclick:preventDefault="true">
+        <!-- Points at the standalone /technology page (the same target the
+             footer uses), not the home page's #technology section. Like
+             Products this is a real route, so no data-section: NavLink's
+             routing-based active state owns the highlight. -->
+        <NavLink class="nav-link"
+                 href="/technology">
             @Loc.T("nav.tech", "Technology")
-        </a>
+        </NavLink>
 
         <!-- 4. RESULTS -->
         <a class="nav-link"

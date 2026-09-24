@@ -73,9 +73,27 @@
         height: auto;
     }
 
-/* Inside the figure the heading sits directly above the scale list, which
-   brings its own top margin -- no second gap needed. */
-.tech-figure .tech-head {
+/* Prose on one side, a figure list on the other. Same two-up as the scale
+   figure, without the framed image. */
+.tech-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+}
+
+    .tech-split .tech-head p + p {
+        margin-top: 0.9rem;
+    }
+
+    .tech-split .tech-scale {
+        margin-top: 0;
+    }
+
+/* Inside the figure and the split, the heading sits directly above a list
+   that brings its own top margin -- no second gap needed. */
+.tech-figure .tech-head,
+.tech-split .tech-head {
     margin-bottom: 0;
 }
 
@@ -112,6 +130,15 @@
         font-size: 0.95rem;
         line-height: 1.6;
     }
+
+/* Variant for a plain figure column (temperature -> mg/L) rather than a
+   sentence: the value carries the weight, not the prose. */
+.tech-scale-figures span {
+    color: #1A2C54;
+    font-size: 1.02rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
 
 .tech-figcaption {
     margin: 1.4rem 0 0;
@@ -342,7 +369,8 @@
 /* ---------- responsive ----------------------------------------------- */
 
 @media (max-width: 900px) {
-    .tech-figure {
+    .tech-figure,
+    .tech-split {
         grid-template-columns: 1fr;
         gap: 1.9rem;
     }

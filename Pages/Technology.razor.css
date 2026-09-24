@@ -1,0 +1,449 @@
+/* Page chrome -- hero, stat strip, link cards, CTA -- comes from
+   css/content-pages.css and is shared with the other content pages. What
+   lives here is only what this page adds on top: the scale figure, the
+   physics cards, the step grid, the comparison table, the dark proof band
+   and the FAQ. Same tokens as the shared sheet: navy #1A2C54 / #0B1F33,
+   teal #3D8FB5, cyan #2de0e5. */
+
+/* ---------- shared band + heading rhythm ---------------------------- */
+
+.tech-band {
+    margin: 0 0 4rem;
+}
+
+    /* The last band carries the CTA, which brings its own top margin, and
+       .cp-body already pads the page foot. */
+    .tech-band:last-of-type {
+        margin-bottom: 1rem;
+    }
+
+.tech-head {
+    max-width: 48rem;
+    margin: 0 0 1.9rem;
+}
+
+.tech-eyebrow {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #3D8FB5;
+    margin-bottom: 0.6rem;
+}
+
+.tech-head h2 {
+    color: #1A2C54;
+    font-size: clamp(1.45rem, 2.6vw, 1.95rem);
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 0.6rem;
+}
+
+.tech-head p {
+    color: #5a6b7d;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ---------- 1. Scale figure ----------------------------------------- */
+/* Two columns rather than a lone centred image: at 1320px a 620px figure
+   left half the row empty on either side, which is what made the page
+   read as sparse. */
+
+.tech-figure {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: center;
+}
+
+.tech-figure-frame {
+    border-radius: 1.25rem;
+    overflow: hidden;
+    background: linear-gradient(160deg, #1A2C54 0%, #0B1F33 100%);
+    border: 1px solid rgba(61, 143, 181, 0.35);
+    box-shadow: 0 30px 60px -32px rgba(11, 31, 51, 0.75);
+}
+
+    .tech-figure-frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+/* Prose on one side, a figure list on the other. Same two-up as the scale
+   figure, without the framed image. */
+.tech-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+}
+
+    .tech-split .tech-head p + p {
+        margin-top: 0.9rem;
+    }
+
+    .tech-split .tech-scale {
+        margin-top: 0;
+    }
+
+/* Inside the figure and the split, the heading sits directly above a list
+   that brings its own top margin -- no second gap needed. */
+.tech-figure .tech-head,
+.tech-split .tech-head {
+    margin-bottom: 0;
+}
+
+.tech-scale {
+    list-style: none;
+    margin: 1.6rem 0 0;
+    padding: 0;
+}
+
+    .tech-scale li {
+        display: flex;
+        gap: 1.1rem;
+        align-items: baseline;
+        padding: 0.95rem 0;
+        border-bottom: 1px solid #e7ebf0;
+    }
+
+        .tech-scale li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+    .tech-scale b {
+        flex: 0 0 7rem;
+        color: #1A2C54;
+        font-size: 1.05rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+    }
+
+    .tech-scale span {
+        color: #3a3a3a;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+/* Variant for a plain figure column (temperature -> mg/L) rather than a
+   sentence: the value carries the weight, not the prose. */
+.tech-scale-figures span {
+    color: #1A2C54;
+    font-size: 1.02rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.tech-figcaption {
+    margin: 1.4rem 0 0;
+    color: #7a8794;
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+/* ---------- 2. Physics cards ---------------------------------------- */
+
+.tech-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+    gap: 1.25rem;
+}
+
+.tech-card {
+    background: linear-gradient(160deg, #ffffff 0%, #f3f9fc 100%);
+    border: 1px solid #e7ebf0;
+    border-radius: 1.1rem;
+    padding: 1.7rem 1.75rem;
+    box-shadow: 0 16px 38px -26px rgba(11, 31, 51, 0.6);
+}
+
+    .tech-card .ico {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 0.8rem;
+        background: rgba(61, 143, 181, 0.12);
+        color: #2b6f92;
+        font-size: 1.3rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .tech-card h3 {
+        color: #1A2C54;
+        font-size: 1.08rem;
+        font-weight: 700;
+        line-height: 1.35;
+        margin: 0 0 0.55rem;
+    }
+
+    .tech-card p {
+        color: #3a3a3a;
+        font-size: 0.95rem;
+        line-height: 1.68;
+        margin: 0;
+    }
+
+/* ---------- 3. Step grid -------------------------------------------- */
+/* The same four steps the page already had, as a 2x2 grid instead of four
+   full-width rows -- the rows ran a short sentence across 1320px. */
+
+/* Fixed two-up rather than auto-fit: auto-fit puts three steps on the top
+   row and leaves the fourth stranded on its own, which reads as a mistake.
+   Four steps want a 2x2. */
+.tech-steps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.tech-step {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e7ebf0;
+    border-radius: 1.1rem;
+    padding: 1.75rem 1.85rem;
+    box-shadow: 0 16px 38px -28px rgba(11, 31, 51, 0.55);
+}
+
+    /* Oversized ghost numeral -- keeps the sequence readable without
+       spending a whole column on a numbered bullet. */
+    .tech-step::before {
+        content: attr(data-n);
+        position: absolute;
+        top: -1rem;
+        right: 0.6rem;
+        font-size: 5.75rem;
+        font-weight: 800;
+        line-height: 1;
+        color: rgba(26, 44, 84, 0.06);
+        pointer-events: none;
+    }
+
+    .tech-step .step-tag {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: #3D8FB5;
+        margin-bottom: 0.55rem;
+    }
+
+    .tech-step h3 {
+        position: relative;
+        color: #1A2C54;
+        font-size: 1.12rem;
+        font-weight: 700;
+        line-height: 1.35;
+        margin: 0 0 0.55rem;
+    }
+
+    .tech-step p {
+        position: relative;
+        color: #3a3a3a;
+        font-size: 0.95rem;
+        line-height: 1.68;
+        margin: 0;
+    }
+
+/* ---------- 4. Comparison table ------------------------------------- */
+
+.tech-tablewrap {
+    border: 1px solid #e7ebf0;
+    border-radius: 1.15rem;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 20px 46px -32px rgba(11, 31, 51, 0.65);
+}
+
+.tech-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    /* Gradient on the row, not the cells, so the header reads as one bar
+       rather than three separately-shaded blocks. */
+    .tech-table thead tr {
+        background: linear-gradient(135deg, #1A2C54 0%, #0B1F33 100%);
+    }
+
+    .tech-table thead th {
+        background: transparent;
+        color: #fff;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-align: left;
+        padding: 1rem 1.3rem;
+    }
+
+        .tech-table thead th:last-child {
+            color: #7fe9ee;
+        }
+
+    .tech-table td {
+        padding: 1.05rem 1.3rem;
+        text-align: left;
+        vertical-align: top;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .tech-table tbody tr + tr {
+        border-top: 1px solid #eef2f6;
+    }
+
+    .tech-table td:first-child {
+        width: 22%;
+        color: #1A2C54;
+        font-weight: 700;
+    }
+
+    .tech-table td:nth-child(2) {
+        color: #6b7a8a;
+    }
+
+    .tech-table td:last-child {
+        color: #17324f;
+        font-weight: 600;
+        background: rgba(45, 224, 229, 0.06);
+        box-shadow: inset 1px 0 0 rgba(61, 143, 181, 0.16);
+    }
+
+/* ---------- 5. FAQ --------------------------------------------------- */
+
+.tech-faq {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 1.1rem;
+}
+
+.tech-q {
+    background: #f6f9fb;
+    border: 1px solid #e7ebf0;
+    border-radius: 1rem;
+    padding: 1.45rem 1.55rem;
+}
+
+    .tech-q h3 {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        color: #1A2C54;
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.45;
+        margin: 0 0 0.55rem;
+    }
+
+        .tech-q h3 i {
+            flex-shrink: 0;
+            color: #3D8FB5;
+            font-size: 1.05rem;
+            line-height: 1.45;
+        }
+
+    .tech-q p {
+        color: #4a5a6a;
+        font-size: 0.94rem;
+        line-height: 1.68;
+        margin: 0;
+    }
+
+    .tech-q a {
+        color: #2b6f92;
+        font-weight: 600;
+        text-underline-offset: 3px;
+    }
+
+/* ---------- responsive ----------------------------------------------- */
+
+@media (max-width: 900px) {
+    .tech-figure,
+    .tech-split {
+        grid-template-columns: 1fr;
+        gap: 1.9rem;
+    }
+}
+
+@media (max-width: 760px) {
+    .tech-band {
+        margin-bottom: 3rem;
+    }
+
+    /* Stack the comparison as one card per row; a 3-column table at phone
+       width either scrolls sideways or crushes to unreadable columns. */
+    .tech-table thead {
+        display: none;
+    }
+
+    .tech-table,
+    .tech-table tbody,
+    .tech-table tr,
+    .tech-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .tech-table tbody tr {
+        padding: 1.15rem 1.25rem;
+    }
+
+        .tech-table tbody tr + tr {
+            border-top: 1px solid #e7ebf0;
+        }
+
+    .tech-table td {
+        padding: 0;
+    }
+
+        .tech-table td:first-child {
+            width: auto;
+            font-size: 1.02rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .tech-table td:not(:first-child) {
+            position: relative;
+            padding: 0.7rem 0 0 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+            .tech-table td:not(:first-child)::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 0.7rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #93a1af;
+                margin-bottom: 0.25rem;
+            }
+
+        .tech-table td:last-child::before {
+            color: #3D8FB5;
+        }
+
+    .tech-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .tech-step {
+        padding: 1.5rem 1.4rem;
+    }
+
+    .tech-card {
+        padding: 1.5rem 1.4rem;
+    }
+}

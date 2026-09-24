@@ -206,90 +206,31 @@
         </div>
     </section>
 
-    <!-- ============ 5. WHAT IT MEANS ON THE POND ============ -->
-    @* Same four figures and the same fineprint as the home page's Results
-       section, reusing its keys so the two never drift apart in one
-       language and not the other. *@
-    <section class="tech-band">
-        <div class="tech-proof">
-            <div class="tech-head">
-                <span class="tech-eyebrow">@Loc.T("techpg.out.kicker", "What it means on the pond")</span>
-                <h2>@Loc.T("techpg.out.h", "Physics is only interesting if it shows up at harvest")</h2>
-                <p>@Loc.T("techpg.out.p", "Oxygen is the cheapest growth promoter ever made. Hold it higher for longer and the rest follows — better survival, better feed conversion, and room to stock harder.")</p>
-            </div>
-
-            <ul class="tech-outcomes">
-                <li>
-                    <b>2&times;</b>
-                    <span>@Loc.T("r1.c", "Dissolved oxygen uplift")</span>
-                </li>
-                <li>
-                    <b>+15%</b>
-                    <span>@Loc.T("r2.c", "Higher survival rate")</span>
-                </li>
-                <li>
-                    <b>&minus;15%</b>
-                    <span>@Loc.T("r3.c", "Feed conversion ratio")</span>
-                </li>
-                <li>
-                    <b>+30%</b>
-                    <span>@Loc.T("r4.c", "Stocking density potential")</span>
-                </li>
-            </ul>
-
-            <p class="tech-fine">
-                @((MarkupString)Loc.T("res.fine", "*Figures are typical ranges reported in published nano-bubble aquaculture studies and field trials; results vary with species, pond condition and management. We prove it on <b>your</b> pond with a free DO-meter demo before you pay anything."))
-            </p>
-        </div>
-    </section>
-
-    <!-- ============ 6. QUESTIONS ============ -->
+    <!-- ============ 5. QUESTIONS ============ -->
+    @* Technology only. The commercial questions (the demo, the species
+       list, whether it suits RAS) are answered on the pages that own
+       them and in the home FAQ -- repeating them here pulled the page
+       off topic. *@
     <section class="tech-band">
         <div class="tech-head">
             <span class="tech-eyebrow">@Loc.T("techpg.faq.kicker", "Questions we get asked")</span>
-            <h2>@Loc.T("techpg.faq.h", "The practical side")</h2>
+            <h2>@Loc.T("techpg.faq.h", "About the bubbles themselves")</h2>
         </div>
 
         <div class="tech-faq">
             <div class="tech-q">
-                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q1", "Does this replace my paddle wheels?")</h3>
-                <p>@Loc.T("techpg.a1", "Most farms run both to begin with. Paddle wheels move water and break the surface film; Oxyniti puts oxygen into the column. We measure dissolved oxygen on your own pond before and after, so you can decide what your site actually needs rather than take our word for it.")</p>
+                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q1", "How long do the bubbles actually last?")</h3>
+                <p>@Loc.T("techpg.a1", "Long enough to matter overnight, which is when it counts. Because they neither rise nor merge, nano-bubbles persist in the water far longer than millimetre bubbles that are gone in seconds — and that is what carries dissolved oxygen through the pre-dawn hours when a pond is most at risk.")</p>
             </div>
 
             <div class="tech-q">
                 <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q2", "Will the water look different?")</h3>
                 <p>@Loc.T("techpg.a2", "Briefly. A fresh plume reads as a faint milky cloud near the unit, then clears as the bubbles disperse through the pond. The bubbles themselves are far too small to see individually — what you can see is the density of them.")</p>
             </div>
-
-            <div class="tech-q">
-                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q3", "How long do the bubbles actually last?")</h3>
-                <p>@Loc.T("techpg.a3", "Long enough to matter overnight, which is when it counts. Because they neither rise nor merge, nano-bubbles persist in the water far longer than millimetre bubbles that are gone in seconds — and that is what carries dissolved oxygen through the pre-dawn hours when a pond is most at risk.")</p>
-            </div>
-
-            <div class="tech-q">
-                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q4", "Does it work in biofloc and RAS?")</h3>
-                <p>
-                    @Loc.T("techpg.a4", "Yes — those are exactly the systems where dissolved oxygen is the ceiling on stocking density.")
-                    <a href="/ras-oxygenation">@Loc.T("techpg.a4.link", "See oxygenation for RAS and biofloc")</a>.
-                </p>
-            </div>
-
-            <div class="tech-q">
-                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q5", "How do I know it is working on my pond?")</h3>
-                <p>@Loc.T("techpg.a5", "With a calibrated DO meter, before and after, on the same day. Our team installs a unit on your pond, takes the readings with you watching, and shows you the difference — no obligation either way.")</p>
-            </div>
-
-            <div class="tech-q">
-                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q6", "Which species has this been used on?")</h3>
-                <p>
-                    @Loc.T("techpg.a6", "Tilapia and GIFT, murrel, pangasius, freshwater prawn and carp polyculture, across pond grow-out, hatcheries and higher-density systems.")
-                    <a href="/aquaculture-oxygenation">@Loc.T("techpg.a6.link", "See how this applies to aquaculture")</a>.
-                </p>
-            </div>
         </div>
     </section>
 
-    <!-- ============ 7. WHERE TO NEXT ============ -->
+    <!-- ============ 6. WHERE TO NEXT ============ -->
     <section class="tech-band">
         <div class="tech-head">
             <span class="tech-eyebrow">@Loc.T("techpg.next.kicker", "Where to next")</span>

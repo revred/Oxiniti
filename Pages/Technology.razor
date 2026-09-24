@@ -27,60 +27,301 @@
 </section>
 
 <div class="cp-body">
-    <div class="tech-illustration" style="margin-bottom: 3rem;">
-        <img src="/images/nanobubble-vs-hair.png" alt="Illustration: a magnified human hair about 90 microns across, beside a cloud of nanobubbles under 200 nm, with a 100 micron scale bar. About 450 nanobubbles span one hair width." style="display: block; width: 100%; max-width: 620px; height: auto; margin: 0 auto; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);" />
-        <p style="max-width: 620px; margin: 0.875rem auto 0; text-align: center; font-size: 0.8125rem; line-height: 1.5; opacity: 0.7;">
-            @Loc.T("techpg.img_caption", "Illustration, not to scale. A typical human hair is 80–100 µm across; individual hairs range from 17 to 181 µm.")
-        </p>
-    </div>
 
-    <div class="cp-step">
-        <div class="cp-step-num">1</div>
-        <div class="cp-step-body">
-            <h2>@Loc.T("techpg.s1.h", "1. Draw and shear")</h2>
-            <p>@Loc.T("techpg.s1.p", "The unit draws pond or tank water and injects air through a nano-shear chamber, generating very large numbers of bubbles under 200 nanometres across.")</p>
+    @* Physics figures only — every number here is a property of the bubble,
+       not a claim about yield, so the strip needs no results disclaimer.
+       The performance figures live further down, with their fineprint. *@
+    <ul class="cp-stats">
+        <li class="cp-stat">
+            <span class="cp-stat-n">&lt;200 nm</span>
+            <span class="cp-stat-l">@Loc.T("techpg.stat1.l", "Bubble diameter")</span>
+        </li>
+        <li class="cp-stat">
+            <span class="cp-stat-n">~450</span>
+            <span class="cp-stat-l">@Loc.T("techpg.stat2.l", "Span one human hair")</span>
+        </li>
+        <li class="cp-stat">
+            <span class="cp-stat-n">10,000&times;</span>
+            <span class="cp-stat-l">@Loc.T("techpg.stat3.l", "Gas-to-water contact area")</span>
+        </li>
+        <li class="cp-stat">
+            <span class="cp-stat-n">24 / 7</span>
+            <span class="cp-stat-l">@Loc.T("techpg.stat4.l", "Day and night operation")</span>
+        </li>
+    </ul>
+
+    <!-- ============ 1. SCALE FIGURE ============ -->
+    <section class="tech-band">
+        <div class="tech-figure">
+            <div class="tech-figure-frame">
+                <img src="/images/nanobubble-vs-hair.png"
+                     width="1200" height="1000"
+                     loading="lazy" decoding="async"
+                     alt="@Loc.T("techpg.img_alt", "Illustration: a magnified human hair about 90 microns across, beside a cloud of nanobubbles under 200 nm, with a 100 micron scale bar. About 450 nanobubbles span one hair width.")" />
+            </div>
+
+            <div>
+                <div class="tech-head">
+                    <span class="tech-eyebrow">@Loc.T("techpg.scale.kicker", "Start with the scale")</span>
+                    <h2>@Loc.T("techpg.scale.h", "Small enough to change the rules")</h2>
+                    <p>@Loc.T("techpg.scale.p", "Everything on this page follows from one number. Shrink an air bubble far enough and it stops behaving like a bubble — it no longer races to the surface, and it no longer gives its oxygen back to the sky.")</p>
+                </div>
+
+                <ul class="tech-scale">
+                    <li>
+                        <b>80&ndash;100 &micro;m</b>
+                        <span>@Loc.T("techpg.scale.hair", "A human hair, across. About 90 µm is typical.")</span>
+                    </li>
+                    <li>
+                        <b>~2 mm</b>
+                        <span>@Loc.T("techpg.scale.conv", "A bubble from a paddle wheel or diffuser — roughly twenty hairs wide.")</span>
+                    </li>
+                    <li>
+                        <b>&lt;200 nm</b>
+                        <span>@Loc.T("techpg.scale.nano", "An Oxyniti nano-bubble. About 450 of them fit across a single hair.")</span>
+                    </li>
+                </ul>
+
+                <p class="tech-figcaption">
+                    @Loc.T("techpg.img_caption", "Illustration, not to scale. A typical human hair is 80–100 µm across; individual hairs range from 17 to 181 µm.")
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="cp-step">
-        <div class="cp-step-num">2</div>
-        <div class="cp-step-body">
-            <h2>@Loc.T("techpg.s2.h", "2. Infuse the whole water column")</h2>
-            <p>@Loc.T("techpg.s2.p", "The resulting nano-bubble plume spreads through the water column — not just the surface — raising dissolved oxygen everywhere fish live, rather than only at the point of aeration.")</p>
+    <!-- ============ 2. WHY SIZE CHANGES THE BEHAVIOUR ============ -->
+    <section class="tech-band">
+        <div class="tech-head">
+            <span class="tech-eyebrow">@Loc.T("techpg.why.kicker", "Why size changes everything")</span>
+            <h2>@Loc.T("techpg.why.h", "Three things stop working the way you expect")</h2>
+            <p>@Loc.T("techpg.why.p", "A nano-bubble is not just a smaller version of an ordinary bubble. Below roughly a micron, three separate effects turn over at once — and together they are the whole reason the approach works.")</p>
         </div>
-    </div>
 
-    <div class="cp-step">
-        <div class="cp-step-num">3</div>
-        <div class="cp-step-body">
-            <h2>@Loc.T("techpg.s3.h", "3. Hold it for longer")</h2>
-            <p>@Loc.T("techpg.s3.p", "Neutral buoyancy keeps bubbles suspended rather than rising and bursting immediately, buffering dissolved oxygen through the highest-risk night-time hours.")</p>
+        <div class="tech-cards">
+            <div class="tech-card">
+                <div class="ico"><i class="bi bi-arrow-down-up"></i></div>
+                <h3>@Loc.T("techpg.why1.h", "They stop rising")</h3>
+                <p>@Loc.T("techpg.why1.p", "Buoyant lift falls away with the cube of a bubble's radius, while the drag holding it back falls only in proportion to it. Below about a micron the arithmetic tips over: buoyancy loses, random thermal motion in the water takes over, and the bubble simply goes where the water goes.")</p>
+            </div>
+
+            <div class="tech-card">
+                <div class="ico"><i class="bi bi-grid-3x3-gap"></i></div>
+                <h3>@Loc.T("techpg.why2.h", "They carry far more surface")</h3>
+                <p>@Loc.T("techpg.why2.p", "Oxygen can only cross where air touches water, and the contact area a given volume of air carries rises as its bubbles get smaller. Shear the same litre of air from 2 mm bubbles down to 200 nm and the surface available for transfer multiplies roughly ten thousand times.")</p>
+            </div>
+
+            <div class="tech-card">
+                <div class="ico"><i class="bi bi-shield-check"></i></div>
+                <h3>@Loc.T("techpg.why3.h", "They refuse to merge")</h3>
+                <p>@Loc.T("techpg.why3.p", "Nano-bubbles carry a negative surface charge, so they push each other apart instead of coalescing into big bubbles that would rise and burst. That charge is what keeps the plume fine — and keeps it down in the water column where the fish are.")</p>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="cp-step">
-        <div class="cp-step-num">4</div>
-        <div class="cp-step-body">
-            <h2>@Loc.T("techpg.s4.h", "4. Maximum surface area for dissolving")</h2>
-            <p>@Loc.T("techpg.s4.p", "Because nano-bubbles are incredibly small, their surface-area-to-volume ratio is massive compared to regular bubbles. This means almost all the air inside the bubble is in direct contact with the surrounding water. This massive contact area, combined with the fact that they don't rise to the surface, gives the oxygen the perfect opportunity to fully dissolve into the water rather than escaping into the atmosphere.")</p>
+    <!-- ============ 3. HOW THE SYSTEM WORKS ============ -->
+    <section class="tech-band">
+        <div class="tech-head">
+            <span class="tech-eyebrow">@Loc.T("techpg.steps.kicker", "How the system works")</span>
+            <h2>@Loc.T("techpg.steps.h", "From pond water to dissolved oxygen, in four steps")</h2>
+            <p>@Loc.T("techpg.steps.p", "The unit sits at the pond edge and runs continuously. There is no chemistry and nothing to dose — it takes in the water you already have, and puts the air back in a form the water can hold on to.")</p>
         </div>
-    </div>
 
-    <div class="cp-callout">
-        <h2>@Loc.T("techpg.compare.h", "Compared with conventional aeration")</h2>
-        <p>@Loc.T("techpg.compare.p", "Conventional paddle-wheel and diffused-air aeration produce millimetre-scale bubbles that rise and burst within seconds, so much of the injected oxygen never fully dissolves. Because nano-bubbles do not rise and burst the same way, more of the injected air has the opportunity to transfer into solution before it is lost.")</p>
-    </div>
+        <div class="tech-steps">
+            <div class="tech-step" data-n="1">
+                <span class="step-tag">@Loc.T("techpg.s1.tag", "Step one")</span>
+                <h3>@Loc.T("techpg.s1.h2", "Draw and shear")</h3>
+                <p>@Loc.T("techpg.s1.p", "The unit draws pond or tank water and injects air through a nano-shear chamber, generating very large numbers of bubbles under 200 nanometres across.")</p>
+            </div>
 
-    <div class="cp-links-row">
-        <a href="/aquaculture-oxygenation"><i class="bi bi-water"></i>@Loc.T("techpg.link.aq", "See how this applies to aquaculture")</a>
-        <a href="/products"><i class="bi bi-box-seam"></i>@Loc.T("techpg.link.products", "View products")</a>
-    </div>
+            <div class="tech-step" data-n="2">
+                <span class="step-tag">@Loc.T("techpg.s2.tag", "Step two")</span>
+                <h3>@Loc.T("techpg.s2.h2", "Infuse the whole water column")</h3>
+                <p>@Loc.T("techpg.s2.p", "The resulting nano-bubble plume spreads through the water column — not just the surface — raising dissolved oxygen everywhere fish live, rather than only at the point of aeration.")</p>
+            </div>
+
+            <div class="tech-step" data-n="3">
+                <span class="step-tag">@Loc.T("techpg.s3.tag", "Step three")</span>
+                <h3>@Loc.T("techpg.s3.h2", "Hold it for longer")</h3>
+                <p>@Loc.T("techpg.s3.p", "Neutral buoyancy keeps bubbles suspended rather than rising and bursting immediately, buffering dissolved oxygen through the highest-risk night-time hours.")</p>
+            </div>
+
+            <div class="tech-step" data-n="4">
+                <span class="step-tag">@Loc.T("techpg.s4.tag", "Step four")</span>
+                <h3>@Loc.T("techpg.s4.h2", "Dissolve, instead of escaping")</h3>
+                <p>@Loc.T("techpg.s4.p", "Because nano-bubbles are incredibly small, their surface-area-to-volume ratio is massive compared to regular bubbles. This means almost all the air inside the bubble is in direct contact with the surrounding water. This massive contact area, combined with the fact that they don't rise to the surface, gives the oxygen the perfect opportunity to fully dissolve into the water rather than escaping into the atmosphere.")</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 4. SIDE BY SIDE ============ -->
+    <section class="tech-band">
+        <div class="tech-head">
+            <span class="tech-eyebrow">@Loc.T("techpg.compare.kicker", "Side by side")</span>
+            <h2>@Loc.T("techpg.compare.h", "Compared with conventional aeration")</h2>
+            <p>@Loc.T("techpg.compare.p", "Conventional paddle-wheel and diffused-air aeration produce millimetre-scale bubbles that rise and burst within seconds, so much of the injected oxygen never fully dissolves. Because nano-bubbles do not rise and burst the same way, more of the injected air has the opportunity to transfer into solution before it is lost.")</p>
+        </div>
+
+        <div class="tech-tablewrap">
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th scope="col">@Loc.T("techpg.tbl.col1", "Attribute")</th>
+                        <th scope="col">@_conventional</th>
+                        <th scope="col">@_nano</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Loc.T("techpg.tbl.r1", "Bubble diameter")</td>
+                        <td data-label="@_conventional">@Loc.T("techpg.tbl.r1a", "Roughly 1–3 mm")</td>
+                        <td data-label="@_nano">@Loc.T("techpg.tbl.r1b", "Under 200 nm")</td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("techpg.tbl.r2", "Behaviour in water")</td>
+                        <td data-label="@_conventional">@Loc.T("techpg.tbl.r2a", "Rises and bursts within seconds")</td>
+                        <td data-label="@_nano">@Loc.T("techpg.tbl.r2b", "Neutrally buoyant — stays suspended")</td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("techpg.tbl.r3", "Where the oxygen goes")</td>
+                        <td data-label="@_conventional">@Loc.T("techpg.tbl.r3a", "Much of it escapes back to the air")</td>
+                        <td data-label="@_nano">@Loc.T("techpg.tbl.r3b", "More of it transfers into solution")</td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("techpg.tbl.r4", "Coverage")</td>
+                        <td data-label="@_conventional">@Loc.T("techpg.tbl.r4a", "Strongest at the surface, near the aerator")</td>
+                        <td data-label="@_nano">@Loc.T("techpg.tbl.r4b", "Through the whole water column")</td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("techpg.tbl.r5", "Contact area per litre of air")</td>
+                        <td data-label="@_conventional">@Loc.T("techpg.tbl.r5a", "Baseline")</td>
+                        <td data-label="@_nano">@Loc.T("techpg.tbl.r5b", "Around 10,000× greater")</td>
+                    </tr>
+                    <tr>
+                        <td>@Loc.T("techpg.tbl.r6", "Overnight")</td>
+                        <td data-label="@_conventional">@Loc.T("techpg.tbl.r6a", "DO falls once algae stop producing oxygen")</td>
+                        <td data-label="@_nano">@Loc.T("techpg.tbl.r6b", "Buffered by bubbles still held in the water")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ============ 5. WHAT IT MEANS ON THE POND ============ -->
+    @* Same four figures and the same fineprint as the home page's Results
+       section, reusing its keys so the two never drift apart in one
+       language and not the other. *@
+    <section class="tech-band">
+        <div class="tech-proof">
+            <div class="tech-head">
+                <span class="tech-eyebrow">@Loc.T("techpg.out.kicker", "What it means on the pond")</span>
+                <h2>@Loc.T("techpg.out.h", "Physics is only interesting if it shows up at harvest")</h2>
+                <p>@Loc.T("techpg.out.p", "Oxygen is the cheapest growth promoter ever made. Hold it higher for longer and the rest follows — better survival, better feed conversion, and room to stock harder.")</p>
+            </div>
+
+            <ul class="tech-outcomes">
+                <li>
+                    <b>2&times;</b>
+                    <span>@Loc.T("r1.c", "Dissolved oxygen uplift")</span>
+                </li>
+                <li>
+                    <b>+15%</b>
+                    <span>@Loc.T("r2.c", "Higher survival rate")</span>
+                </li>
+                <li>
+                    <b>&minus;15%</b>
+                    <span>@Loc.T("r3.c", "Feed conversion ratio")</span>
+                </li>
+                <li>
+                    <b>+30%</b>
+                    <span>@Loc.T("r4.c", "Stocking density potential")</span>
+                </li>
+            </ul>
+
+            <p class="tech-fine">
+                @((MarkupString)Loc.T("res.fine", "*Figures are typical ranges reported in published nano-bubble aquaculture studies and field trials; results vary with species, pond condition and management. We prove it on <b>your</b> pond with a free DO-meter demo before you pay anything."))
+            </p>
+        </div>
+    </section>
+
+    <!-- ============ 6. QUESTIONS ============ -->
+    <section class="tech-band">
+        <div class="tech-head">
+            <span class="tech-eyebrow">@Loc.T("techpg.faq.kicker", "Questions we get asked")</span>
+            <h2>@Loc.T("techpg.faq.h", "The practical side")</h2>
+        </div>
+
+        <div class="tech-faq">
+            <div class="tech-q">
+                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q1", "Does this replace my paddle wheels?")</h3>
+                <p>@Loc.T("techpg.a1", "Most farms run both to begin with. Paddle wheels move water and break the surface film; Oxyniti puts oxygen into the column. We measure dissolved oxygen on your own pond before and after, so you can decide what your site actually needs rather than take our word for it.")</p>
+            </div>
+
+            <div class="tech-q">
+                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q2", "Will the water look different?")</h3>
+                <p>@Loc.T("techpg.a2", "Briefly. A fresh plume reads as a faint milky cloud near the unit, then clears as the bubbles disperse through the pond. The bubbles themselves are far too small to see individually — what you can see is the density of them.")</p>
+            </div>
+
+            <div class="tech-q">
+                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q3", "How long do the bubbles actually last?")</h3>
+                <p>@Loc.T("techpg.a3", "Long enough to matter overnight, which is when it counts. Because they neither rise nor merge, nano-bubbles persist in the water far longer than millimetre bubbles that are gone in seconds — and that is what carries dissolved oxygen through the pre-dawn hours when a pond is most at risk.")</p>
+            </div>
+
+            <div class="tech-q">
+                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q4", "Does it work in biofloc and RAS?")</h3>
+                <p>
+                    @Loc.T("techpg.a4", "Yes — those are exactly the systems where dissolved oxygen is the ceiling on stocking density.")
+                    <a href="/ras-oxygenation">@Loc.T("techpg.a4.link", "See oxygenation for RAS and biofloc")</a>.
+                </p>
+            </div>
+
+            <div class="tech-q">
+                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q5", "How do I know it is working on my pond?")</h3>
+                <p>@Loc.T("techpg.a5", "With a calibrated DO meter, before and after, on the same day. Our team installs a unit on your pond, takes the readings with you watching, and shows you the difference — no obligation either way.")</p>
+            </div>
+
+            <div class="tech-q">
+                <h3><i class="bi bi-question-circle-fill"></i>@Loc.T("techpg.q6", "Which species has this been used on?")</h3>
+                <p>
+                    @Loc.T("techpg.a6", "Tilapia and GIFT, murrel, pangasius, freshwater prawn and carp polyculture, across pond grow-out, hatcheries and higher-density systems.")
+                    <a href="/aquaculture-oxygenation">@Loc.T("techpg.a6.link", "See how this applies to aquaculture")</a>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 7. WHERE TO NEXT ============ -->
+    <section class="tech-band">
+        <div class="tech-head">
+            <span class="tech-eyebrow">@Loc.T("techpg.next.kicker", "Where to next")</span>
+            <h2>@Loc.T("techpg.next.h", "Take it further")</h2>
+        </div>
+
+        <ul class="cp-link-grid">
+            <li><a class="cp-link-card" href="/aquaculture-oxygenation"><i class="bi bi-water"></i>@Loc.T("techpg.link.aq", "See how this applies to aquaculture")</a></li>
+            <li><a class="cp-link-card" href="/ras-oxygenation"><i class="bi bi-diagram-3"></i>@Loc.T("techpg.link.ras", "Oxygenation for RAS and biofloc")</a></li>
+            <li><a class="cp-link-card" href="/products"><i class="bi bi-box-seam"></i>@Loc.T("techpg.link.products", "View the OXY-Nano range")</a></li>
+            <li><a class="cp-link-card" href="/#profit-calculator"><i class="bi bi-calculator"></i>@Loc.T("techpg.link.calc", "Estimate the impact on your pond")</a></li>
+        </ul>
+
+        <div class="cp-cta">
+            <p>@Loc.T("techpg.cta", "Book a free demo and we will measure the difference on your own water, before you pay anything.")</p>
+            <a class="cp-cta-btn" href="/contact">@Loc.T("techpg.cta.link", "Contact Oxyniti")<i class="bi bi-arrow-right"></i></a>
+        </div>
+    </section>
+
 </div>
 
 @code {
     [Parameter] public string? Locale { get; set; }
 
     private bool _notFound;
+
+    // The two comparison-column names appear once as a table heading and
+    // again on every cell's data-label (the mobile layout drops the header
+    // row and prints the label per cell instead). Held once so a
+    // translation can never disagree with itself down the column.
+    private string _conventional => Loc.T("techpg.tbl.conv", "Conventional aeration");
+    private string _nano => Loc.T("techpg.tbl.nano", "Oxyniti nano-bubbles");
 
     protected override void OnInitialized()
     {

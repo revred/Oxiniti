@@ -90,13 +90,17 @@
         </a>
 
         <!-- 6. CONTACT -->
-        <a class="nav-link"
-           href="/#free-demo"
-           data-section="free-demo"
-           @onclick='() => GoToHomeSection("free-demo")'
-           @onclick:preventDefault="true">
+        <!-- Points at the standalone /contact page (the same target the
+             footer uses), not the home page's #free-demo form. Like
+             Products and Technology this is a real route, so no
+             data-section: NavLink's routing-based active state owns the
+             highlight. The #free-demo section keeps its other entry
+             points (hero CTA, mobile CTA bar, footer, and the Contact
+             page's own "Book a free demo" button). -->
+        <NavLink class="nav-link"
+                 href="/contact">
             @Loc.T("nav.contact", "Contact Us")
-        </a>
+        </NavLink>
     </nav>
 
 </div>

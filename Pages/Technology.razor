@@ -149,6 +149,14 @@
                 <h2>@Loc.T("techpg.ceiling.h", "Water can only hold so much oxygen")</h2>
                 <p>@Loc.T("techpg.ceiling.p", "Aeration is not filling an empty container. Water has a fixed appetite for dissolved oxygen, and that appetite shrinks as the water warms — at exactly the time of year your fish are breathing hardest.")</p>
                 <p>@Loc.T("techpg.ceiling.p2", "Set against a danger zone below 3 mg/L, a pond at 35 °C is working on a thin margin. That is why it matters how much of the air you inject actually dissolves, rather than how much of it you inject.")</p>
+
+                @* The page leans on the overnight crash repeatedly without ever
+                   showing it. The 24-hour curve lives in the home page's
+                   "4 AM problem" section, so link across rather than draw a
+                   second copy of the same chart here. *@
+                <div class="cp-links-row">
+                    <a href="/#why-oxygen"><i class="bi bi-graph-down"></i>@Loc.T("techpg.ceiling.link", "See dissolved oxygen over 24 hours")</a>
+                </div>
             </div>
 
             <div>

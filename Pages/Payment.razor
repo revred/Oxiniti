@@ -11,6 +11,7 @@
 @inject NavigationManager Nav
 @inject IMakerClient MakerClient
 @inject LocalizationService Loc
+@inject AuthReadyGate AuthReady
 
 <div id="checkout-container" style="min-height:600px"></div>
 
@@ -30,6 +31,16 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender || _mounted) return;
+
+        // Wait for MainLayout's token rehydration (see AuthReadyGate) before
+        // calling the API -- on a hard refresh the saved token isn't restored yet.
+        await AuthReady.Ready;
+
+        if (!AuthenticationService.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(Address))
         {

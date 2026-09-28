@@ -326,6 +326,10 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        // Reset first: Blazor reuses this component when navigating from a
+        // bad-locale URL to a good one, so a stale "true" kept the 404 up.
+        _notFound = false;
+
         var resolved = LocalizationService.ResolveRouteLocale(Locale, "technology");
 
         switch (resolved.Outcome)

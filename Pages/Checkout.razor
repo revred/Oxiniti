@@ -5,6 +5,7 @@
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager Nav
 @inject LocalizationService Loc
+@inject AuthReadyGate AuthReady
 
 <div class="container-fluid px-4 py-5">
 <h2 class="mb-4">@Loc.T("checkout.title", "Checkout")</h2>
@@ -14,6 +15,13 @@
     <div class="d-flex align-items-center gap-2">
         <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
         <span>@Loc.T("checkout.loading", "Loading checkout…")</span>
+    </div>
+}
+else if (loadFailed)
+{
+    <div class="alert alert-warning d-flex align-items-center justify-content-between">
+        <div>@Loc.T("checkout.loadfailed", "We couldn’t load your addresses. Please check your connection and try again.")</div>
+        <button class="btn btn-outline-secondary" @onclick="RetryLoadAsync">@Loc.T("checkout.retry", "Try again")</button>
     </div>
 }
 else if (addresses.Count == 0)
@@ -181,6 +189,7 @@ else
 @code {
     // State
     private bool isReady;
+    private bool loadFailed;
     private List<AddressDetails> addresses = new();
     private long selectedBarId;
     private AddressDetails? editing;
@@ -190,8 +199,45 @@ else
     protected override async Task OnInitializedAsync()
     {
         Loc.OnChange += StateHasChanged;
-        await LoadAddressesAsync();
+
+        // Wait for MainLayout's token rehydration (see AuthReadyGate) --
+        // without it a hard refresh called the API before the saved token
+        // was restored, got a 401 and crashed the page.
+        await AuthReady.Ready;
+
+        if (!AuthenticationService.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await TryLoadAddressesAsync();
         isReady = true;
+    }
+
+    private async Task RetryLoadAsync()
+    {
+        isReady = false;
+        await TryLoadAddressesAsync();
+        isReady = true;
+    }
+
+    private async Task TryLoadAddressesAsync()
+    {
+        loadFailed = false;
+        try
+        {
+            await LoadAddressesAsync();
+        }
+        catch (ApiException ex) when (ex.StatusCode == 401)
+        {
+            Nav.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[Checkout] GetAddressAsync failed: {ex.Message}");
+            loadFailed = true;
+        }
     }
 
     private async Task LoadAddressesAsync()

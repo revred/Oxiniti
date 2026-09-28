@@ -2,6 +2,8 @@
 @inject IMakerClient MakerClient
 @inject NavigationManager Nav
 @inject LocalizationService Loc
+@inject IAuthenticationService AuthenticationService
+@inject AuthReadyGate AuthReady
 
 <div class="container-fluid px-4 py-5">
 <h2 class="mb-4">@Loc.T("orders.title", "Your Orders")</h2>
@@ -225,6 +227,17 @@ else
     protected override async Task OnInitializedAsync()
     {
         Loc.OnChange += StateHasChanged;
+
+        // Wait for MainLayout's token rehydration (see AuthReadyGate) before
+        // calling the API -- on a hard refresh the saved token isn't restored yet.
+        await AuthReady.Ready;
+
+        if (!AuthenticationService.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
         await LoadOrders();
     }
 

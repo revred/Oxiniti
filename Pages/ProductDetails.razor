@@ -323,6 +323,7 @@ else
     private ProductDetailsReply? Detail { get; set; }
     private int Quantity { get; set; } = 1;
     private bool _eventAttached = false;
+    private string? _loadedSlug;
     private string? AddedMessage;
     public IReadOnlyList<Maker.RampEdge.DigitalAsset> SortedAssets => Detail?.Assets.OrderBy(a => a.Is3DFile).ToList() ?? [];
     private IList<ProductData> AlsoLike { get; set; } = [];
@@ -433,18 +434,19 @@ else
 
     private async Task LoadSimilarProductsAsync()
     {
+        var slug = Slug;
         try
         {
             var result = await ProductApi.ProductsBySlugAsync(new ProductRequest
             {
-                Slug = Slug,
+                Slug = slug,
                 Search = "",
                 SortBy = "",
                 Page = 1,
                 PageSize = 4
             });
 
-            AlsoLike = result.Products.ToList();
+            if (slug == Slug) AlsoLike = result.Products.ToList();
         }
         catch (Exception ex)
         {
@@ -453,9 +455,25 @@ else
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
+    }
+
+    // OnParametersSetAsync, not OnInitializedAsync: clicking a "you may also
+    // like" card navigates /product/A -> /product/B, and Blazor reuses this
+    // same component instance for that, so an init-only load left B's URL
+    // showing A's name, price and images. Reload whenever the slug changes.
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Slug == _loadedSlug) return;
+        _loadedSlug = Slug;
+
+        Detail = null;
+        AlsoLike = [];
+        Quantity = 1;
+        AddedMessage = null;
+        _eventAttached = false;
 
         // These three used to be awaited one after another, and from South India
         // to UK South a single round trip to the CMS API is ~0.65 s of pure
@@ -483,21 +501,25 @@ else
 
     private async Task LoadDetailAsync()
     {
+        var slug = Slug;
         try
         {
-            Detail = await ProductApi.ProductDetailsAsync(new ProductRequest
+            var detail = await ProductApi.ProductDetailsAsync(new ProductRequest
             {
-                Slug = Slug,
+                Slug = slug,
                 Search = "",
                 SortBy = "",
                 Page = 1,
                 PageSize = 4
             });
+
+            // A slower reply for the previous product must not overwrite this one.
+            if (slug == Slug) Detail = detail;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[ProductDetail] ProductDetailsAsync failed: {ex}");
-            Detail = null;
+            if (slug == Slug) Detail = null;
         }
     }
 

@@ -57,10 +57,11 @@
                     <span class="placeholder col-7"></span>
                 </div>
 
-                <!-- Price -->
+                @* Price skeleton hidden along with the price itself.
                 <div class="placeholder-wave mb-3">
                     <span class="placeholder col-2"></span>
                 </div>
+                *@
 
                 <!-- Quantity controls -->
                 <div class="mb-3">
@@ -235,7 +236,10 @@ else
                     }
 
                     <h2>@Detail.Name</h2>
+                    @* Price hidden: the site shows product details only, pricing is by enquiry.
                     <p class="fs-4 fw-bold text-purple">@InrFormat.Rupees(Detail.Price)</p>
+                    *@
+                    @* Quantity only fed Add to cart, which is paused below; restore both together.
                     <div class="mb-3">
                         <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
                         <div class="d-inline-flex align-items-center">
@@ -244,7 +248,9 @@ else
                             <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" @onclick="() => ChangeQuantity(+1)">+</button>
                         </div>
                     </div>
+                    *@
 
+                    @* Add to cart is paused: enquiries go through Contact us for now.
                     <button class="btn btn-outline-dark w-100 mb-2" @onclick="AddToCart">
                         @if (AddedMessage != null)
                         {
@@ -255,6 +261,8 @@ else
                             <text>@Loc.T("pd.cart.add", "Add to cart")</text>
                         }
                     </button>
+                    *@
+                    <a class="btn btn-outline-dark w-100 mb-2" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
                     @if(!AuthenticationService.IsAuthenticated){
                         <button class="btn btn-gradient w-100 mb-4">
                             @Loc.T("pd.auth.loginToBuy", "Login/Register to Buy")
@@ -286,7 +294,9 @@ else
                                  alt="@p.Name" />
                             <div class="card-body">
                                 <h6 class="card-title">@p.Name</h6>
+                                @* Price hidden: pricing is by enquiry.
                                 <p class="mb-0">@InrFormat.Rupees(p.Price)</p>
+                                *@
                             </div>
                         </div>
                     </div>
@@ -352,11 +362,12 @@ else
             Name = Detail!.Name,
             Description = Detail.Description,
             Image = SortedAssets.FirstOrDefault(a => !a.Is3DFile)?.Url,
-            Offers = new JsonLdOffer
-            {
-                Url = CanonicalUrl,
-                Price = Detail.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)
-            }
+            // No Offers while prices are hidden, so search results don't show one either.
+            // Offers = new JsonLdOffer
+            // {
+            //     Url = CanonicalUrl,
+            //     Price = Detail.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            // }
         };
 
         return JsonSerializer.Serialize(product, JsonLdOptions);
@@ -385,7 +396,8 @@ else
         public string? Description { get; set; }
         public string? Image { get; set; }
         public JsonLdBrand Brand { get; set; } = new();
-        public JsonLdOffer Offers { get; set; } = new();
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public JsonLdOffer? Offers { get; set; }
     }
 
     private sealed class JsonLdBrand

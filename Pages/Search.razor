@@ -64,9 +64,12 @@
                     <p class="text-muted mb-2 description">
                         @Shorten(p.Description, 150)
                     </p>
+                    @* Price hidden: pricing is by enquiry.
                     <p class="fw-bold text-purple">@InrFormat.Rupees(p.Price)</p>
+                    *@
                 </div>
                 <div class="product-action col-auto">
+                    @* Add to cart is paused: enquiries go through Contact us for now.
                     <button @onclick:stopPropagation
                             @onclick="() => AddToCart(p)"
                             class="btn btn-gradient btn-lg @(HighlightedQuantities.ContainsKey(p.Slug) ? "added-highlight" : "")">
@@ -76,6 +79,8 @@
                                         : Loc.T("productsfilter.addtocart", "Add to Cart →")
                                         )
                     </button>
+                    *@
+                    <a href="/contact" @onclick:stopPropagation class="btn btn-gradient btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
                 </div>
             </div>
         }

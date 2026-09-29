@@ -376,7 +376,8 @@ internal static class ProductPageTemplate
         html.Append("                </div>\n");
         html.Append("                <div class=\"col-12 col-lg-6\">\n");
         html.Append($"                    <h1>{Enc(detail.Name)}</h1>\n");
-        html.Append($"                    <p class=\"fs-4 fw-bold text-purple\">{Oxyniti.Services.InrFormat.Rupees(detail.Price)}</p>\n");
+        // Price hidden: the site shows product details only, pricing is by enquiry.
+        // html.Append($"                    <p class=\"fs-4 fw-bold text-purple\">{Oxyniti.Services.InrFormat.Rupees(detail.Price)}</p>\n");
         html.Append($"                    <p>{Enc(detail.Description)}</p>\n");
         html.Append("                    <div class=\"accordion\" id=\"specAccordion\">\n");
         // ReadMeHtml is trusted CMS-authored markup, same as ProductDetails.razor's
@@ -427,11 +428,12 @@ internal static class ProductPageTemplate
             Name = detail.Name,
             Description = detail.Description,
             Image = mainImage is null ? null : AbsoluteUrl(mainImage),
-            Offers = new JsonLdOffer
-            {
-                Url = canonicalUrl,
-                Price = detail.Price.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            },
+            // No Offers while prices are hidden, so search results don't show one either.
+            // Offers = new JsonLdOffer
+            // {
+            //     Url = canonicalUrl,
+            //     Price = detail.Price.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            // },
         };
 
         return JsonSerializer.Serialize(product, JsonLdOptions);
@@ -460,7 +462,8 @@ internal static class ProductPageTemplate
         public string? Description { get; set; }
         public string? Image { get; set; }
         public JsonLdBrand Brand { get; set; } = new();
-        public JsonLdOffer Offers { get; set; } = new();
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public JsonLdOffer? Offers { get; set; }
     }
 
     private sealed class JsonLdBrand

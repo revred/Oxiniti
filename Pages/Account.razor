@@ -30,9 +30,11 @@ else
                 <a class="sidebar-item" href="/my-demos">
                     <i class="bi bi-geo-alt-fill"></i> @Loc.T("account.nav.demos", "My Demos")
                 </a>
+                @* My Orders hidden for now (ordering is paused); the /orders page still exists.
                 <a class="sidebar-item" href="/orders">
                     <i class="bi bi-box-seam-fill"></i> @Loc.T("account.nav.orders", "My Orders")
                 </a>
+                *@
                 <button type="button" class="sidebar-item sidebar-logout" @onclick="HandleLogout">
                     <i class="bi bi-box-arrow-right"></i> @Loc.T("account.nav.logout", "Logout")
                 </button>

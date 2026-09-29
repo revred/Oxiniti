@@ -312,7 +312,7 @@ else
         return Loc.T("orders.date.unknown", "Unknown");
     }
 
-    private string FormatMoney(int cents) => $"₹{(cents / 100.0m).ToString("N2", System.Globalization.CultureInfo.InvariantCulture)}";
+    private string FormatMoney(int cents) => InrFormat.RupeesAndPaise(cents / 100m);
 
     private void NavigateToProduct(string? slug)
     {

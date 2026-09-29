@@ -376,7 +376,7 @@ internal static class ProductPageTemplate
         html.Append("                </div>\n");
         html.Append("                <div class=\"col-12 col-lg-6\">\n");
         html.Append($"                    <h1>{Enc(detail.Name)}</h1>\n");
-        html.Append($"                    <p class=\"fs-4 fw-bold text-purple\">₹{detail.Price}</p>\n");
+        html.Append($"                    <p class=\"fs-4 fw-bold text-purple\">{Oxyniti.Services.InrFormat.Rupees(detail.Price)}</p>\n");
         html.Append($"                    <p>{Enc(detail.Description)}</p>\n");
         html.Append("                    <div class=\"accordion\" id=\"specAccordion\">\n");
         // ReadMeHtml is trusted CMS-authored markup, same as ProductDetails.razor's

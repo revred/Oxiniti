@@ -235,7 +235,7 @@ else
                     }
 
                     <h2>@Detail.Name</h2>
-                    <p class="fs-4 fw-bold text-purple">₹@Detail.Price</p>
+                    <p class="fs-4 fw-bold text-purple">@InrFormat.Rupees(Detail.Price)</p>
                     <div class="mb-3">
                         <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
                         <div class="d-inline-flex align-items-center">
@@ -286,7 +286,7 @@ else
                                  alt="@p.Name" />
                             <div class="card-body">
                                 <h6 class="card-title">@p.Name</h6>
-                                <p class="mb-0">@(p.Price.ToString()):C</p>
+                                <p class="mb-0">@InrFormat.Rupees(p.Price)</p>
                             </div>
                         </div>
                     </div>

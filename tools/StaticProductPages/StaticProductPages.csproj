@@ -32,6 +32,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Same rupee formatting as the live pages (₹1,00,000), so the static and hydrated price match. -->
+    <Compile Include="..\..\Services\InrFormat.cs" Link="InrFormat.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Maker.RampEdgeV1" Version="1.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />

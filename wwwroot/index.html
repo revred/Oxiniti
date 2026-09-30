@@ -58,7 +58,17 @@
          path that is not the home route the hero and the homepage copy are
          hidden (app.css: html.shell-app-route) and the neutral
          .shell-route-loading placeholder in the body shows in their place.
-         Locale roots (/ta, /hi, ...) are home routes too. -->
+         Locale roots (/ta, /hi, ...) are home routes too.
+
+         /yield-calculator/ is a static page, not a Blazor route. Static Web
+         Apps serves its index.html directly, but a server that falls back to
+         this shell for folder URLs (the `dotnet run` dev server does) would
+         boot the app into NotFound -- so hand that request to the file. -->
+    <script>
+        if (/^\/yield-calculator\/?$/.test(location.pathname)) {
+            location.replace("/yield-calculator/index.html" + location.search + location.hash);
+        }
+    </script>
     <script>
         (function () {
             var p = location.pathname.replace(/\/index\.html$/, "").replace(/\/+$/, "");

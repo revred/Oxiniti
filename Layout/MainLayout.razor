@@ -240,6 +240,24 @@
 
     private DotNetObjectReference<MainLayout>? _dotNetRef;
 
+    // /yield-calculator/ is a static page outside this app (see
+    // scripts/sync-yield-calculator.sh). Left to the router, a link to it
+    // renders NotFoundContent -- or matches a /{locale} route first -- so
+    // turn every in-app navigation there into a real page load. forceLoad
+    // skips location-changing handlers, so this cannot re-enter itself.
+    private IDisposable? _staticPageNavigation;
+
+    private ValueTask ForceLoadStaticPages(LocationChangingContext context)
+    {
+        var path = Nav.ToBaseRelativePath(context.TargetLocation);
+        if (path == "yield-calculator" || path.StartsWith("yield-calculator/", StringComparison.Ordinal))
+        {
+            context.PreventNavigation();
+            Nav.NavigateTo("/yield-calculator/", forceLoad: true);
+        }
+        return ValueTask.CompletedTask;
+    }
+
 
     private string UserInitial =>
         !string.IsNullOrWhiteSpace(AuthenticationService?.UserName)
@@ -249,6 +267,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _staticPageNavigation = Nav.RegisterLocationChangingHandler(ForceLoadStaticPages);
+
         AuthenticationService.OnChange += StateHasChanged;
 
         // CartService.OnChange += UpdateCartCount; // cart entry point hidden for the duration

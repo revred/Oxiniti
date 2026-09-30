@@ -101,6 +101,15 @@
     color: rgba(255, 255, 255, 0.85);
 }
 
+.calc-right .detail-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 @media (max-width: 900px) {
     .calc-card {
         grid-template-columns: 1fr;

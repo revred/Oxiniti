@@ -89,7 +89,15 @@
             @Loc.T("nav.footage", "Use Cases")
         </a>
 
-        <!-- 6. CONTACT -->
+        <!-- 6. YIELD CALCULATOR -->
+        <!-- A static page outside the Blazor app; MainLayout's
+             location-changing handler turns this into a full page load. -->
+        <a class="nav-link"
+           href="/yield-calculator/">
+            @Loc.T("nav.calc", "Yield calculator")
+        </a>
+
+        <!-- 7. CONTACT -->
         <!-- Points at the standalone /contact page (the same target the
              footer uses), not the home page's #free-demo form. Like
              Products and Technology this is a real route, so no

@@ -1,0 +1,3 @@
+Source: https://github.com/vivian4fb/oxyniti-yield-calc.git
+Commit: e1e154ebe6a6fbc65b553613b5dfbf4667ce7efe
+Synced by scripts/sync-yield-calculator.sh -- do not edit files here by hand.

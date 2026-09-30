@@ -1,0 +1,571 @@
+<!-- Oxyniti yield calculator — page shell (EXECUTION_PLAN.md WP4 brief; layout section 6).
+     Classic scripts only, in the fixed order (section 4.3), so the page works from file://. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<base href="/yield-calculator/" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<title>Oxyniti yield &amp; profit calculator — Tamil Nadu fish &amp; shrimp ponds</title>
+<meta name="description" content="Estimate extra harvest, extra profit and payback from OXY-Nano aeration for your pond, by species, district, season and stocking density — capped at the internal +18 % model, never a flat claim." />
+<link rel="canonical" href="https://www.oxyniti.com/yield-calculator/" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;600;700;800&family=Catamaran:wght@500;700;800&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div id="model-banner" class="model-banner hidden" role="alert"></div>
+<div id="fixture-note" class="fixture-note hidden" role="status"></div>
+
+<header class="site-header">
+  <div class="brand">
+    <a href="/" aria-label="Oxyniti home"><img src="assets/logo-mark.svg" alt="" width="38" height="38" /></a>
+    <div class="brand-text">
+      <span class="brand-word">Oxyniti</span>
+      <span class="brand-tag" data-i18n="brand.tag">Yield &amp; profit calculator</span>
+    </div>
+  </div>
+  <div class="header-controls">
+    <select id="lang-select" class="lang-select" aria-label="Language">
+      <option value="en" data-i18n="nav.lang.en">English</option>
+      <option value="ta" data-i18n="nav.lang.ta">தமிழ் (partial)</option>
+    </select>
+    <button id="theme-toggle" class="btn-icon" type="button" aria-label="Toggle light / dark theme" data-i18n-title="nav.theme">
+      <span aria-hidden="true">&#9788;</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══════════ MAP ═══════════ -->
+  <section id="map-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker" data-i18n="map.kicker">Tamil Nadu aquaculture</span>
+        <h2 data-i18n="map.h2">Click a district to set your pond's location.</h2>
+      </div>
+      <div class="map-grid">
+        <div id="map" role="img" aria-label="Map of Tamil Nadu districts coloured by inland fish production, with aquaculture hotspot markers. Click a district to select it."></div>
+        <aside class="district-card" id="district-card">
+          <p class="d-hint" id="district-placeholder" data-i18n="district.card.placeholder">Click the map or choose a district below to see its production statistics and climate station.</p>
+          <div id="district-card-body" class="hidden">
+            <span class="d-name" id="district-name"></span>
+            <dl>
+              <dt data-i18n="district.card.production">Inland production</dt>
+              <dd id="district-production">—</dd>
+              <dt data-i18n="district.card.station">Climate station</dt>
+              <dd id="district-station">—</dd>
+            </dl>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CALCULATOR ═══════════ -->
+  <section id="calculator">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker" data-i18n="roi.kicker">Your profit</span>
+        <h2 data-i18n="roi.h2">Slide to see what more oxygen is worth.</h2>
+      </div>
+
+      <div class="calc-grid">
+        <!-- ---- INPUT CARD ---- -->
+        <div class="input-card">
+          <h3 data-i18n="roi.h3">Your pond</h3>
+          <p class="sub" data-i18n="roi.sub">Move the sliders — estimates update instantly.</p>
+
+          <form id="calc-form" autocomplete="off">
+            <div class="field">
+              <label class="field-label" for="in-district" data-i18n="input.district">District</label>
+              <select id="in-district"></select>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-station_name" data-i18n="input.station_name">City (climate station)</label>
+              <select id="in-station_name"></select>
+              <p class="field-hint" data-i18n="input.station_hint">Optional — pick a city to see this species' numbers under that city's climate instead of the district default. The reference crop used for the size comparison stays anchored to Tiruchirappalli either way.</p>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-species" data-i18n="f.species">What do you farm?</label>
+              <select id="in-species"></select>
+              <details class="species-panel">
+                <summary data-i18n="input.species_panel_toggle">All species and their sourced data</summary>
+                <div class="species-panel-body" id="species-panel-body"></div>
+              </details>
+            </div>
+
+            <div class="field">
+              <div class="field-label"><span data-i18n="roi.size">Pond size</span><output class="field-out" id="out-area_acre"></output></div>
+              <div class="range-wrap"><input type="range" id="in-area_acre" min="0.25" max="10" step="0.25" value="1" /></div>
+            </div>
+
+            <div class="field">
+              <div class="field-label"><span data-i18n="input.depth_m">Average water depth</span><output class="field-out" id="out-depth_m"></output></div>
+              <div class="range-wrap"><input type="range" id="in-depth_m" min="0.8" max="2.5" step="0.1" value="1.5" /></div>
+              <p class="field-hint" data-i18n="input.depth_hint">Default is an assumed typical depth, not a sourced Tamil Nadu figure — adjust to match your pond.</p>
+            </div>
+
+            <div class="field">
+              <div class="field-label"><span data-i18n="input.density_per_acre">Stocking density</span><output class="field-out" id="out-density_per_acre"></output></div>
+              <div class="range-wrap"><input type="range" id="in-density_per_acre" min="0" max="1" step="1" value="0" /></div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-stock_month" data-i18n="input.stock_month">Stocking month</label>
+              <select id="in-stock_month">
+                <option value="1" data-i18n="month.1">January</option>
+                <option value="2" data-i18n="month.2">February</option>
+                <option value="3" data-i18n="month.3">March</option>
+                <option value="4" data-i18n="month.4">April</option>
+                <option value="5" data-i18n="month.5">May</option>
+                <option value="6" data-i18n="month.6">June</option>
+                <option value="7" data-i18n="month.7">July</option>
+                <option value="8" data-i18n="month.8">August</option>
+                <option value="9" data-i18n="month.9">September</option>
+                <option value="10" data-i18n="month.10">October</option>
+                <option value="11" data-i18n="month.11">November</option>
+                <option value="12" data-i18n="month.12">December</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-bloom" data-i18n="input.bloom">Pond colour (plankton bloom)</label>
+              <select id="in-bloom">
+                <option value="light">Light</option>
+                <option value="medium" selected>Medium</option>
+                <option value="dense">Dense</option>
+              </select>
+              <p class="field-hint" data-i18n="input.bloom_hint">Secchi-disc hint: the less clearly you can see a white disc lowered into the water, the denser the bloom — dense blooms draw down more oxygen overnight.</p>
+            </div>
+
+            <div class="field">
+              <div class="field-label"><span data-i18n="roi.price">Farm-gate price</span><output class="field-out" id="out-price_inr_kg"></output></div>
+              <div class="range-wrap"><input type="range" id="in-price_inr_kg" min="0" max="1" step="1" value="0" /></div>
+              <p class="field-hint" id="price-sourced-note"></p>
+            </div>
+
+            <div class="field">
+              <div class="field-label"><span data-i18n="input.feed_price_inr_kg">Pellet feed price</span><output class="field-out" id="out-feed_price_inr_kg"></output></div>
+              <div class="range-wrap"><input type="range" id="in-feed_price_inr_kg" min="20" max="120" step="1" value="60" /></div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-existing_aeration_kw" data-i18n="input.existing_aeration_kw">Existing aeration</label>
+              <select id="in-existing_aeration_kw">
+                <option value="0" data-i18n="input.aeration_none">None</option>
+                <option value="0.7457" data-i18n="input.aeration_1x1">1 × 1 HP paddlewheel</option>
+                <option value="1.4914" data-i18n="input.aeration_2x1">2 × 1 HP paddlewheel</option>
+                <option value="2.9828" data-i18n="input.aeration_2x2">2 × 2 HP paddlewheel</option>
+                <option value="custom" data-i18n="input.aeration_custom">Custom (kW)</option>
+              </select>
+              <input type="number" id="in-existing_aeration_kw-custom" class="hidden" min="0" max="15" step="0.1" placeholder="kW" />
+            </div>
+
+            <div class="field hidden" id="existing_run_h-row">
+              <div class="field-label"><span data-i18n="input.existing_run_h">Existing aeration hours</span><output class="field-out" id="out-existing_run_h"></output></div>
+              <div class="range-wrap"><input type="range" id="in-existing_run_h" min="0" max="24" step="1" value="8" /></div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-tariff-preset" data-i18n="input.tariff_inr_kwh">Electricity tariff</label>
+              <select id="in-tariff-preset"></select>
+              <input type="number" id="in-tariff-custom" class="hidden" min="0" max="12" step="0.01" placeholder="₹/kWh" data-i18n-ph="input.tariff_custom" />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-unit_model" data-i18n="input.unit_model">Nano-bubble generator</label>
+              <select id="in-unit_model"></select>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-n_units-mode" data-i18n="input.n_units_mode">Number of units</label>
+              <select id="in-n_units-mode">
+                <option value="auto" data-i18n="input.n_units_auto">Auto (sized to your pond)</option>
+                <option value="manual" data-i18n="input.n_units_manual_option">Manual</option>
+              </select>
+              <input type="number" id="in-n_units-manual" class="hidden" min="1" max="20" step="1" value="1" />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="in-unit_price_inr" data-i18n="input.unit_price_inr">Unit price</label>
+              <input type="number" id="in-unit_price_inr" min="0" step="100" placeholder="₹" />
+              <p class="field-hint" data-i18n="input.unit_price_hint">Prefilled with a rough estimate (ASSUMED) — replace it with a real quote when you have one.</p>
+            </div>
+
+            <details class="advanced-details" id="advanced-details">
+              <summary data-i18n="input.advanced">Advanced</summary>
+              <div class="advanced-body">
+                <div class="field">
+                  <label class="field-label" for="in-o2_input_lpm_override" data-i18n="input.o2_input_lpm_override">Oxygen delivery per unit (datasheet)</label>
+                  <input type="number" id="in-o2_input_lpm_override" min="0.5" max="60" step="0.1" placeholder="L/min" />
+                  <p class="field-hint" data-i18n="input.override_hint">Enter the OEM datasheet figure if you have it — leave blank to use the published product value.</p>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="in-power_kw_override" data-i18n="input.power_kw_override">Electrical input per unit (datasheet)</label>
+                  <input type="number" id="in-power_kw_override" min="0.1" max="10" step="0.01" placeholder="kW" />
+                  <p class="field-hint" data-i18n="input.override_hint">Enter the OEM datasheet figure if you have it — leave blank to use the published product value.</p>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="in-concentrator_kw" data-i18n="input.concentrator_kw">Oxygen concentrator power</label>
+                  <input type="number" id="in-concentrator_kw" min="0" max="2" step="0.01" placeholder="kW" />
+                  <p class="field-hint" data-i18n="input.concentrator_hint">Prefilled from the product page. Clearing it excludes the concentrator from the electricity cost with a warning.</p>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="in-concentrator_price_inr" data-i18n="input.concentrator_price_inr">Oxygen concentrator price</label>
+                  <input type="number" id="in-concentrator_price_inr" min="0" step="100" placeholder="₹" />
+                  <p class="field-hint" data-i18n="input.concentrator_price_hint">Prefilled with a rough estimate (ASSUMED) — replace it with a real quote when you have one.</p>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="in-maintenance_pct" data-i18n="input.maintenance_pct">Maintenance per year</label>
+                  <input type="number" id="in-maintenance_pct" min="0" max="15" step="0.1" placeholder="%" />
+                  <p class="field-hint" data-i18n="input.maintenance_hint">Per cent of capex, ASSUMED. Applied every year against the extra profit.</p>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="in-subsidy_pct" data-i18n="input.subsidy_pct">Subsidy on unit</label>
+                  <select id="in-subsidy_pct"></select>
+                </div>
+                <div class="field">
+                  <div class="field-label"><span data-i18n="input.run_h">Run hours</span><output class="field-out" id="out-run_h"></output></div>
+                  <div class="range-wrap"><input type="range" id="in-run_h" min="2" max="24" step="1" value="8" /></div>
+                </div>
+                <div class="field field-check">
+                  <input type="checkbox" id="in-include_fcr_gain" />
+                  <label for="in-include_fcr_gain" data-i18n="input.include_fcr_gain">Apply FCR improvement (advanced, unverified)</label>
+                </div>
+                <p class="field-hint" data-i18n="input.include_fcr_gain_hint">−7% feed conversion at full relief — a single-pond trial (Mauladani et al. 2020), status UNTESTED. Off by default.</p>
+              </div>
+            </details>
+          </form>
+        </div>
+
+        <!-- ---- RESULTS CARD ---- -->
+        <div class="results-card" id="results-card">
+          <h3 data-i18n="results.h3">Your estimate</h3>
+          <p class="band-sub hidden" id="res-station"></p>
+
+          <div id="result-error" class="result-error hidden"></div>
+
+          <div id="result-content">
+            <p id="result-placeholder" class="band-sub" data-i18n="results.placeholder">Set your pond's inputs on the left to see an estimate.</p>
+
+            <div class="result-band">
+              <span class="lbl" data-i18n="roi.harv">Estimated extra harvest</span>
+              <div class="band-value" id="res-harvest">—</div>
+              <div class="band-sub" data-i18n="results.harv_sub">per crop / per year, low–high</div>
+            </div>
+
+            <div class="result-band">
+              <span class="lbl" data-i18n="results.profit">Estimated extra profit</span>
+              <div class="band-value" id="res-profit">—</div>
+              <div class="band-sub" data-i18n="results.profit_sub">per crop / per year, low–high</div>
+            </div>
+
+            <div class="result-grid">
+              <div class="result-band">
+                <span class="lbl" data-i18n="results.payback">Payback on the unit</span>
+                <div class="band-value" id="res-payback">—</div>
+                <div class="band-sub" id="res-investment"></div>
+              </div>
+              <div class="result-band">
+                <span class="lbl" data-i18n="results.units">Units needed</span>
+                <div class="band-value" id="res-units">—</div>
+                <div class="band-sub" data-i18n="results.units_sub">to relieve the worst crop month</div>
+              </div>
+            </div>
+
+            <p class="sensitivity-note" data-i18n="results.sensitivity">Sensitivity check 2026-09-21 (final model): the oxygen delivery per unit and the stocking density move this estimate more than any other input. At the owner-stated 1–2 L/min no number of units pays back at any tariff; at 20 L/min per unit on an intensively stocked pond (20,235/acre) one unit pays back in about 25 months, or 10 months with a 60 % PMMSY subsidy.</p>
+
+            <div class="result-band baseline-context" id="res-baseline">
+              <span class="lbl" data-i18n="results.baseline">Baseline, for context</span>
+            </div>
+
+            <ul class="warnings-list" id="res-warnings"></ul>
+
+            <p class="ceiling-note" data-i18n="results.ceiling_note">Capped at the internal model's +18 % saleable kg (+12 % growth, +5 points survival), applied in proportion to how oxygen-limited the pond is in each crop month. Not a guarantee. We verify on your pond with a DO meter during the free demo.</p>
+
+            <div class="gate-note" id="gate-note">
+              <span class="gate-lock" aria-hidden="true">&#128274;</span>
+              <span data-i18n="results.gate_note">Extra profit, payback, unit sizing, the month-by-month oxygen budget and the charts go into a written report for your pond. We check every request by hand before sending it.</span>
+            </div>
+            <div class="cta-row">
+              <button id="cta-report" class="btn btn-warm" type="button" data-i18n="results.cta_report">Get my pond report</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SEASONAL STRIP ═══════════ -->
+  <section id="season-section">
+    <div class="container">
+      <div class="chart-block">
+        <h3 data-i18n="season.h3">Seasonal strip</h3>
+        <p class="sub" data-i18n="season.sub">Water temperature, thermal suitability and oxygen stress before/after, month by month.</p>
+        <div id="season-strip"></div>
+        <p class="chart-locked hidden" id="season-locked" data-i18n="chart.locked">Included in your pond report.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STATION COMPARISON (amendment A9.4) ═══════════ -->
+  <section id="station-compare-section">
+    <div class="container">
+      <div class="chart-block">
+        <h3 data-i18n="station_compare.h3">Where does this species grow best?</h3>
+        <p class="sub" data-i18n="station_compare.note">This comparison keeps every other input fixed and varies only the city's climate.</p>
+        <div class="assumptions-table-wrap">
+          <table class="assumptions-table compare-table" id="station-compare-table">
+            <thead>
+              <tr>
+                <th><button type="button" class="sort-btn" data-sort-key="station" data-i18n="station_compare.col_city">City</button></th>
+                <th><button type="button" class="sort-btn" data-sort-key="district" data-i18n="station_compare.col_district">District</button></th>
+                <th><button type="button" class="sort-btn" data-sort-key="G_T" data-i18n="station_compare.col_gt">Growth-days factor</button></th>
+                <th><button type="button" class="sort-btn" data-sort-key="harvest_size_g" data-i18n="station_compare.col_harvest_size">Harvest size</button></th>
+                <th><button type="button" class="sort-btn" data-sort-key="baseline_kg_crop" data-i18n="station_compare.col_baseline">Baseline harvest</button></th>
+                <th><button type="button" class="sort-btn" data-sort-key="ds" data-i18n="station_compare.col_ds">Oxygen relief</button></th>
+                <th><button type="button" class="sort-btn" data-sort-key="extra_kg_crop_high" data-i18n="station_compare.col_extra_harvest">Extra harvest (high)</button></th>
+                <th><button type="button" class="sort-btn is-sorted-desc" data-sort-key="profit_year_high" data-i18n="station_compare.col_extra_profit">Extra profit (high)</button></th>
+                <th><button type="button" class="sort-btn" data-sort-key="n_best" data-i18n="station_compare.col_units">Units</button></th>
+              </tr>
+            </thead>
+            <tbody id="station-compare-tbody"></tbody>
+          </table>
+        </div>
+        <p class="chart-locked hidden" id="compare-locked" data-i18n="chart.locked">Included in your pond report.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ WATERFALL ═══════════ -->
+  <section id="waterfall-section">
+    <div class="container">
+      <div class="chart-block">
+        <h3 data-i18n="waterfall.h3">Profit waterfall</h3>
+        <p class="sub" data-i18n="waterfall.sub">How the extra profit is built, per crop — low case and high case side by side.</p>
+        <div id="waterfall"></div>
+        <p class="chart-locked hidden" id="waterfall-locked" data-i18n="chart.locked">Included in your pond report.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ ASSUMPTIONS ═══════════ -->
+  <section id="assumptions-section">
+    <div class="container">
+      <details class="assumptions-details" id="assumptions-details">
+        <summary data-i18n="assumptions.h3">Assumptions</summary>
+        <p class="sub" data-i18n="assumptions.sub">Every parameter behind this estimate — value, unit, status, date and source.</p>
+        <div class="assumptions-table-wrap">
+          <table class="assumptions-table">
+            <thead>
+              <tr>
+                <th data-i18n="assumptions.col_label">Parameter</th>
+                <th data-i18n="assumptions.col_value">Value</th>
+                <th data-i18n="assumptions.col_status">Status</th>
+                <th data-i18n="assumptions.col_date">Date</th>
+                <th data-i18n="assumptions.col_source">Source</th>
+              </tr>
+            </thead>
+            <tbody id="assumptions-tbody"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ═══════════ METHOD ═══════════ -->
+  <section id="method-section" class="method-section">
+    <div class="container">
+      <div class="section-head">
+        <h3 data-i18n="method.h3">How this is calculated</h3>
+        <p data-i18n="method.sub">In words — see plan/MODEL_SPEC.md for the equations.</p>
+      </div>
+      <div class="method-body">
+        <div class="method-step"><h4 data-i18n="method.step1.h">1. Pond water temperature</h4><p data-i18n="method.step1.p">Each district is matched to the nearest climate station. Monthly mean air temperature is converted to pond water temperature with a simple regression, since shallow tropical ponds track air temperature closely.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step2.h">2. Thermal suitability</h4><p data-i18n="method.step2.p">Each species has a tolerable range and a narrower optimum range. A month scores 1 when the water is within the optimum band, sliding down to 0 at the tolerable edges and beyond. The crop's average score, relative to the same species stocked at its default month in Tiruchirappalli, scales the harvest size up or down.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step3.h">3. Night-time oxygen budget</h4><p data-i18n="method.step3.p">For each crop month, the pond's dissolved oxygen at dusk is reduced overnight by fish respiration, plankton respiration and sediment demand, offset by any existing aeration and a small diffusion term. The result is the dawn dissolved oxygen the fish actually experience.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step4.h">4. Oxygen stress and relief</h4><p data-i18n="method.step4.p">A stress index compares dawn oxygen to the species' growth threshold and lethal limit. The OXY-Nano unit adds oxygen by mass balance from its published litres-per-minute rating, and the resulting relief — averaged over the crop — drives the uplift.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step5.h">5. Uplift, capped</h4><p data-i18n="method.step5.p">Relief is converted to extra growth and extra survival, calibrated so a fully oxygen-limited pond reaches the internal model's ceiling of +18 % extra saleable kilograms — never more. A partially-limited pond gets proportionally less.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step6.h">6. Economics and payback</h4><p data-i18n="method.step6.p">Extra harvest at your farm-gate price, less the extra feed and electricity it costs to produce, gives the extra profit per crop and per year. Payback divides the unit's capital cost (less any subsidy) by the extra annual profit; it stays blocked until you enter a real unit price.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step7.h">7. Sizing the units</h4><p data-i18n="method.step7.p">The number of units needed is set by the worst crop month's oxygen deficit, so the unit count reflects your pond's night-time chemistry rather than a flat per-acre rule.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ LIMITATIONS ═══════════ -->
+  <section id="limitations-section">
+    <div class="container">
+      <h3 data-i18n="limitations.h3">Known limitations</h3>
+      <ul class="limitations-list">
+        <li data-i18n="limitations.l1">Monthly climate normals are used, not this year's actual weather.</li>
+        <li data-i18n="limitations.l2">Growth and mortality are modelled as linear through the crop; there is no disease, water-exchange or algal-crash model.</li>
+        <li data-i18n="limitations.l3">The uplift is calibrated to an internal conservative model, not measured on your pond.</li>
+        <li data-i18n="limitations.l4">Prices are the sourced range on the sourcing date; your own price overrides them.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════ LEAD FORM (plan/LEAD_CAPTURE.md) ═══════════ -->
+  <dialog id="lead-dialog" class="lead-dialog" aria-labelledby="lead-h3">
+    <div class="lead-dialog-inner">
+      <button type="button" class="lead-close" id="lead-close" aria-label="Close">&times;</button>
+      <form id="lead-form" class="lead-form" novalidate autocomplete="on">
+        <h3 id="lead-h3" data-i18n="lead.h3">Get your pond report</h3>
+        <p class="sub" data-i18n="lead.sub">Tell us where to send it. Every request is checked by a person before the report goes out, so please give the details a field representative could call you on.</p>
+
+        <div id="lead-form-error" class="lead-error hidden" role="alert"></div>
+
+        <div class="field">
+          <label class="field-label" for="lead-name" data-i18n="lead.name">Name</label>
+          <input type="text" id="lead-name" name="name" maxlength="80" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label class="field-label" for="lead-phone" data-i18n="lead.phone">WhatsApp number</label>
+          <input type="tel" id="lead-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile" required />
+          <p class="field-hint" data-i18n="lead.phone_hint">10-digit Indian mobile number. The report is sent to this number.</p>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="lead-village" data-i18n="lead.village">Village / town</label>
+            <input type="text" id="lead-village" name="village" maxlength="80" autocomplete="address-level2" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="lead-district" data-i18n="lead.district">District</label>
+            <input type="text" id="lead-district" name="district" readonly tabindex="-1" />
+            <p class="field-hint" data-i18n="lead.district_hint">From the map above; change it there.</p>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="lead-role" data-i18n="lead.role">You are</label>
+            <select id="lead-role" name="role" required>
+              <option value="" data-i18n="lead.role.choose">Choose</option>
+              <option value="owner" data-i18n="lead.role.owner">Farm owner</option>
+              <option value="manager" data-i18n="lead.role.manager">Farm manager</option>
+              <option value="planning" data-i18n="lead.role.planning">Planning a new pond</option>
+              <option value="consultant" data-i18n="lead.role.consultant">Consultant / trader</option>
+              <option value="supplier" data-i18n="lead.role.supplier">Equipment supplier</option>
+              <option value="other" data-i18n="lead.role.other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for="lead-ponds" data-i18n="lead.ponds">Number of ponds</label>
+            <select id="lead-ponds" name="ponds" required>
+              <option value="" data-i18n="lead.ponds.choose">Choose</option>
+              <option value="1">1</option>
+              <option value="2-5">2 to 5</option>
+              <option value="6-20">6 to 20</option>
+              <option value="20+">More than 20</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="lead-area-total" data-i18n="lead.area_total">Total water area (acres, optional)</label>
+            <input type="number" id="lead-area-total" name="area_total_acre" min="0.1" max="5000" step="0.25" inputmode="decimal" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="lead-best-time" data-i18n="lead.best_time">Best time to call (optional)</label>
+            <input type="text" id="lead-best-time" name="best_time" maxlength="40" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="lead-email" data-i18n="lead.email">E-mail (optional)</label>
+          <input type="text" id="lead-email" name="email" inputmode="email" autocomplete="email" maxlength="120" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="lead-challenge" id="lead-challenge-q" data-i18n="lead.challenge">Quick check: what is</label>
+          <input type="number" id="lead-challenge" name="challenge" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <!-- honeypot: invisible to people, tempting to bots -->
+        <div class="lead-hp" aria-hidden="true">
+          <label for="lead-website" data-i18n="lead.honeypot_label">Website</label>
+          <input type="text" id="lead-website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        <div id="lead-turnstile" class="cf-turnstile"></div>
+        <div class="field field-check">
+          <input type="checkbox" id="lead-consent" name="consent" required />
+          <label for="lead-consent" data-i18n="lead.consent">Oxyniti may contact me on WhatsApp or phone about this estimate and a free DO-meter demo.</label>
+        </div>
+        <p class="field-hint" data-i18n="lead.privacy">Your details are used only to prepare and send your report and to arrange the demo. They are not sold or shared.</p>
+        <div class="cta-row">
+          <button type="submit" id="lead-submit" class="btn btn-warm" data-i18n="lead.submit">Request my report</button>
+          <button type="button" id="lead-cancel" class="btn btn-ghost" data-i18n="lead.cancel">Not now</button>
+        </div>
+      </form>
+
+      <div id="lead-received" class="lead-received hidden">
+        <h3 data-i18n="lead.received_h">Request received</h3>
+        <p class="lead-ref"><span data-i18n="lead.received_ref">Reference</span>: <b id="lead-received-ref"></b></p>
+        <p id="lead-received-p"></p>
+        <div class="cta-row">
+          <a id="lead-cta-whatsapp" class="btn btn-warm" href="https://wa.me/919659727477" target="_blank" rel="noopener" data-i18n="lead.cta_whatsapp">Send request on WhatsApp</a>
+          <button id="lead-cta-copy" class="btn btn-ghost" type="button" data-i18n="lead.cta_copy">Copy request</button>
+        </div>
+        <p class="copy-status" id="lead-copy-status" role="status"></p>
+        <p class="field-hint"><button type="button" class="link-btn" id="lead-request-again" data-i18n="lead.request_again">Submit a different request</button></p>
+      </div>
+    </div>
+  </dialog>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <img class="footer-logo" src="assets/logo.svg" alt="Oxyniti" width="140" height="70" />
+        <p data-i18n="footer.made">Built for Tamil Nadu fish and shrimp farmers.</p>
+        <p class="field-hint" data-i18n="footer.disclaimer">Estimates only. We verify your pond's real numbers with a free DO-meter demo before you pay anything.</p>
+      </div>
+      <div>
+        <h5 data-i18n="footer.sources_h">Data sources and licences</h5>
+        <!-- WP6: short form of the full list in site/README.md. Licences named where they bind. -->
+        <ul id="data-sources">
+          <li>District boundaries — <a href="https://www.geoboundaries.org/api/current/gbOpen/IND/ADM2/" target="_blank" rel="noopener">geoBoundaries gbOpen IND ADM2</a>, boundaryID IND-ADM2-76128533, under <strong>ODbL 1.0</strong>: attribution and share-alike apply to the boundary data.</li>
+          <li>Map tiles — &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, ODbL.</li>
+          <li>Climate normals — <a href="https://www.imdpune.gov.in/library/public/Climatological%20Tables%201991-2020.pdf" target="_blank" rel="noopener">IMD Pune, Climatological Tables of Observatories in India 1991–2020</a>.</li>
+          <li>District fish production — <a href="https://www.tn.gov.in/deptst/fisheries.pdf" target="_blank" rel="noopener">DES, Statistical Hand Book of Tamil Nadu 2021-22</a>, Tables 8.2 and 8.3.</li>
+          <li>Farms, hatcheries and seed farms — <a href="https://cms.tn.gov.in/cms_migrated/document/docfiles/fisheries_e_pn_2025_26.pdf" target="_blank" rel="noopener">TN Fisheries Policy Note 2025-26</a>, Tables 4, 7 and 8.</li>
+          <li>Agro-climatic zones — <a href="https://agritech.tnau.ac.in/agriculture/agri_soilresource_agroclimate.html" target="_blank" rel="noopener">TNAU seven-zone classification</a>.</li>
+          <li>Crop costs and yields — <a href="https://agritech.tnau.ac.in/banking/nabard_pdf/Fisheries/6.GIFT_Tilapia_culture_15.pdf" target="_blank" rel="noopener">NABARD / TNAU 2015 model projects</a> — 2015 vintage, status ASSUMED.</li>
+          <li>Electricity tariff — <a href="https://www.tnerc.tn.gov.in/Orders/files/TO-Order%20No6300620252131.pdf" target="_blank" rel="noopener">TNERC tariff order</a>, LT III-A(1) and LT IV, effective 2025-07-01.</li>
+          <li>Subsidy rates — <a href="https://static.pib.gov.in/WriteReadData/userfiles/PMMSY%20BookEnglish.pdf" target="_blank" rel="noopener">PMMSY</a>; whether an aerator qualifies as an "input" is NOT_FOUND, so the options are labelled UNTESTED.</li>
+          <li>Oxygen saturation — Benson &amp; Krause 1984, as used by <a href="https://water.usgs.gov/water-resources/software/DOTABLES/" target="_blank" rel="noopener">USGS DOTABLES</a>; night-time oxygen budget after Boyd.</li>
+          <li>Uplift evidence — Mauladani et al. 2020, Rahmawati et al. 2021, Tran-Duy et al. 2008, Boyd &amp; Hanson 2010. Full list with statuses in the project README.</li>
+          <li>Product figures — <a href="https://www.oxyniti.com/product/nano-bubble-generator-1.5-HP" target="_blank" rel="noopener">oxyniti.com product pages</a> (2 L/min and 6 L/min oxygen input).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>&copy; Oxyniti (NBG)</span>
+    </div>
+  </div>
+</footer>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="data/species.data.js"></script>
+<script src="data/climate.data.js"></script>
+<script src="data/hotspots.data.js"></script>
+<script src="data/tn_districts.data.js"></script>
+<script src="data/products.data.js"></script>
+<script src="data/economics.data.js"></script>
+<script src="data/coefficients.data.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/map.js"></script>
+<script src="js/model.js"></script>
+<script src="js/leads.config.js"></script>
+<script src="js/leads.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

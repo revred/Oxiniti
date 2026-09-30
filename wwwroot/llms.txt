@@ -32,6 +32,7 @@ A: Oxyniti is currently serving Tamil Nadu and South India.
 - [Aquaculture Oxygenation](https://www.oxyniti.com/aquaculture-oxygenation): Oxygenation for fish ponds.
 - [Advanced Aquaculture Systems](https://www.oxyniti.com/ras-oxygenation): Oxygenation for advanced aquaculture systems — recirculating aquaculture (RAS) and biofloc.
 - [Products](https://www.oxyniti.com/products): Nano-bubble generator product range (live catalog).
+- [Yield calculator](https://www.oxyniti.com/yield-calculator/): Per-pond estimate of extra harvest from Oxyniti aeration for Tamil Nadu fish and shrimp ponds, by species, district, stocking month and density, with a map of aquaculture hotspots.
 - [About](https://www.oxyniti.com/about): Company background.
 
 ## Contact

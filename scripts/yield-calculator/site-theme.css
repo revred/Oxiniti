@@ -131,6 +131,61 @@
    attribution painted over the sticky header while scrolling. */
 #yc-root #map { position: relative; z-index: 0; }
 
+/* The calculator's reset (.yc * { margin: 0; padding: 0 }) loads after
+   leaflet.css and wipes Leaflet's own spacing, so tooltips, popups and the
+   attribution line had text touching their edges. Put it back. */
+#yc-root .leaflet-tooltip {
+  padding: 8px 12px;
+  line-height: 1.45;
+  border-radius: 8px;
+}
+#yc-root .leaflet-popup-content { margin: 14px 18px; line-height: 1.45; }
+#yc-root .leaflet-popup-content p { margin: 4px 0; }
+#yc-root .leaflet-control-attribution {
+  padding: 3px 10px;
+  margin: 0 12px 10px 0;
+  border-radius: 6px;
+}
+
+/* Two cards side by side instead of one split card: the results card is
+   only as tall as its content and stays in view while the (long) input
+   list scrolls past -- no empty blue column. Phones keep the stacked
+   layout from the calculator's own 900px breakpoint. */
+@media (min-width: 901px) {
+  #yc-root { overflow-x: clip; } /* hidden would make .yc a scroll container and break sticky */
+  #yc-root .calc-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 28px;
+    align-items: start;
+    overflow: visible;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #yc-root .input-card,
+  #yc-root .results-card {
+    border-radius: calc(var(--radius) + 6px);
+    box-shadow: var(--shadow);
+  }
+}
+@media (min-width: 901px) and (min-height: 760px) {
+  #yc-root .results-card {
+    position: sticky;
+    top: calc(var(--oxy-header-h, 88px) + 20px);
+  }
+}
+
+/* The report button sat navy-on-blue inside the results card. White with
+   navy text is the one thing on the panel that reads as the action. */
+#yc-root .results-card .btn-warm {
+  background: #ffffff;
+  color: #0B1F33;
+  box-shadow: 0 10px 24px rgba(2, 8, 23, 0.35);
+}
+#yc-root .results-card .btn-warm:hover {
+  background: #8DDCEE;
+  box-shadow: 0 14px 30px rgba(2, 8, 23, 0.45);
+}
+
 /* Data sources (from the calculator's own footer: the boundary data is
    ODbL, which requires this attribution on the page). */
 #yc-root .oxy-sources {

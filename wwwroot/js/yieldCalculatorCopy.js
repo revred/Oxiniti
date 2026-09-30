@@ -75,6 +75,10 @@ const TIDY = [
     [/Not estimable — missing: .*/, "Not enough data yet for an estimate."],
     [/^Not enough sourced data to estimate.*/, "Not enough data yet for an estimate."],
     [/ \(data incomplete\)/g, " (not available yet)"],
+    // map.js district tooltips
+    [/^Climate station: not mapped$/, "Nearest weather station: not available"],
+    [/^Climate station: /, "Nearest weather station: "],
+    [/^no published district figure$/, "Fish production: not published"],
     // "(... ASSUMED ...)" as a whole parenthetical
     [new RegExp(`\\s*\\([^()]*\\b${STATUS}\\b[^()]*\\)`, "g"), ""],
     // "; location ASSUMED from the OSM pond of that name" as a trailing clause

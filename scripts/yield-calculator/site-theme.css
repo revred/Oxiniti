@@ -114,10 +114,34 @@
 }
 #yc-root .result-grid .result-band { border-bottom: none; padding-bottom: 0; }
 
-/* "Sent to your WhatsApp after we check your request" is said under
-   Extra profit and again in the note above the button; once more under
-   each of Payback and Units is noise. */
-#yc-root .result-grid .band-value.is-locked + .band-sub { display: none; }
+/* "Sent to your WhatsApp after we check your request" under each locked
+   figure repeats the note above the button; the note says it once. */
+#yc-root .band-value.is-locked + .band-sub { display: none; }
+
+/* The "+18%, not a guarantee" note, moved out of the card at sync time
+   (apply-site-copy.mjs) to small print under both cards. */
+#yc-root .ceiling-note.yc-smallprint {
+  margin: 18px 4px 0;
+  padding: 0;
+  border: none;
+  max-width: 880px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--fg-dim);
+}
+
+/* Group headings inside the input card (apply-site-copy.mjs). */
+#yc-root .yc-group {
+  margin: 30px 0 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aqua);
+}
+#yc-root .input-card .sub + .yc-group { margin-top: 8px; padding-top: 0; border-top: none; }
 
 /* An empty warnings list would still take a gap slot in the column. */
 #yc-root #res-warnings:empty { display: none; }
@@ -167,11 +191,100 @@
     box-shadow: var(--shadow);
   }
 }
-@media (min-width: 901px) and (min-height: 760px) {
+/* Pinned at every screen height: yieldCalculator.js sets `top` so that a
+   card taller than the screen sticks with its bottom (and the report
+   button) in view instead of not sticking at all. */
+@media (min-width: 901px) {
   #yc-root .results-card {
     position: sticky;
     top: calc(var(--oxy-header-h, 88px) + 20px);
+    padding: 26px 28px;
+    gap: 16px;
   }
+
+  /* Extra profit | Payback | Units in one row: all three are locked for
+     visitors, so three short cells beat two full-width rows. */
+  #yc-root #result-content {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  #yc-root #result-content > * { grid-column: 1 / -1; }
+  #yc-root #result-content > .result-grid { display: contents; }
+  #yc-root #result-content > .result-band:has(#res-profit),
+  #yc-root .result-grid > .result-band { grid-column: auto; border-bottom: none; padding-bottom: 0; }
+  #yc-root .result-band .band-value.is-locked { font-size: 0.95rem; }
+  #yc-root .baseline-context {
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    padding-top: 16px;
+  }
+}
+
+/* Phones: the estimate card sits below the long input list, so a slim bar
+   pinned to the bottom carries the harvest range and the report button
+   while the card is still below the screen (yieldCalculator.js mounts it
+   and toggles .is-on). The site's floating buttons step up above it. */
+#yc-root .yc-mbar { display: none; }
+@media (max-width: 900px) {
+  #yc-root .yc-mbar {
+    display: flex;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 1020;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 10px 10px 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #3D8FB5, #0B1F33);
+    color: #ffffff;
+    box-shadow: 0 10px 28px rgba(2, 8, 23, 0.35);
+    transform: translateY(calc(100% + 24px));
+    transition: transform 0.25s ease;
+  }
+  #yc-root .yc-mbar.is-on { transform: none; }
+  #yc-root .yc-mbar-lbl {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  #yc-root .yc-mbar > div { min-width: 0; }
+  #yc-root .yc-mbar-lbl,
+  #yc-root .yc-mbar-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #yc-root .yc-mbar-val {
+    display: block;
+    margin-top: 2px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+  }
+  #yc-root .yc-mbar-btn {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 100px;
+    background: #ffffff;
+    color: #0B1F33;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  body.yc-mbar-on .floating-actions {
+    bottom: 5.75rem;
+    transition: bottom 0.25s ease;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #yc-root .yc-mbar,
+  body.yc-mbar-on .floating-actions { transition: none; }
 }
 
 /* The report button sat navy-on-blue inside the results card. White with

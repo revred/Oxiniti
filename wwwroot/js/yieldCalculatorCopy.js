@@ -32,7 +32,14 @@ export const COPY = {
     "results.sensitivity": "",
     "method.sub": "",
 
-    // Results card
+    // Results card -- kept short so it fits beside the inputs on a laptop
+    "results.harv_sub": "Low–high range",
+    // Short labels for the one-row Profit | Payback | Units cells
+    "results.profit": "Extra profit",
+    "results.payback": "Payback",
+    "results.units": "Units needed",
+    "results.locked": "In your report",
+    "results.gate_note": "Profit, payback and unit sizing come in your free pond report, sent on WhatsApp after we check your request.",
     "results.ceiling_note": "At most +18% more saleable fish, for a pond short of oxygen in every month of the crop — less when it is short only some of the time. Not a guarantee: we measure your pond with a DO meter during the free demo.",
 
     // How this is calculated

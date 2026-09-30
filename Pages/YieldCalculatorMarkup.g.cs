@@ -57,7 +57,8 @@ internal static class YieldCalculatorMarkup
           <p class="sub" data-i18n="roi.sub">Move the sliders — estimates update instantly.</p>
 
           <form id="calc-form" autocomplete="off">
-            <div class="field">
+            <p class="yc-group">Location &amp; species</p>
+          <div class="field">
               <label class="field-label" for="in-district" data-i18n="input.district">District</label>
               <select id="in-district"></select>
             </div>
@@ -77,7 +78,8 @@ internal static class YieldCalculatorMarkup
               </details>
             </div>
 
-            <div class="field">
+            <p class="yc-group">Pond details</p>
+          <div class="field">
               <div class="field-label"><span data-i18n="roi.size">Pond size</span><output class="field-out" id="out-area_acre"></output></div>
               <div class="range-wrap"><input type="range" id="in-area_acre" min="0.25" max="10" step="0.25" value="1" /></div>
             </div>
@@ -121,7 +123,8 @@ internal static class YieldCalculatorMarkup
               <p class="field-hint" data-i18n="input.bloom_hint">Secchi-disc hint: the less clearly you can see a white disc lowered into the water, the denser the bloom — dense blooms draw down more oxygen overnight.</p>
             </div>
 
-            <div class="field">
+            <p class="yc-group">Prices &amp; power</p>
+          <div class="field">
               <div class="field-label"><span data-i18n="roi.price">Farm-gate price</span><output class="field-out" id="out-price_inr_kg"></output></div>
               <div class="range-wrap"><input type="range" id="in-price_inr_kg" min="0" max="1" step="1" value="0" /></div>
               <p class="field-hint" id="price-sourced-note"></p>
@@ -155,7 +158,8 @@ internal static class YieldCalculatorMarkup
               <input type="number" id="in-tariff-custom" class="hidden" min="0" max="12" step="0.01" placeholder="₹/kWh" data-i18n-ph="input.tariff_custom" />
             </div>
 
-            <div class="field">
+            <p class="yc-group">Equipment</p>
+          <div class="field">
               <label class="field-label" for="in-unit_model" data-i18n="input.unit_model">Nano-bubble generator</label>
               <select id="in-unit_model"></select>
             </div>
@@ -234,18 +238,18 @@ internal static class YieldCalculatorMarkup
             <div class="result-band">
               <span class="lbl" data-i18n="roi.harv">Estimated extra harvest</span>
               <div class="band-value" id="res-harvest">—</div>
-              <div class="band-sub" data-i18n="results.harv_sub">per crop / per year, low–high</div>
+              <div class="band-sub" data-i18n="results.harv_sub">Low–high range</div>
             </div>
 
             <div class="result-band">
-              <span class="lbl" data-i18n="results.profit">Estimated extra profit</span>
+              <span class="lbl" data-i18n="results.profit">Extra profit</span>
               <div class="band-value" id="res-profit">—</div>
               <div class="band-sub" data-i18n="results.profit_sub">per crop / per year, low–high</div>
             </div>
 
             <div class="result-grid">
               <div class="result-band">
-                <span class="lbl" data-i18n="results.payback">Payback on the unit</span>
+                <span class="lbl" data-i18n="results.payback">Payback</span>
                 <div class="band-value" id="res-payback">—</div>
                 <div class="band-sub" id="res-investment"></div>
               </div>
@@ -264,11 +268,9 @@ internal static class YieldCalculatorMarkup
 
             <ul class="warnings-list" id="res-warnings"></ul>
 
-            <p class="ceiling-note" data-i18n="results.ceiling_note">At most +18% more saleable fish, for a pond short of oxygen in every month of the crop — less when it is short only some of the time. Not a guarantee: we measure your pond with a DO meter during the free demo.</p>
-
             <div class="gate-note" id="gate-note">
               <span class="gate-lock" aria-hidden="true">&#128274;</span>
-              <span data-i18n="results.gate_note">Extra profit, payback, unit sizing, the month-by-month oxygen budget and the charts go into a written report for your pond. We check every request by hand before sending it.</span>
+              <span data-i18n="results.gate_note">Profit, payback and unit sizing come in your free pond report, sent on WhatsApp after we check your request.</span>
             </div>
             <div class="cta-row">
               <button id="cta-report" class="btn btn-warm" type="button" data-i18n="results.cta_report">Get my pond report</button>
@@ -276,6 +278,7 @@ internal static class YieldCalculatorMarkup
           </div>
         </div>
       </div>
+      <p class="ceiling-note yc-smallprint" data-i18n="results.ceiling_note">At most +18% more saleable fish, for a pond short of oxygen in every month of the crop — less when it is short only some of the time. Not a guarantee: we measure your pond with a DO meter during the free demo.</p>
     </div>
   </section>
 

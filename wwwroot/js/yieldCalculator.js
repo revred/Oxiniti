@@ -140,6 +140,82 @@ function watchAndTidy(root) {
     }).observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["title"] });
 }
 
+// Desktop: the estimate card is sticky (site-theme.css). When it is taller
+// than the space under the header, a fixed `top` would pin its bottom --
+// and the report button -- off screen, so the top is pulled up until the
+// card's bottom sits just inside the viewport; scrolling back up still
+// reveals its top as the column scrolls.
+function pinResultsCard() {
+    const card = document.getElementById("results-card");
+    if (!card) return;
+    const place = () => {
+        if (!window.matchMedia("(min-width: 901px)").matches) { card.style.top = ""; return; }
+        const header = document.querySelector(".site-header");
+        const below = (header ? header.getBoundingClientRect().height : 88) + 20;
+        card.style.top = Math.min(below, window.innerHeight - card.offsetHeight - 16) + "px";
+    };
+    new ResizeObserver(place).observe(card);
+    window.addEventListener("resize", place);
+    place();
+}
+
+// Phones (site-theme.css shows it at <= 900px): a bottom bar with the
+// per-year harvest range and the report button, on while the estimate card
+// is still below the screen -- i.e. while the visitor is on the map or the
+// inputs -- and off once the card itself is in view, or the form is open.
+function mountMobileBar(root) {
+    const harvest = document.getElementById("res-harvest");
+    const card = document.getElementById("results-card");
+    const cta = document.getElementById("cta-report");
+    const dialog = document.getElementById("lead-dialog");
+    if (!harvest || !card || !cta) return;
+
+    const t = (key, fallback) => (window.OxyI18n ? window.OxyI18n.t(key, fallback) : fallback);
+    const bar = document.createElement("div");
+    bar.className = "yc-mbar";
+    bar.setAttribute("role", "region");
+    bar.setAttribute("aria-label", t("results.h3", "Your estimate"));
+    bar.innerHTML = '<div><span class="yc-mbar-lbl"></span><span class="yc-mbar-val"></span></div>'
+        + '<button type="button" class="yc-mbar-btn"></button>';
+    const label = bar.querySelector(".yc-mbar-lbl");
+    const value = bar.querySelector(".yc-mbar-val");
+    const button = bar.querySelector(".yc-mbar-btn");
+    root.appendChild(bar);
+
+    const syncText = () => {
+        const tamil = window.OxyI18n && window.OxyI18n.getLang() === "ta";
+        label.textContent = tamil ? t("roi.harv", "Extra harvest") : "Extra harvest";
+        button.textContent = cta.textContent.trim() || t("results.cta_report", "Get my pond report");
+        // "10 kg–20 kg per crop\n25 kg–50 kg per year" (see tidyNode): show the
+        // per-year line, shortened to fit one line of a phone bar.
+        const lines = harvest.textContent.split("\n").map((s) => s.trim()).filter(Boolean);
+        value.textContent = lines.length
+            ? lines[lines.length - 1].replace(/ kg–/, "–").replace(/ per year$/, " / year")
+            : "—";
+    };
+    syncText();
+    new MutationObserver(syncText).observe(harvest, { childList: true, characterData: true, subtree: true });
+    new MutationObserver(syncText).observe(cta, { childList: true, characterData: true, subtree: true });
+    document.addEventListener("oxy:langchange", syncText);
+
+    button.addEventListener("click", () => cta.click());
+
+    let queued = false;
+    const place = () => {
+        queued = false;
+        const phone = window.matchMedia("(max-width: 900px)").matches;
+        const cardBelow = card.getBoundingClientRect().top > window.innerHeight - 40;
+        const on = phone && cardBelow && !(dialog && dialog.open);
+        bar.classList.toggle("is-on", on);
+        document.body.classList.toggle("yc-mbar-on", on);
+    };
+    const queue = () => { if (!queued) { queued = true; requestAnimationFrame(place); } };
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    if (dialog) new MutationObserver(queue).observe(dialog, { attributes: true, attributeFilter: ["open"] });
+    place();
+}
+
 export async function boot() {
     const root = document.getElementById("yc-root");
     // tools/Prerender sets __oxyPrerender: the captured HTML must be the
@@ -184,6 +260,8 @@ export async function boot() {
     applySiteCopy();
     start.call(document, new Event("DOMContentLoaded"));
     watchAndTidy(root);
+    pinResultsCard();
+    mountMobileBar(root);
 }
 
 boot().catch((err) => console.error("[yield-calculator] start-up failed:", err));

@@ -47,7 +47,37 @@ for (const [pattern, what] of [
     replaceOnce(pattern, (m) => m + " hidden", what);
 }
 
-// 3. Data sources: keep every source and link (the ODbL boundary data needs
+// 3. Compact results card: the "+18%, not a guarantee" note moves out of
+//    the card to small print under both cards, so the card is short enough
+//    to stay pinned beside the inputs on a 125%-scaled laptop screen.
+{
+    const noteRe = /\s*<p class="ceiling-note" data-i18n="results.ceiling_note">[^<]*<\/p>/;
+    const note = html.match(noteRe);
+    if (!note) throw new Error("apply-site-copy: no ceiling note in the results card");
+    html = html.replace(noteRe, "");
+    replaceOnce(
+        /(<button id="cta-report"[^\n]*\n\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>)/,
+        (m) => m + "\n      " + note[0].trim().replace('class="ceiling-note"', 'class="ceiling-note yc-smallprint"'),
+        "end of the calculator grid",
+    );
+}
+
+// 4. Group headings in the long input card, before the first field of each
+//    group. English only, like the rest of the site-side wording.
+for (const [firstInput, heading] of [
+    ["in-district", "Location &amp; species"],
+    ["in-area_acre", "Pond details"],
+    ["in-price_inr_kg", "Prices &amp; power"],
+    ["in-unit_model", "Equipment"],
+]) {
+    const at = html.indexOf(`id="${firstInput}"`);
+    if (at === -1) throw new Error(`apply-site-copy: no #${firstInput} for the "${heading}" group heading`);
+    const field = html.lastIndexOf('<div class="field">', at);
+    if (field === -1) throw new Error(`apply-site-copy: no field wrapper before #${firstInput}`);
+    html = html.slice(0, field) + `<p class="yc-group">${heading}</p>\n          ` + html.slice(field);
+}
+
+// 5. Data sources: keep every source and link (the ODbL boundary data needs
 //    its attribution), drop the model's status labels and internal pointers.
 for (const [from, to] of [
     [", boundaryID IND-ADM2-76128533, under <strong>ODbL 1.0</strong>: attribution and share-alike apply to the boundary data.", ", licensed under <strong>ODbL 1.0</strong>."],

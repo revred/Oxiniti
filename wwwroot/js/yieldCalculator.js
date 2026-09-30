@@ -92,12 +92,21 @@ function applySiteCopy() {
 // Text the calculator draws from its data (option labels, the species panel,
 // map popups) is tidied as it appears. tidyText is idempotent, so the
 // observer's own edits settle after one pass.
+//
+// Result figures ("10–20 kg per crop  ·  25–50 kg per year") read better as
+// two lines than as one that wraps mid-range; the separator becomes a line
+// break there (site-theme.css renders it with white-space: pre-line).
+function tidyNode(node) {
+    let tidy = tidyText(node.nodeValue);
+    if (node.parentElement && node.parentElement.classList.contains("band-value")) {
+        tidy = tidy.replace(/\s+·\s+/g, "\n");
+    }
+    if (tidy !== node.nodeValue) node.nodeValue = tidy;
+}
+
 function tidyTree(root) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        const tidy = tidyText(node.nodeValue);
-        if (tidy !== node.nodeValue) node.nodeValue = tidy;
-    }
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) tidyNode(node);
     const withTitles = root.nodeType === Node.ELEMENT_NODE
         ? [root, ...root.querySelectorAll("[title]")]
         : [];
@@ -115,15 +124,13 @@ function watchAndTidy(root) {
     new MutationObserver((mutations) => {
         for (const m of mutations) {
             if (m.type === "characterData") {
-                const tidy = tidyText(m.target.nodeValue);
-                if (tidy !== m.target.nodeValue) m.target.nodeValue = tidy;
+                tidyNode(m.target);
             } else if (m.type === "attributes") {
                 tidyTree(m.target);
             } else {
                 m.addedNodes.forEach((n) => {
                     if (n.nodeType === Node.TEXT_NODE) {
-                        const tidy = tidyText(n.nodeValue);
-                        if (tidy !== n.nodeValue) n.nodeValue = tidy;
+                        tidyNode(n);
                     } else if (n.nodeType === Node.ELEMENT_NODE) {
                         tidyTree(n);
                     }

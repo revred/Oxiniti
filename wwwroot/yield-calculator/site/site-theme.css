@@ -87,6 +87,50 @@
 #yc-root .results-card a,
 #yc-root .results-card .link-btn { color: #8DDCEE; }
 
+/* Results card rhythm. The calculator sized it for its own display font;
+   in the site's Helvetica/Arial the harvest range ran to three ragged
+   lines and the rows sat tight against each other. */
+#yc-root .results-card { gap: 22px; }
+#yc-root #result-content { display: flex; flex-direction: column; gap: 18px; }
+#yc-root .result-band { padding-bottom: 18px; }
+/* yieldCalculator.js turns the "per crop · per year" separator into a line
+   break inside result figures; pre-line renders it. */
+#yc-root .result-band .band-value { white-space: pre-line; }
+#yc-root .result-band .lbl { margin-bottom: 10px; }
+#yc-root .result-band .band-value {
+  font-size: clamp(1.3rem, 2.1vw, 1.6rem);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+#yc-root .result-band .band-sub { margin-top: 6px; line-height: 1.5; }
+#yc-root .result-band .band-value.is-locked { font-size: 1.05rem; }
+
+/* Payback | Units: one divider under the pair, not a stray half-width line
+   under the left cell only. */
+#yc-root .result-grid {
+  gap: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  padding-bottom: 18px;
+}
+#yc-root .result-grid .result-band { border-bottom: none; padding-bottom: 0; }
+
+/* "Sent to your WhatsApp after we check your request" is said under
+   Extra profit and again in the note above the button; once more under
+   each of Payback and Units is noise. */
+#yc-root .result-grid .band-value.is-locked + .band-sub { display: none; }
+
+/* An empty warnings list would still take a gap slot in the column. */
+#yc-root #res-warnings:empty { display: none; }
+#yc-root .baseline-context { gap: 8px 20px; align-items: baseline; padding-bottom: 0; border-bottom: none; }
+#yc-root .baseline-context .lbl { margin-bottom: 0; width: 100%; }
+#yc-root .ceiling-note { padding-top: 18px; line-height: 1.6; }
+#yc-root .gate-note { padding: 14px 16px; line-height: 1.55; }
+
+/* Leaflet's panes and controls use z-index 400-1000 and the site header is
+   z-index 1000; without a stacking context of its own the map's legend and
+   attribution painted over the sticky header while scrolling. */
+#yc-root #map { position: relative; z-index: 0; }
+
 /* Data sources (from the calculator's own footer: the boundary data is
    ODbL, which requires this attribution on the page). */
 #yc-root .oxy-sources {

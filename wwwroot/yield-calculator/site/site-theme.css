@@ -18,7 +18,7 @@
   --text: #ffffff;
   --text-dim: rgba(255, 255, 255, 0.78);
 
-  --bg: #f5f9fc;
+  --bg: #ffffff; /* white, like every other page on the site */
   --bg-panel: #ffffff;
   --bg-panel-solid: #ffffff;
   --border: rgba(26, 44, 84, 0.12);
@@ -163,13 +163,51 @@
   line-height: 1.45;
   border-radius: 8px;
 }
-#yc-root .leaflet-popup-content { margin: 14px 18px; line-height: 1.45; }
+#yc-root .leaflet-popup-content-wrapper { padding: 1px; } /* keeps the content's margin inside the card */
+#yc-root .leaflet-popup-content { margin: 14px 40px 14px 18px; line-height: 1.45; }
+/* Leaflet parks the popup's close button in the very corner, which on this
+   rounded card clipped it and let long titles run underneath. Sit it inside
+   the card, clear of the text (the content's 40px right margin above). */
+#yc-root .leaflet-container a.leaflet-popup-close-button {
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  font: 20px/28px var(--font-body, system-ui, sans-serif);
+  border-radius: 50%;
+}
+#yc-root .leaflet-container a.leaflet-popup-close-button:hover,
+#yc-root .leaflet-container a.leaflet-popup-close-button:focus-visible {
+  background: rgba(127, 127, 127, 0.14);
+}
 #yc-root .leaflet-popup-content p { margin: 4px 0; }
 #yc-root .leaflet-control-attribution {
   padding: 3px 10px;
   margin: 0 12px 10px 0;
   border-radius: 6px;
 }
+
+/* The same reset wipes the margin: auto a modal <dialog> centres itself
+   with, so the report form opened in the top-left corner. Centre it again,
+   and let only the inner panel scroll (the dialog's own default max-height
+   and overflow gave a second scrollbar beside it). */
+#yc-root .lead-dialog {
+  margin: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Side-by-side form fields: the calculator centres each .field-row and
+   drops the bottom margin of only its last .field, so the right-hand field
+   (and any field beside one with a hint) sat lower than its partner. Align
+   the pair at the top and space the row, not its fields; on phones, where
+   the pair wraps, the row gap keeps the usual 20px between them. */
+#yc-root .lead-form .field-row {
+  align-items: flex-start;
+  gap: 20px 10px;
+  margin-bottom: 20px;
+}
+#yc-root .lead-form .field-row > .field { margin-bottom: 0; }
 
 /* Two cards side by side instead of one split card: the results card is
    only as tall as its content and stays in view while the (long) input
@@ -318,3 +356,49 @@
   color: var(--fg-dim);
 }
 #yc-root .oxy-sources li { margin-bottom: 6px; }
+
+/* "Advanced", "Assumptions" and "Data sources and licences": the calculator
+   draws the first two as 0.94rem text with a small "▸" character (the last
+   had the browser's own triangle), which read as fine print. One larger
+   label and a drawn chevron that turns down when the section is open. */
+#yc-root details.advanced-details summary,
+#yc-root .assumptions-details summary,
+#yc-root .oxy-sources summary {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--fg-strong);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+}
+#yc-root .oxy-sources summary::-webkit-details-marker { display: none; }
+#yc-root details.advanced-details summary::before,
+#yc-root .assumptions-details summary::before,
+#yc-root .oxy-sources summary::before {
+  content: "";
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-right: 3px solid var(--aqua);
+  border-bottom: 3px solid var(--aqua);
+  transform: rotate(-45deg);
+  margin: 0 4px 0 2px;
+  transition: transform 0.2s ease;
+}
+#yc-root details.advanced-details[open] summary::before,
+#yc-root .assumptions-details[open] summary::before,
+#yc-root .oxy-sources details[open] summary::before {
+  content: "";
+  transform: rotate(45deg) translate(-2px, -2px);
+}
+
+/* The limitations list, the estimate disclaimer and the sources list read
+   as grey fine print (--fg-dim); set them in the headings' dark ink. */
+#yc-root .limitations-list li,
+#yc-root .oxy-sources .field-hint,
+#yc-root .oxy-sources ul {
+  color: var(--fg-strong);
+}

@@ -7,7 +7,10 @@
 // parsed with the page: ui.js starts from a DOMContentLoaded listener, which has
 // long fired by the time a Blazor page renders. So this loads the stylesheets,
 // then the scripts in their original order, catches the DOMContentLoaded
-// listener ui.js registers, and calls it directly.
+// listener ui.js registers, and calls it directly. Before that it lays the
+// site's visitor wording (yieldCalculatorCopy.js) over the calculator's strings.
+import { COPY, tidyText } from "./yieldCalculatorCopy.js";
+
 const BASE = "/yield-calculator/";
 
 const STYLES = [
@@ -56,6 +59,80 @@ function loadScript(src) {
     });
 }
 
+function hasCopy(key) {
+    return Object.prototype.hasOwnProperty.call(COPY, key);
+}
+
+// ui.js, leads.js and charts.js all read strings through window.OxyI18n.t,
+// and ui.js paints the static labels through window.OxyI18n.applyTranslations
+// -- so wrapping those two covers every string the calculator shows.
+// setLang() repaints through i18n.js's own internal copy, hence the
+// oxy:langchange hook.
+function applySiteCopy() {
+    const i18n = window.OxyI18n;
+    if (!i18n) throw new Error("[yield-calculator] i18n.js did not define window.OxyI18n");
+
+    const t = i18n.t;
+    i18n.t = (key, fallback) => (hasCopy(key) ? COPY[key] : t(key, fallback));
+
+    const paint = (root) => {
+        (root || document).querySelectorAll("[data-i18n]").forEach((el) => {
+            const key = el.getAttribute("data-i18n");
+            if (hasCopy(key)) el.textContent = COPY[key];
+        });
+    };
+    const applyTranslations = i18n.applyTranslations;
+    i18n.applyTranslations = (root) => {
+        applyTranslations(root);
+        paint(root);
+    };
+    document.addEventListener("oxy:langchange", () => paint(document));
+}
+
+// Text the calculator draws from its data (option labels, the species panel,
+// map popups) is tidied as it appears. tidyText is idempotent, so the
+// observer's own edits settle after one pass.
+function tidyTree(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const tidy = tidyText(node.nodeValue);
+        if (tidy !== node.nodeValue) node.nodeValue = tidy;
+    }
+    const withTitles = root.nodeType === Node.ELEMENT_NODE
+        ? [root, ...root.querySelectorAll("[title]")]
+        : [];
+    withTitles.forEach((el) => {
+        const title = el.getAttribute && el.getAttribute("title");
+        if (title) {
+            const tidy = tidyText(title);
+            if (tidy !== title) el.setAttribute("title", tidy);
+        }
+    });
+}
+
+function watchAndTidy(root) {
+    tidyTree(root);
+    new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.type === "characterData") {
+                const tidy = tidyText(m.target.nodeValue);
+                if (tidy !== m.target.nodeValue) m.target.nodeValue = tidy;
+            } else if (m.type === "attributes") {
+                tidyTree(m.target);
+            } else {
+                m.addedNodes.forEach((n) => {
+                    if (n.nodeType === Node.TEXT_NODE) {
+                        const tidy = tidyText(n.nodeValue);
+                        if (tidy !== n.nodeValue) n.nodeValue = tidy;
+                    } else if (n.nodeType === Node.ELEMENT_NODE) {
+                        tidyTree(n);
+                    }
+                });
+            }
+        }
+    }).observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["title"] });
+}
+
 export async function boot() {
     const root = document.getElementById("yc-root");
     // tools/Prerender sets __oxyPrerender: the captured HTML must be the
@@ -97,7 +174,9 @@ export async function boot() {
     if (typeof start !== "function") {
         throw new Error("[yield-calculator] ui.js registered no DOMContentLoaded start-up");
     }
+    applySiteCopy();
     start.call(document, new Event("DOMContentLoaded"));
+    watchAndTidy(root);
 }
 
 boot().catch((err) => console.error("[yield-calculator] start-up failed:", err));

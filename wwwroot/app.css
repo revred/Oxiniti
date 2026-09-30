@@ -557,3 +557,13 @@ html.shell-app-route .shell-route-loading {
 [id] {
     scroll-margin-top: calc(var(--oxy-header-h, 88px) + 8px);
 }
+
+/* The homepage's fixed "Book a Free Demo" bar (MobileCtaBar, phones only)
+   sits over the last lines of the page. The footer is the last thing on every
+   page (MainLayout), so it carries the extra room itself -- its own gradient
+   runs under the bar instead of a blank strip below it. */
+@media (max-width: 768px) {
+    body:has(.mobile-cta-bar) footer.site-footer {
+        padding-bottom: 5.5rem;
+    }
+}

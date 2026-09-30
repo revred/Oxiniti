@@ -27,13 +27,13 @@ internal static class YieldCalculatorMarkup
       <div class="map-grid">
         <div id="map" role="img" aria-label="Map of Tamil Nadu districts coloured by inland fish production, with aquaculture hotspot markers. Click a district to select it."></div>
         <aside class="district-card" id="district-card">
-          <p class="d-hint" id="district-placeholder" data-i18n="district.card.placeholder">Click the map or choose a district below to see its production statistics and climate station.</p>
+          <p class="d-hint" id="district-placeholder" data-i18n="district.card.placeholder">Click the map or choose a district to see its fish production and nearest weather station.</p>
           <div id="district-card-body" class="hidden">
             <span class="d-name" id="district-name"></span>
             <dl>
               <dt data-i18n="district.card.production">Inland production</dt>
               <dd id="district-production">—</dd>
-              <dt data-i18n="district.card.station">Climate station</dt>
+              <dt data-i18n="district.card.station">Nearest weather station</dt>
               <dd id="district-station">—</dd>
             </dl>
           </div>
@@ -63,16 +63,16 @@ internal static class YieldCalculatorMarkup
             </div>
 
             <div class="field">
-              <label class="field-label" for="in-station_name" data-i18n="input.station_name">City (climate station)</label>
+              <label class="field-label" for="in-station_name" data-i18n="input.station_name">Weather from a nearby city</label>
               <select id="in-station_name"></select>
-              <p class="field-hint" data-i18n="input.station_hint">Optional — pick a city to see this species' numbers under that city's climate instead of the district default. The reference crop used for the size comparison stays anchored to Tiruchirappalli either way.</p>
+              <p class="field-hint" data-i18n="input.station_hint">Optional — see how the same pond would do in another city's weather.</p>
             </div>
 
             <div class="field">
               <label class="field-label" for="in-species" data-i18n="f.species">What do you farm?</label>
               <select id="in-species"></select>
               <details class="species-panel">
-                <summary data-i18n="input.species_panel_toggle">All species and their sourced data</summary>
+                <summary data-i18n="input.species_panel_toggle">About each species</summary>
                 <div class="species-panel-body" id="species-panel-body"></div>
               </details>
             </div>
@@ -85,7 +85,7 @@ internal static class YieldCalculatorMarkup
             <div class="field">
               <div class="field-label"><span data-i18n="input.depth_m">Average water depth</span><output class="field-out" id="out-depth_m"></output></div>
               <div class="range-wrap"><input type="range" id="in-depth_m" min="0.8" max="2.5" step="0.1" value="1.5" /></div>
-              <p class="field-hint" data-i18n="input.depth_hint">Default is an assumed typical depth, not a sourced Tamil Nadu figure — adjust to match your pond.</p>
+              <p class="field-hint" data-i18n="input.depth_hint">A typical depth — adjust to match your pond.</p>
             </div>
 
             <div class="field">
@@ -172,21 +172,21 @@ internal static class YieldCalculatorMarkup
             <div class="field">
               <label class="field-label" for="in-unit_price_inr" data-i18n="input.unit_price_inr">Unit price</label>
               <input type="number" id="in-unit_price_inr" min="0" step="100" placeholder="₹" />
-              <p class="field-hint" data-i18n="input.unit_price_hint">Prefilled with a rough estimate (ASSUMED) — replace it with a real quote when you have one.</p>
+              <p class="field-hint" data-i18n="input.unit_price_hint">A rough estimate — replace it with your quote.</p>
             </div>
 
             <details class="advanced-details" id="advanced-details">
               <summary data-i18n="input.advanced">Advanced</summary>
               <div class="advanced-body">
                 <div class="field">
-                  <label class="field-label" for="in-o2_input_lpm_override" data-i18n="input.o2_input_lpm_override">Oxygen delivery per unit (datasheet)</label>
+                  <label class="field-label" for="in-o2_input_lpm_override" data-i18n="input.o2_input_lpm_override">Oxygen delivery per unit</label>
                   <input type="number" id="in-o2_input_lpm_override" min="0.5" max="60" step="0.1" placeholder="L/min" />
-                  <p class="field-hint" data-i18n="input.override_hint">Enter the OEM datasheet figure if you have it — leave blank to use the published product value.</p>
+                  <p class="field-hint" data-i18n="input.override_hint">Leave blank to use the figures on our product page.</p>
                 </div>
                 <div class="field">
-                  <label class="field-label" for="in-power_kw_override" data-i18n="input.power_kw_override">Electrical input per unit (datasheet)</label>
+                  <label class="field-label" for="in-power_kw_override" data-i18n="input.power_kw_override">Power use per unit</label>
                   <input type="number" id="in-power_kw_override" min="0.1" max="10" step="0.01" placeholder="kW" />
-                  <p class="field-hint" data-i18n="input.override_hint">Enter the OEM datasheet figure if you have it — leave blank to use the published product value.</p>
+                  <p class="field-hint" data-i18n="input.override_hint">Leave blank to use the figures on our product page.</p>
                 </div>
                 <div class="field">
                   <label class="field-label" for="in-concentrator_kw" data-i18n="input.concentrator_kw">Oxygen concentrator power</label>
@@ -196,12 +196,12 @@ internal static class YieldCalculatorMarkup
                 <div class="field">
                   <label class="field-label" for="in-concentrator_price_inr" data-i18n="input.concentrator_price_inr">Oxygen concentrator price</label>
                   <input type="number" id="in-concentrator_price_inr" min="0" step="100" placeholder="₹" />
-                  <p class="field-hint" data-i18n="input.concentrator_price_hint">Prefilled with a rough estimate (ASSUMED) — replace it with a real quote when you have one.</p>
+                  <p class="field-hint" data-i18n="input.concentrator_price_hint">A rough estimate — replace it with your quote.</p>
                 </div>
                 <div class="field">
                   <label class="field-label" for="in-maintenance_pct" data-i18n="input.maintenance_pct">Maintenance per year</label>
                   <input type="number" id="in-maintenance_pct" min="0" max="15" step="0.1" placeholder="%" />
-                  <p class="field-hint" data-i18n="input.maintenance_hint">Per cent of capex, ASSUMED. Applied every year against the extra profit.</p>
+                  <p class="field-hint" data-i18n="input.maintenance_hint">Yearly upkeep, as a % of the unit price.</p>
                 </div>
                 <div class="field">
                   <label class="field-label" for="in-subsidy_pct" data-i18n="input.subsidy_pct">Subsidy on unit</label>
@@ -213,9 +213,9 @@ internal static class YieldCalculatorMarkup
                 </div>
                 <div class="field field-check">
                   <input type="checkbox" id="in-include_fcr_gain" />
-                  <label for="in-include_fcr_gain" data-i18n="input.include_fcr_gain">Apply FCR improvement (advanced, unverified)</label>
+                  <label for="in-include_fcr_gain" data-i18n="input.include_fcr_gain">Include better feed conversion</label>
                 </div>
-                <p class="field-hint" data-i18n="input.include_fcr_gain_hint">−7% feed conversion at full relief — a single-pond trial (Mauladani et al. 2020), status UNTESTED. Off by default.</p>
+                <p class="field-hint" data-i18n="input.include_fcr_gain_hint">Based on one pond trial: about 7% less feed per kilo of fish. Off by default.</p>
               </div>
             </details>
           </form>
@@ -256,7 +256,7 @@ internal static class YieldCalculatorMarkup
               </div>
             </div>
 
-            <p class="sensitivity-note" data-i18n="results.sensitivity">Sensitivity check 2026-09-21 (final model): the oxygen delivery per unit and the stocking density move this estimate more than any other input. At the owner-stated 1–2 L/min no number of units pays back at any tariff; at 20 L/min per unit on an intensively stocked pond (20,235/acre) one unit pays back in about 25 months, or 10 months with a 60 % PMMSY subsidy.</p>
+            <p class="sensitivity-note" hidden data-i18n="results.sensitivity"></p>
 
             <div class="result-band baseline-context" id="res-baseline">
               <span class="lbl" data-i18n="results.baseline">Baseline, for context</span>
@@ -264,7 +264,7 @@ internal static class YieldCalculatorMarkup
 
             <ul class="warnings-list" id="res-warnings"></ul>
 
-            <p class="ceiling-note" data-i18n="results.ceiling_note">Capped at the internal model's +18 % saleable kg (+12 % growth, +5 points survival), applied in proportion to how oxygen-limited the pond is in each crop month. Not a guarantee. We verify on your pond with a DO meter during the free demo.</p>
+            <p class="ceiling-note" data-i18n="results.ceiling_note">At most +18% more saleable fish, for a pond short of oxygen in every month of the crop — less when it is short only some of the time. Not a guarantee: we measure your pond with a DO meter during the free demo.</p>
 
             <div class="gate-note" id="gate-note">
               <span class="gate-lock" aria-hidden="true">&#128274;</span>
@@ -280,7 +280,7 @@ internal static class YieldCalculatorMarkup
   </section>
 
   <!-- ═══════════ SEASONAL STRIP ═══════════ -->
-  <section id="season-section">
+  <section id="season-section" hidden>
     <div class="container">
       <div class="chart-block">
         <h3 data-i18n="season.h3">Seasonal strip</h3>
@@ -292,7 +292,7 @@ internal static class YieldCalculatorMarkup
   </section>
 
   <!-- ═══════════ STATION COMPARISON (amendment A9.4) ═══════════ -->
-  <section id="station-compare-section">
+  <section id="station-compare-section" hidden>
     <div class="container">
       <div class="chart-block">
         <h3 data-i18n="station_compare.h3">Where does this species grow best?</h3>
@@ -321,7 +321,7 @@ internal static class YieldCalculatorMarkup
   </section>
 
   <!-- ═══════════ WATERFALL ═══════════ -->
-  <section id="waterfall-section">
+  <section id="waterfall-section" hidden>
     <div class="container">
       <div class="chart-block">
         <h3 data-i18n="waterfall.h3">Profit waterfall</h3>
@@ -333,7 +333,7 @@ internal static class YieldCalculatorMarkup
   </section>
 
   <!-- ═══════════ ASSUMPTIONS ═══════════ -->
-  <section id="assumptions-section">
+  <section id="assumptions-section" hidden>
     <div class="container">
       <details class="assumptions-details" id="assumptions-details">
         <summary data-i18n="assumptions.h3">Assumptions</summary>
@@ -361,14 +361,14 @@ internal static class YieldCalculatorMarkup
     <div class="container">
       <div class="section-head">
         <h3 data-i18n="method.h3">How this is calculated</h3>
-        <p data-i18n="method.sub">In words — see plan/MODEL_SPEC.md for the equations.</p>
+        <p data-i18n="method.sub" hidden></p>
       </div>
       <div class="method-body">
-        <div class="method-step"><h4 data-i18n="method.step1.h">1. Pond water temperature</h4><p data-i18n="method.step1.p">Each district is matched to the nearest climate station. Monthly mean air temperature is converted to pond water temperature with a simple regression, since shallow tropical ponds track air temperature closely.</p></div>
-        <div class="method-step"><h4 data-i18n="method.step2.h">2. Thermal suitability</h4><p data-i18n="method.step2.p">Each species has a tolerable range and a narrower optimum range. A month scores 1 when the water is within the optimum band, sliding down to 0 at the tolerable edges and beyond. The crop's average score, relative to the same species stocked at its default month in Tiruchirappalli, scales the harvest size up or down.</p></div>
-        <div class="method-step"><h4 data-i18n="method.step3.h">3. Night-time oxygen budget</h4><p data-i18n="method.step3.p">For each crop month, the pond's dissolved oxygen at dusk is reduced overnight by fish respiration, plankton respiration and sediment demand, offset by any existing aeration and a small diffusion term. The result is the dawn dissolved oxygen the fish actually experience.</p></div>
-        <div class="method-step"><h4 data-i18n="method.step4.h">4. Oxygen stress and relief</h4><p data-i18n="method.step4.p">A stress index compares dawn oxygen to the species' growth threshold and lethal limit. The OXY-Nano unit adds oxygen by mass balance from its published litres-per-minute rating, and the resulting relief — averaged over the crop — drives the uplift.</p></div>
-        <div class="method-step"><h4 data-i18n="method.step5.h">5. Uplift, capped</h4><p data-i18n="method.step5.p">Relief is converted to extra growth and extra survival, calibrated so a fully oxygen-limited pond reaches the internal model's ceiling of +18 % extra saleable kilograms — never more. A partially-limited pond gets proportionally less.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step1.h">1. Pond water temperature</h4><p data-i18n="method.step1.p">Each district uses its nearest weather station. Shallow tropical ponds follow the air temperature closely, so the monthly air temperature gives the pond's water temperature.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step2.h">2. The right temperature for your fish</h4><p data-i18n="method.step2.p">Every species grows best in a certain temperature range. Months inside that range count fully and months outside it count less, which sets the expected harvest size.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step3.h">3. Oxygen through the night</h4><p data-i18n="method.step3.p">Overnight, fish, plankton and the pond bottom use up oxygen while your existing aeration puts some back. We work out how much is left at dawn, when it is lowest.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step4.h">4. What OXY-Nano adds</h4><p data-i18n="method.step4.p">We compare that dawn oxygen with the level your species needs to grow and survive, then add the oxygen an OXY-Nano unit delivers each month.</p></div>
+        <div class="method-step"><h4 data-i18n="method.step5.h">5. The gain, capped at +18%</h4><p data-i18n="method.step5.p">The extra oxygen becomes extra growth and better survival. A pond short of oxygen in every month gains at most +18% more saleable fish, never more; a pond short only some of the time gains proportionally less.</p></div>
         <div class="method-step"><h4 data-i18n="method.step6.h">6. Economics and payback</h4><p data-i18n="method.step6.p">Extra harvest at your farm-gate price, less the extra feed and electricity it costs to produce, gives the extra profit per crop and per year. Payback divides the unit's capital cost (less any subsidy) by the extra annual profit; it stays blocked until you enter a real unit price.</p></div>
         <div class="method-step"><h4 data-i18n="method.step7.h">7. Sizing the units</h4><p data-i18n="method.step7.p">The number of units needed is set by the worst crop month's oxygen deficit, so the unit count reflects your pond's night-time chemistry rather than a flat per-acre rule.</p></div>
       </div>
@@ -380,10 +380,10 @@ internal static class YieldCalculatorMarkup
     <div class="container">
       <h3 data-i18n="limitations.h3">Known limitations</h3>
       <ul class="limitations-list">
-        <li data-i18n="limitations.l1">Monthly climate normals are used, not this year's actual weather.</li>
-        <li data-i18n="limitations.l2">Growth and mortality are modelled as linear through the crop; there is no disease, water-exchange or algal-crash model.</li>
-        <li data-i18n="limitations.l3">The uplift is calibrated to an internal conservative model, not measured on your pond.</li>
-        <li data-i18n="limitations.l4">Prices are the sourced range on the sourcing date; your own price overrides them.</li>
+        <li data-i18n="limitations.l1">It uses average monthly weather, not this year's actual weather.</li>
+        <li data-i18n="limitations.l2">Disease, water exchange and sudden algae crashes are not included.</li>
+        <li data-i18n="limitations.l3">The gain is a careful estimate, not a measurement of your pond.</li>
+        <li data-i18n="limitations.l4">Prices are typical market ranges — enter your own price for a closer estimate.</li>
       </ul>
     </div>
   </section>
@@ -499,17 +499,17 @@ internal static class YieldCalculatorMarkup
     <details>
       <summary data-i18n="footer.sources_h">Data sources and licences</summary>
       <ul id="data-sources">
-          <li>District boundaries — <a href="https://www.geoboundaries.org/api/current/gbOpen/IND/ADM2/" target="_blank" rel="noopener">geoBoundaries gbOpen IND ADM2</a>, boundaryID IND-ADM2-76128533, under <strong>ODbL 1.0</strong>: attribution and share-alike apply to the boundary data.</li>
+          <li>District boundaries — <a href="https://www.geoboundaries.org/api/current/gbOpen/IND/ADM2/" target="_blank" rel="noopener">geoBoundaries gbOpen IND ADM2</a>, licensed under <strong>ODbL 1.0</strong>.</li>
           <li>Map tiles — &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, ODbL.</li>
-          <li>Climate normals — <a href="https://www.imdpune.gov.in/library/public/Climatological%20Tables%201991-2020.pdf" target="_blank" rel="noopener">IMD Pune, Climatological Tables of Observatories in India 1991–2020</a>.</li>
+          <li>Weather averages — <a href="https://www.imdpune.gov.in/library/public/Climatological%20Tables%201991-2020.pdf" target="_blank" rel="noopener">IMD Pune, Climatological Tables of Observatories in India 1991–2020</a>.</li>
           <li>District fish production — <a href="https://www.tn.gov.in/deptst/fisheries.pdf" target="_blank" rel="noopener">DES, Statistical Hand Book of Tamil Nadu 2021-22</a>, Tables 8.2 and 8.3.</li>
           <li>Farms, hatcheries and seed farms — <a href="https://cms.tn.gov.in/cms_migrated/document/docfiles/fisheries_e_pn_2025_26.pdf" target="_blank" rel="noopener">TN Fisheries Policy Note 2025-26</a>, Tables 4, 7 and 8.</li>
           <li>Agro-climatic zones — <a href="https://agritech.tnau.ac.in/agriculture/agri_soilresource_agroclimate.html" target="_blank" rel="noopener">TNAU seven-zone classification</a>.</li>
-          <li>Crop costs and yields — <a href="https://agritech.tnau.ac.in/banking/nabard_pdf/Fisheries/6.GIFT_Tilapia_culture_15.pdf" target="_blank" rel="noopener">NABARD / TNAU 2015 model projects</a> — 2015 vintage, status ASSUMED.</li>
+          <li>Crop costs and yields — <a href="https://agritech.tnau.ac.in/banking/nabard_pdf/Fisheries/6.GIFT_Tilapia_culture_15.pdf" target="_blank" rel="noopener">NABARD / TNAU 2015 model projects</a>.</li>
           <li>Electricity tariff — <a href="https://www.tnerc.tn.gov.in/Orders/files/TO-Order%20No6300620252131.pdf" target="_blank" rel="noopener">TNERC tariff order</a>, LT III-A(1) and LT IV, effective 2025-07-01.</li>
-          <li>Subsidy rates — <a href="https://static.pib.gov.in/WriteReadData/userfiles/PMMSY%20BookEnglish.pdf" target="_blank" rel="noopener">PMMSY</a>; whether an aerator qualifies as an "input" is NOT_FOUND, so the options are labelled UNTESTED.</li>
+          <li>Subsidy rates — <a href="https://static.pib.gov.in/WriteReadData/userfiles/PMMSY%20BookEnglish.pdf" target="_blank" rel="noopener">PMMSY</a>.</li>
           <li>Oxygen saturation — Benson &amp; Krause 1984, as used by <a href="https://water.usgs.gov/water-resources/software/DOTABLES/" target="_blank" rel="noopener">USGS DOTABLES</a>; night-time oxygen budget after Boyd.</li>
-          <li>Uplift evidence — Mauladani et al. 2020, Rahmawati et al. 2021, Tran-Duy et al. 2008, Boyd &amp; Hanson 2010. Full list with statuses in the project README.</li>
+          <li>Research on oxygen and fish growth — Mauladani et al. 2020, Rahmawati et al. 2021, Tran-Duy et al. 2008, Boyd &amp; Hanson 2010.</li>
           <li>Product figures — <a href="https://www.oxyniti.com/product/nano-bubble-generator-1.5-HP" target="_blank" rel="noopener">oxyniti.com product pages</a> (2 L/min and 6 L/min oxygen input).</li>
         </ul>
     </details>

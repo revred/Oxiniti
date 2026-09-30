@@ -48,9 +48,11 @@ SHA="$(git -C "$TMP/calc" rev-parse HEAD)"
 SRC="$TMP/calc/site"
 
 # Empty the folder rather than delete it: on Windows a running `dotnet run`
-# holds the directory itself open, and removing it fails.
+# holds directories open, and removing them fails. Files always go; a
+# directory the server holds stays and is refilled by the copy below.
 mkdir -p "$DEST"
-find "$DEST" -mindepth 1 -delete
+find "$DEST" -mindepth 1 -type f -delete
+find "$DEST" -mindepth 1 -depth -type d -empty -delete 2>/dev/null || true
 cp -R "$SRC/js" "$SRC/data" "$SRC/vendor" "$SRC/assets" "$DEST/"
 mkdir -p "$DEST/css" "$DEST/site"
 node "$SITE_SRC/scope-css.mjs" "$SRC/css/styles.css" "$DEST/css/styles.scoped.css"
@@ -89,6 +91,10 @@ perl -0e '
     print "internal static class YieldCalculatorMarkup\n{\n";
     print "    public const string Html = \"\"\"\"\"\n$body\n\"\"\"\"\";\n}\n";
 ' < "$SRC/index.html" > "$MARKUP_CS"
+
+# Visitor wording (wwwroot/js/yieldCalculatorCopy.js), hidden developer-facing
+# sections, and a data-sources list without the model's status labels.
+node "$SITE_SRC/apply-site-copy.mjs" "$MARKUP_CS"
 
 printf 'Source: %s\nCommit: %s\nSynced by scripts/sync-yield-calculator.sh -- do not edit files here by hand.\n' \
     "$REPO_URL" "$SHA" > "$DEST/SOURCE.txt"

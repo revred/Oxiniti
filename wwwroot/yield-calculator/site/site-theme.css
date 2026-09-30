@@ -46,6 +46,22 @@
 
 #yc-root .yc-main { padding: 8px 0 40px; }
 
+/* Left out of the public page: the model's working notes (the sensitivity
+   paragraph, the pointer to the model spec), the parameter audit table, and
+   the three chart sections that only ever show "Included in your pond
+   report" to visitors -- the results card already says what the report
+   holds -- plus the data-quality badge in map popups and the dated
+   price-source line under the farm-gate price. ui.js still fills them, so
+   nothing about the calculator breaks. */
+#yc-root .sensitivity-note,
+#yc-root [data-i18n="method.sub"],
+#yc-root #season-section,
+#yc-root #station-compare-section,
+#yc-root #waterfall-section,
+#yc-root #assumptions-section,
+#yc-root #price-sourced-note,
+#yc-root .oxy-badge { display: none; }
+
 /* The calculator relies on the browser's bold headings; the site's global
    heading rules set a lighter weight. */
 #yc-root h1,

@@ -67,6 +67,60 @@
         })();
     </script>
 
+    <!-- Refresh / Back-Forward scroll position. Left to itself the browser
+         restores the old scroll position at once -- onto the pre-boot shell
+         below, which is far shorter than the real page, so a refresh from
+         halfway down the home page (or a /?scrollTo= section link) landed on
+         the shell's crawlable FAQ with the header scrolled away until Blazor
+         booted. Instead: take over restoration, remember the position on
+         pagehide, and put it back once the real page is on screen (the
+         shell's .static-shell is gone and the page is tall enough). Only on
+         reload / back-forward -- a fresh visit starts at the top -- and never
+         for /?scrollTo=, which Home.razor scrolls itself. Hands restoration
+         back to the browser afterwards, so in-app Back keeps working. -->
+    <script>
+        (function () {
+            if (!("scrollRestoration" in history)) return;
+            var KEY = "oxy-scroll:";
+            addEventListener("pagehide", function () {
+                // The browser acts on the mode stored with the entry being
+                // left, before this script can run on the next load.
+                history.scrollRestoration = "manual";
+                try { sessionStorage.setItem(KEY + location.pathname + location.search, String(Math.round(scrollY))); } catch (e) { }
+            });
+            history.scrollRestoration = "manual";
+
+            var nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+            var y = 0;
+            if (nav && (nav.type === "reload" || nav.type === "back_forward") && !/[?&]scrollTo=/.test(location.search)) {
+                try { y = Number(sessionStorage.getItem(KEY + location.pathname + location.search)) || 0; } catch (e) { }
+            }
+
+            var gaveUp = false;
+            var stop = function () { gaveUp = true; };
+            ["wheel", "touchstart", "keydown", "mousedown"].forEach(function (t) { addEventListener(t, stop, { once: true, passive: true }); });
+
+            var started = Date.now();
+            // This runs in <head>: the shell is not parsed yet, so start
+            // watching for it to go only once the body is in.
+            var wait = function () {
+                var shellUp = !!document.querySelector(".static-shell");
+                var tallEnough = document.documentElement.scrollHeight >= y + innerHeight / 2;
+                if (!gaveUp && (shellUp || !tallEnough) && Date.now() - started < 15000) {
+                    setTimeout(wait, 100);
+                    return;
+                }
+                if (!gaveUp && y > 0 && !shellUp) {
+                    scrollTo(0, y);
+                    setTimeout(function () { if (!gaveUp) scrollTo(0, y); }, 500); // late images
+                }
+                history.scrollRestoration = "auto";
+            };
+            if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wait);
+            else wait();
+        })();
+    </script>
+
     <!-- The other four stylesheets (~450KB combined: bootstrap.min.css,
          bootstrap-icons.min.css, content-pages.css, and the ~100KB Blazor
          scoped-CSS bundle) are not needed by the shell and were previously

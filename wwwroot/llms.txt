@@ -20,14 +20,14 @@ Q: Can I see it working on my own pond before I commit?
 A: Yes. The Oxyniti team installs a unit on the pond, measures dissolved oxygen before and after with a calibrated DO meter, and shows the difference the same day, no obligation.
 
 Q: How do I estimate the profit impact for my pond?
-A: Use the profit calculator on the Oxyniti homepage, entering pond size and species, to see an estimate of extra yield and margin.
+A: Use the yield calculator at https://www.oxyniti.com/yield-calculator/: choose species, district, stocking month and density to see an estimate of the extra harvest, then request a detailed pond report on WhatsApp.
 
 Q: Where do you currently install?
 A: Oxyniti is currently serving Tamil Nadu and South India.
 
 ## Site
 
-- [Homepage](https://www.oxyniti.com/): Overview, profit calculator, and full FAQ.
+- [Homepage](https://www.oxyniti.com/): Overview and full FAQ.
 - [Technology](https://www.oxyniti.com/technology): How nano-bubble oxygenation works.
 - [Aquaculture Oxygenation](https://www.oxyniti.com/aquaculture-oxygenation): Oxygenation for fish ponds.
 - [Advanced Aquaculture Systems](https://www.oxyniti.com/ras-oxygenation): Oxygenation for advanced aquaculture systems — recirculating aquaculture (RAS) and biofloc.

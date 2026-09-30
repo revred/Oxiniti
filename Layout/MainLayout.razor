@@ -24,15 +24,15 @@
             </div>
 
 
-            <!-- Profit Calculator — scrolls to the ROI section on this page -->
-            <button class="header-icon-btn profit-btn"
-                    @onclick="GoToProfitCalculator"
-                    title="@Loc.T("roi.kicker", "Profit Calc")"
-                    aria-label="@Loc.T("roi.kicker", "Profit Calc")">
+            <!-- Yield calculator — the static /yield-calculator/ page -->
+            <a class="header-icon-btn profit-btn"
+               href="/yield-calculator/"
+               title="@Loc.T("nav.calc", "Yield calculator")"
+               aria-label="@Loc.T("nav.calc", "Yield calculator")">
 
                 <i class="bi bi-graph-up-arrow"></i>
 
-            </button>
+            </a>
 
 
             <!-- WhatsApp — opens the Oxyniti Network group chat; unrelated to Profit Calculator -->
@@ -453,38 +453,6 @@
 
 
         Nav.NavigateTo("/");
-    }
-
-
-    private async Task GoToProfitCalculator()
-    {
-        var relative =
-            Nav.ToBaseRelativePath(Nav.Uri);
-
-        var isHome =
-            string.IsNullOrEmpty(relative)
-            || relative.StartsWith("?");
-
-
-        if (isHome)
-        {
-            try
-            {
-                await JSRuntime.InvokeVoidAsync(
-                    "oxynitiScroll.toId",
-                    "profit-calculator");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    $"[MainLayout] Error scrolling to profit calculator: {ex}");
-            }
-        }
-        else
-        {
-            Nav.NavigateTo(
-                "/?scrollTo=profit-calculator");
-        }
     }
 
 

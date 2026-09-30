@@ -6,16 +6,15 @@
 // Blazor @onclick/@oninput/@bind handler is wired here instead, in plain JS,
 // against the exact same DOM the Razor components already render (ids/names
 // added alongside this file for the handful of elements that needed a
-// stable hook -- see FreeDemoSection.razor, ProfitCalculatorSection.razor,
-// Layout/MainLayout.razor).
+// stable hook -- see FreeDemoSection.razor, Layout/MainLayout.razor).
 //
 // Everything below is either a direct call into a JS module the app
 // *already* ships (scrollHelper.js, tankBubbles.js, testimonialTranslate.js,
 // mapLoader.js/mapHelper.js, qrLoader.js/qrHelper.js,
 // lazyBackgroundVideo.js -- none of them have ever depended on a live
 // Blazor circuit, only on JS interop calling into them) or a small,
-// deliberately-scoped port of a Razor @code block's own logic (the profit
-// calculator's arithmetic, the free-demo form's localStorage write). Nothing
+// deliberately-scoped port of a Razor @code block's own logic (the free-demo
+// form's localStorage write). Nothing
 // here talks to the not-yet-deployed Oxyniti backend
 // (Services/DemoAccountService.cs) -- every call it would make already
 // no-ops today (OxynitiApi:BaseAddress is unset in appsettings.json), so
@@ -32,12 +31,10 @@
         initAuthHeader();
         initLanguageSelect();
         initNavScrollSpy();
-        initProfitCalcScrollButtons();
         initScrollToQueryParam();
         initTankBubbles();
         initTestimonialHoverTranslate();
         initWhatsAppQrCodes();
-        initProfitCalculator();
         initFreeDemoForm();
         initVideos();
         initOxyNanoClickToPlay();
@@ -228,27 +225,6 @@
         }
     }
 
-    // ---- Profit-calculator scroll buttons (header + floating) --------------
-    function initProfitCalcScrollButtons() {
-        var buttons = document.querySelectorAll(".profit-btn, .floating-btn-profit");
-        if (!buttons.length) return;
-
-        buttons.forEach(function (btn) {
-            btn.addEventListener("click", function (e) {
-                var isHome = location.pathname === "/" || location.pathname === "";
-                if (isHome && typeof window.oxynitiScroll !== "undefined") {
-                    e.preventDefault();
-                    window.oxynitiScroll.toId("profit-calculator");
-                } else if (!document.getElementById("profit-calculator")) {
-                    // Only relevant off the homepage, where the calculator
-                    // doesn't exist on the page at all yet.
-                    e.preventDefault();
-                    location.href = "/?scrollTo=profit-calculator";
-                }
-            });
-        });
-    }
-
     // ---- Tank bubble decoration (Technology section) ------------------------
     function initTankBubbles() {
         if (document.querySelector(".tank.regular .tank-bubble-layer") && window.oxynitiTankBubbles) {
@@ -281,57 +257,6 @@
                 });
             });
         });
-    }
-
-    // ---- Profit calculator (ports ProfitCalculatorSection.razor's @code) ----
-    function initProfitCalculator() {
-        var acresInput = document.getElementById("calc-acres");
-        var priceInput = document.getElementById("calc-price");
-        if (!acresInput || !priceInput) return;
-
-        var acresLabel = document.getElementById("calc-acres-label");
-        var priceLabel = document.getElementById("calc-price-label");
-        var kgOut = document.getElementById("calc-kg");
-        var revenueOut = document.getElementById("calc-revenue");
-
-        var BASE_YIELD_KG_PER_ACRE = 2500;
-        var UPLIFT_LOW = 0.20;
-        var UPLIFT_HIGH = 0.30;
-
-        function fmtInr(n) {
-            return "₹" + Math.round(n).toLocaleString("en-IN");
-        }
-
-        function render() {
-            var acres = parseFloat(acresInput.value);
-            var pricePerKg = parseInt(priceInput.value, 10);
-
-            var lowKg = acres * BASE_YIELD_KG_PER_ACRE * UPLIFT_LOW;
-            var highKg = acres * BASE_YIELD_KG_PER_ACRE * UPLIFT_HIGH;
-            var lowRevenue = lowKg * pricePerKg;
-            var highRevenue = highKg * pricePerKg;
-
-            if (acresLabel) {
-                var acreWord = acres === 1 ? "acre" : "acres";
-                acresLabel.textContent = trimTrailingZero(acres) + " " + acreWord;
-            }
-            if (priceLabel) {
-                priceLabel.textContent = fmtInr(pricePerKg) + "/kg";
-            }
-            if (kgOut) {
-                kgOut.textContent = "+" + Math.round(lowKg).toLocaleString("en-IN") + " – " + Math.round(highKg).toLocaleString("en-IN") + " kg / year";
-            }
-            if (revenueOut) {
-                revenueOut.textContent = fmtInr(lowRevenue) + " – " + fmtInr(highRevenue);
-            }
-        }
-
-        function trimTrailingZero(n) {
-            return n % 1 === 0 ? n.toFixed(0) : n.toFixed(1);
-        }
-
-        acresInput.addEventListener("input", render);
-        priceInput.addEventListener("input", render);
     }
 
     // ---- Free-demo form (ports FreeDemoSection.razor's @code) ---------------

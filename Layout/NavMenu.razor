@@ -89,15 +89,10 @@
             @Loc.T("nav.footage", "Use Cases")
         </a>
 
-        <!-- 6. YIELD CALCULATOR -->
-        <!-- MainLayout's location-changing handler turns this into a full
-             page load, so the calculator's scripts start on a fresh page. -->
-        <a class="nav-link nav-link-wide-only"
-           href="/yield-calculator">
-            @Loc.T("nav.calc", "Yield calculator")
-        </a>
+        <!-- The yield calculator has no text link here: the header's
+             calculator icon (MainLayout) reaches it at every width. -->
 
-        <!-- 7. CONTACT -->
+        <!-- 6. CONTACT -->
         <!-- Points at the standalone /contact page (the same target the
              footer uses), not the home page's #free-demo form. Like
              Products and Technology this is a real route, so no

@@ -18,17 +18,11 @@
         <!-- RIGHT : ACTIONS -->
         <div class="header-actions">
 
-            <!-- Search -->
-            <div class="header-search">
-                <Oxyniti.Pages.Inputs.SearchBox />
-            </div>
-
-
             <!-- Yield calculator — /yield-calculator -->
             <a class="header-icon-btn profit-btn"
                href="/yield-calculator"
-               title="@Loc.T("nav.calc", "Yield calculator")"
-               aria-label="@Loc.T("nav.calc", "Yield calculator")">
+               title="@Loc.T("nav.calc", "Yield Calculator")"
+               aria-label="@Loc.T("nav.calc", "Yield Calculator")">
 
                 <i class="bi bi-graph-up-arrow"></i>
 
@@ -249,15 +243,25 @@
     // (wwwroot/js/yieldCalculator.js). Arriving by in-app navigation would
     // render fresh markup those already-loaded scripts never start on, so
     // turn every in-app navigation there into a real page load. forceLoad
-    // skips location-changing handlers, so this cannot re-enter itself.
+    // does NOT skip location-changing handlers: the NavigateTo below re-enters
+    // this handler, which (before _forcingLoad) recursed until the stack
+    // overflowed -- ~1000 console errors and no calculator.
     private IDisposable? _staticPageNavigation;
+    private bool _forcingLoad;
 
     private ValueTask ForceLoadStaticPages(LocationChangingContext context)
     {
-        var path = Nav.ToBaseRelativePath(context.TargetLocation);
+        if (_forcingLoad) return ValueTask.CompletedTask; // our own forceLoad: let it through
+
+        // TargetLocation is whatever was passed to NavigateTo -- often relative
+        // ("/?scrollTo=hero"), which ToBaseRelativePath rejects with an
+        // ArgumentException that also cancels the navigation. Resolve it first.
+        var path = Nav.ToBaseRelativePath(Nav.ToAbsoluteUri(context.TargetLocation).ToString());
+        path = path.Split('?', '#')[0];
         if (path == "yield-calculator" || path.StartsWith("yield-calculator/", StringComparison.Ordinal))
         {
             context.PreventNavigation();
+            _forcingLoad = true;
             Nav.NavigateTo("/yield-calculator", forceLoad: true);
         }
         return ValueTask.CompletedTask;

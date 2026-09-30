@@ -196,18 +196,9 @@
    The clamps above shrink type/gaps smoothly instead of in steps, and the
    hamburger now takes over at 1024px -- while the row still fits unwrapped
    -- rather than at 860px, long after links had silently scrolled out of
-   view. MainLayout drops the search field at 1200px to fund the same budget.
+   view. (The header's search field, once dropped at 1200px for the same
+   budget, now lives on the /search page, linked from the footer.)
    ========================================================= */
-
-/* The row above is budgeted for six labels. A seventh ("Yield calculator")
-   clipped "Contact Us" at every width from 1025 to ~1550px, so it shows only
-   where it fits: wide screens, and the collapsed menu below 1025px. The
-   header's calculator icon (MainLayout) reaches the page at every width. */
-@media (min-width: 1025px) and (max-width: 1599px) {
-    .nav-link-wide-only {
-        display: none;
-    }
-}
 
 @media (max-width: 1150px) {
     .brand-tag {

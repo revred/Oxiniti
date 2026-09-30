@@ -1,15 +1,15 @@
-/* oxyniti.com theme for the yield calculator.
+/* oxyniti.com theme for the yield calculator on Pages/YieldCalculator.razor.
    Copied to wwwroot/yield-calculator/site/ by scripts/sync-yield-calculator.sh and
-   loaded after the calculator's own css/styles.css, so it only re-points the
-   calculator's design tokens (and a few surfaces) at the site's palette:
-   the #020817 header, the #1A2C54 -> #3D8FB5 brand gradient, the #0B1F33
-   navy, the #8DDCEE / #2de0e5 cyan accents, and the site's Helvetica/Arial
-   type. The site has no dark mode, so the calculator's light/dark toggle is
-   hidden and both of its themes resolve to these values. */
+   loaded after the calculator's scoped stylesheet (css/styles.scoped.css). It
+   only re-points the calculator's design tokens at the site palette -- the
+   #1A2C54 -> #3D8FB5 brand gradient, #0B1F33 navy, #8DDCEE accents and the
+   site's Helvetica/Arial type. The page's header and footer are the site's
+   own components, so nothing here styles them.
 
-:root,
-:root[data-theme],
-:root:not([data-theme="dark"]) {
+   #yc-root (an id) outranks every .yc[...] theme block in the scoped sheet,
+   so the site palette wins in both of the calculator's light/dark modes. */
+
+#yc-root {
   --ink: #0B1F33;
   --deep: #1A2C54;
   --deep-2: #1C4E6E;
@@ -36,177 +36,57 @@
   --font-body: "Helvetica Neue", Helvetica, Arial, "Noto Sans Tamil", sans-serif;
 }
 
-/* One theme only, like the rest of oxyniti.com. */
-#theme-toggle { display: none; }
+/* map.js reads its marker colours from the document root, not the container. */
+:root {
+  --aqua: #3D8FB5;
+  --cyan: #1A2C54;
+  --ink: #0B1F33;
+  --text: #ffffff;
+}
 
-/* Header: the site's near-black navy bar. */
-.site-header {
-  background: #020817;
-  border-bottom: none;
-}
-.site-header .brand-word { color: #ffffff; }
-.site-header .brand-tag { color: rgba(141, 220, 238, 0.8); }
-.site-header .lang-select {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.18);
-}
-.site-header .lang-select option { color: #0B1F33; }
+#yc-root .yc-main { padding: 8px 0 40px; }
+
+/* The calculator relies on the browser's bold headings; the site's global
+   heading rules set a lighter weight. */
+#yc-root h1,
+#yc-root h2,
+#yc-root h3,
+#yc-root h4 { font-weight: 700; }
 
 /* Primary buttons: the site's brand gradient with white text. */
-.btn-warm {
+#yc-root .btn-warm {
   color: #ffffff;
   box-shadow: 0 10px 26px rgba(26, 44, 84, 0.28);
 }
-.btn-warm:hover { box-shadow: 0 14px 34px rgba(26, 44, 84, 0.38); }
+#yc-root .btn-warm:hover { box-shadow: 0 14px 34px rgba(26, 44, 84, 0.38); }
 
 /* Results card: the site's blue gradient panel (as the old homepage
    calculator had), so its figures and links need light colours -- the
    brand gradient is navy and would sink into the panel. */
-.result-band .band-value {
+#yc-root .result-band .band-value {
   background: linear-gradient(100deg, #ffffff, #8DDCEE);
   -webkit-background-clip: text;
   background-clip: text;
 }
-.results-card a,
-.results-card .link-btn { color: #8DDCEE; }
+#yc-root .results-card a,
+#yc-root .results-card .link-btn { color: #8DDCEE; }
 
-/* ------------------------------------------------------------------
-   Data sources (kept from the calculator's own footer: the boundary
-   data is ODbL, which requires this attribution on the page).
-   ------------------------------------------------------------------ */
-.oxy-sources {
+/* Data sources (from the calculator's own footer: the boundary data is
+   ODbL, which requires this attribution on the page). */
+#yc-root .oxy-sources {
   padding: 28px 0 32px;
   border-top: 1px solid var(--border);
 }
-.oxy-sources .field-hint { margin-bottom: 12px; }
-.oxy-sources summary {
+#yc-root .oxy-sources .field-hint { margin-bottom: 12px; }
+#yc-root .oxy-sources summary {
   cursor: pointer;
   font-weight: 600;
   color: var(--fg-strong);
 }
-.oxy-sources ul {
+#yc-root .oxy-sources ul {
   margin: 12px 0 0;
   padding-left: 1.2rem;
   font-size: 0.85rem;
   color: var(--fg-dim);
 }
-.oxy-sources li { margin-bottom: 6px; }
-
-/* ------------------------------------------------------------------
-   oxyniti.com footer -- port of Pages/Components/Footer.razor.css.
-   Class names carry an oxy- prefix so they cannot collide with the
-   calculator's own .site-footer / .container rules.
-   ------------------------------------------------------------------ */
-.oxy-footer {
-  background: linear-gradient(180deg, #0B1F33 0%, #1C4E6E 100%);
-  padding: 3.5rem 0 1.5rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-}
-.oxy-footer p { color: inherit; }
-.oxy-footer-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 2.5vw, 2rem);
-}
-.oxy-footer-content {
-  display: grid;
-  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-  gap: 2.5rem;
-  margin-bottom: 2.5rem;
-}
-.oxy-footer-brand { min-width: 0; }
-.oxy-footer-brand img { width: 100px; height: auto; display: block; }
-.oxy-footer-brand h3 {
-  margin: 0;
-  font-family: inherit;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #ffffff;
-}
-.oxy-footer-caption {
-  margin-top: 0.35rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(141, 220, 238, 0.8) !important;
-}
-.oxy-footer-desc {
-  margin-top: 0.85rem;
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.7) !important;
-  max-width: 320px;
-}
-.oxy-footer-links {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 0.85fr)) minmax(0, 1.1fr);
-  gap: 2rem;
-}
-.oxy-footer-section { min-width: 0; }
-.oxy-footer-section h4 {
-  font-family: inherit;
-  font-size: 1.1rem;
-  margin: 0 0 1rem;
-  padding-bottom: 0.5rem;
-  font-weight: 600;
-  color: #ffffff;
-  border-bottom: 2px solid rgba(141, 220, 238, 0.35);
-  display: inline-block;
-}
-.oxy-footer-section ul { list-style: none; padding: 0; margin: 0; }
-.oxy-footer-section li { margin-bottom: 0.5rem; }
-.oxy-footer-section a {
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-.oxy-footer-section a:hover { color: #8DDCEE; }
-.oxy-footer-whatsapp {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.6rem;
-  min-width: 0;
-  max-width: 100%;
-}
-.oxy-footer-qr {
-  width: 96px;
-  height: 96px;
-  background: #ffffff;
-  border-radius: 8px;
-}
-.oxy-footer-whatsapp-title {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.75);
-}
-.oxy-footer-whatsapp-title svg { width: 0.95rem; height: 0.95rem; fill: #25D366; flex-shrink: 0; }
-.oxy-footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  padding-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-@media (max-width: 980px) {
-  .oxy-footer-content { grid-template-columns: 1fr; gap: 2rem; }
-}
-@media (max-width: 768px) {
-  .oxy-footer-links { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-  .oxy-footer-community { grid-column: 1 / -1; }
-  .oxy-footer-bottom { justify-content: flex-start; }
-}
+#yc-root .oxy-sources li { margin-bottom: 6px; }

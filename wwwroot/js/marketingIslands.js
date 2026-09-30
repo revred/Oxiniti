@@ -39,6 +39,17 @@
         initVideos();
         initOxyNanoClickToPlay();
         initFaqAccordion();
+        initYieldCalculator();
+    }
+
+    // ---- Yield calculator (/yield-calculator) -------------------------------
+    // The same start-up Pages/YieldCalculator.razor runs once Blazor renders it;
+    // see yieldCalculator.js.
+    function initYieldCalculator() {
+        if (!document.getElementById("yc-root")) return;
+        import("./yieldCalculator.js").catch(function (err) {
+            console.error("[marketingIslands] Error loading the yield calculator:", err);
+        });
     }
 
     // ---- FAQ accordion -----------------------------------------------------

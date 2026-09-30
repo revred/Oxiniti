@@ -24,9 +24,9 @@
             </div>
 
 
-            <!-- Yield calculator — the static /yield-calculator/ page -->
+            <!-- Yield calculator — /yield-calculator -->
             <a class="header-icon-btn profit-btn"
-               href="/yield-calculator/"
+               href="/yield-calculator"
                title="@Loc.T("nav.calc", "Yield calculator")"
                aria-label="@Loc.T("nav.calc", "Yield calculator")">
 
@@ -240,9 +240,10 @@
 
     private DotNetObjectReference<MainLayout>? _dotNetRef;
 
-    // /yield-calculator/ is a static page outside this app (see
-    // scripts/sync-yield-calculator.sh). Left to the router, a link to it
-    // renders NotFoundContent -- or matches a /{locale} route first -- so
+    // /yield-calculator (Pages/YieldCalculator.razor) runs the calculator's
+    // own classic scripts, which load once per document and start once
+    // (wwwroot/js/yieldCalculator.js). Arriving by in-app navigation would
+    // render fresh markup those already-loaded scripts never start on, so
     // turn every in-app navigation there into a real page load. forceLoad
     // skips location-changing handlers, so this cannot re-enter itself.
     private IDisposable? _staticPageNavigation;
@@ -253,7 +254,7 @@
         if (path == "yield-calculator" || path.StartsWith("yield-calculator/", StringComparison.Ordinal))
         {
             context.PreventNavigation();
-            Nav.NavigateTo("/yield-calculator/", forceLoad: true);
+            Nav.NavigateTo("/yield-calculator", forceLoad: true);
         }
         return ValueTask.CompletedTask;
     }

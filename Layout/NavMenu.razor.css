@@ -199,6 +199,16 @@
    view. MainLayout drops the search field at 1200px to fund the same budget.
    ========================================================= */
 
+/* The row above is budgeted for six labels. A seventh ("Yield calculator")
+   clipped "Contact Us" at every width from 1025 to ~1550px, so it shows only
+   where it fits: wide screens, and the collapsed menu below 1025px. The
+   header's calculator icon (MainLayout) reaches the page at every width. */
+@media (min-width: 1025px) and (max-width: 1599px) {
+    .nav-link-wide-only {
+        display: none;
+    }
+}
+
 @media (max-width: 1150px) {
     .brand-tag {
         letter-spacing: 0.06em;

@@ -90,10 +90,10 @@
         </a>
 
         <!-- 6. YIELD CALCULATOR -->
-        <!-- A static page outside the Blazor app; MainLayout's
-             location-changing handler turns this into a full page load. -->
-        <a class="nav-link"
-           href="/yield-calculator/">
+        <!-- MainLayout's location-changing handler turns this into a full
+             page load, so the calculator's scripts start on a fresh page. -->
+        <a class="nav-link nav-link-wide-only"
+           href="/yield-calculator">
             @Loc.T("nav.calc", "Yield calculator")
         </a>
 

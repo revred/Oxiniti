@@ -113,7 +113,7 @@
 }
 
 
-/* Profit — tied to the on-page ROI section */
+/* Yield calculator — links to /yield-calculator/ */
 
 .profit-btn {
     background: linear-gradient(135deg, #1A2C54, #3D8FB5);
@@ -131,63 +131,6 @@
     background: #25D366;
 
     margin-left: clamp(-8px, -0.6vw, 0px); /* pulls it closer to the profit button */
-}
-
-
-/* =========================================================
-   SEARCH
-   ========================================================= */
-
-.header-search {
-    width: clamp(150px, 13vw, 220px);
-    height: 46px;
-
-    display: flex;
-    align-items: center;
-
-    flex-shrink: 0;
-}
-
-
-/*
-    SearchBox existing styles
-*/
-
-.header-search ::deep .search-input,
-.header-search .search-input {
-    /* Follows the wrapper rather than restating a fixed px width, so the
-       field and its box can never disagree mid-resize. */
-    width: 100% !important;
-    height: 46px !important;
-
-    box-sizing: border-box;
-
-    border: none !important;
-    outline: none !important;
-
-    border-radius: 25px !important;
-
-    background: #182b3e !important;
-
-    color: #ffffff !important;
-
-    font-size: 14px;
-
-    padding-left: 46px !important;
-}
-
-
-.header-search ::deep .search-input::placeholder,
-.header-search .search-input::placeholder {
-    color: #aab6c3 !important;
-
-    opacity: 1;
-}
-
-
-.header-search ::deep .search-icon,
-.header-search .search-icon {
-    color: #b8c4cf !important;
 }
 
 
@@ -613,7 +556,8 @@ main {
    RESPONSIVE
 
    The 1350 / 1150 ladders that used to live here (header height, action gap,
-   search width, language width) are gone: each was a step change, and a step
+   search width -- the search field has since left the header -- and
+   language width) are gone: each was a step change, and a step
    change is exactly what makes a heading or a control jump sideways when the
    window is dragged or the zoom level ticks over. Those four are now clamp()
    values on the base rules above, so they scale continuously instead.
@@ -624,26 +568,6 @@ main {
    What is left here is genuinely discrete: a control either fits or it does
    not.
    ========================================================= */
-
-/*
-    The search field is dropped here rather than at 980px.
-
-    Measured, the six nav labels need 420px unwrapped, the brand ~194px and
-    the actions 552px. Holding the search box down to 980px left the nav row
-    ~200px short between 1000 and 1400px, and because .nav-links scrolls with
-    a hidden scrollbar the shortfall was spent silently: at 1100px "Contact
-    Us" was entirely gone, at 992px only three of six links were left. The
-    field is the cheapest thing in that budget to give up -- search is still
-    reachable from the page itself -- and giving it up here is what lets every
-    nav label stay visible and unwrapped down to the 1024px hamburger point.
-*/
-@media (max-width: 1200px) {
-
-    .header-search {
-        display: none;
-    }
-}
-
 
 @media (max-width: 860px) {
 

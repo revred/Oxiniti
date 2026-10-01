@@ -247,6 +247,11 @@ internal static partial class Program
         await using var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
 
+        // Lets page scripts that draw into the DOM at runtime (the yield
+        // calculator's map and results, wwwroot/js/yieldCalculator.js) stay
+        // out of the capture, so the static file boots them from clean markup.
+        await page.AddInitScriptAsync("window.__oxyPrerender = true;");
+
         try
         {
             await page.GotoAsync(url, new PageGotoOptions

@@ -196,7 +196,8 @@
    The clamps above shrink type/gaps smoothly instead of in steps, and the
    hamburger now takes over at 1024px -- while the row still fits unwrapped
    -- rather than at 860px, long after links had silently scrolled out of
-   view. MainLayout drops the search field at 1200px to fund the same budget.
+   view. (The header's search field, once dropped at 1200px for the same
+   budget, now lives on the /search page, linked from the footer.)
    ========================================================= */
 
 @media (max-width: 1150px) {

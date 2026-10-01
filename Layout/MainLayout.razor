@@ -18,21 +18,15 @@
         <!-- RIGHT : ACTIONS -->
         <div class="header-actions">
 
-            <!-- Search -->
-            <div class="header-search">
-                <Oxyniti.Pages.Inputs.SearchBox />
-            </div>
-
-
-            <!-- Profit Calculator — scrolls to the ROI section on this page -->
-            <button class="header-icon-btn profit-btn"
-                    @onclick="GoToProfitCalculator"
-                    title="@Loc.T("roi.kicker", "Profit Calc")"
-                    aria-label="@Loc.T("roi.kicker", "Profit Calc")">
+            <!-- Yield calculator — /yield-calculator -->
+            <a class="header-icon-btn profit-btn"
+               href="/yield-calculator"
+               title="@Loc.T("nav.calc", "Yield Calculator")"
+               aria-label="@Loc.T("nav.calc", "Yield Calculator")">
 
                 <i class="bi bi-graph-up-arrow"></i>
 
-            </button>
+            </a>
 
 
             <!-- WhatsApp — opens the Oxyniti Network group chat; unrelated to Profit Calculator -->
@@ -219,6 +213,10 @@
         </article>
     </main>
 
+    @* One footer for every page, full width -- outside <main> and the pages'
+       own padded wrappers, which used to inset it differently page by page. *@
+    <Footer />
+
     <FloatingActionButtons />
 
 </div>
@@ -240,6 +238,35 @@
 
     private DotNetObjectReference<MainLayout>? _dotNetRef;
 
+    // /yield-calculator (Pages/YieldCalculator.razor) runs the calculator's
+    // own classic scripts, which load once per document and start once
+    // (wwwroot/js/yieldCalculator.js). Arriving by in-app navigation would
+    // render fresh markup those already-loaded scripts never start on, so
+    // turn every in-app navigation there into a real page load. forceLoad
+    // does NOT skip location-changing handlers: the NavigateTo below re-enters
+    // this handler, which (before _forcingLoad) recursed until the stack
+    // overflowed -- ~1000 console errors and no calculator.
+    private IDisposable? _staticPageNavigation;
+    private bool _forcingLoad;
+
+    private ValueTask ForceLoadStaticPages(LocationChangingContext context)
+    {
+        if (_forcingLoad) return ValueTask.CompletedTask; // our own forceLoad: let it through
+
+        // TargetLocation is whatever was passed to NavigateTo -- often relative
+        // ("/?scrollTo=hero"), which ToBaseRelativePath rejects with an
+        // ArgumentException that also cancels the navigation. Resolve it first.
+        var path = Nav.ToBaseRelativePath(Nav.ToAbsoluteUri(context.TargetLocation).ToString());
+        path = path.Split('?', '#')[0];
+        if (path == "yield-calculator" || path.StartsWith("yield-calculator/", StringComparison.Ordinal))
+        {
+            context.PreventNavigation();
+            _forcingLoad = true;
+            Nav.NavigateTo("/yield-calculator", forceLoad: true);
+        }
+        return ValueTask.CompletedTask;
+    }
+
 
     private string UserInitial =>
         !string.IsNullOrWhiteSpace(AuthenticationService?.UserName)
@@ -249,6 +276,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _staticPageNavigation = Nav.RegisterLocationChangingHandler(ForceLoadStaticPages);
+
         AuthenticationService.OnChange += StateHasChanged;
 
         // CartService.OnChange += UpdateCartCount; // cart entry point hidden for the duration
@@ -433,38 +462,6 @@
 
 
         Nav.NavigateTo("/");
-    }
-
-
-    private async Task GoToProfitCalculator()
-    {
-        var relative =
-            Nav.ToBaseRelativePath(Nav.Uri);
-
-        var isHome =
-            string.IsNullOrEmpty(relative)
-            || relative.StartsWith("?");
-
-
-        if (isHome)
-        {
-            try
-            {
-                await JSRuntime.InvokeVoidAsync(
-                    "oxynitiScroll.toId",
-                    "profit-calculator");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    $"[MainLayout] Error scrolling to profit calculator: {ex}");
-            }
-        }
-        else
-        {
-            Nav.NavigateTo(
-                "/?scrollTo=profit-calculator");
-        }
     }
 
 

@@ -1,18 +1,16 @@
-@inject NavigationManager Nav
-@inject IJSRuntime JSRuntime
 @inject LocalizationService Loc
 
 <div class="floating-actions">
 
-    <button class="floating-btn floating-btn-profit"
-            @onclick="GoToProfitCalculator"
-            title="@Loc.T("roi.kicker", "Profit Calc")"
-            aria-label="@Loc.T("roi.kicker", "Profit Calc")">
+    <a class="floating-btn floating-btn-profit"
+       href="/yield-calculator"
+       title="@Loc.T("nav.calc", "Yield Calculator")"
+       aria-label="@Loc.T("nav.calc", "Yield Calculator")">
 
         <i class="bi bi-graph-up-arrow"></i>
-        <span class="floating-tooltip">@Loc.T("roi.kicker", "Profit Calc")</span>
+        <span class="floating-tooltip">@Loc.T("nav.calc", "Yield Calculator")</span>
 
-    </button>
+    </a>
 
     <a class="floating-btn floating-btn-whatsapp"
        href="@SiteContact.WhatsAppLink()"
@@ -32,27 +30,5 @@
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;
-    }
-
-    private async Task GoToProfitCalculator()
-    {
-        var relative = Nav.ToBaseRelativePath(Nav.Uri);
-        var isHome = string.IsNullOrEmpty(relative) || relative.StartsWith("?");
-
-        if (isHome)
-        {
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("oxynitiScroll.toId", "profit-calculator");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[FloatingActionButtons] Error scrolling to profit calculator: {ex}");
-            }
-        }
-        else
-        {
-            Nav.NavigateTo("/?scrollTo=profit-calculator");
-        }
     }
 }

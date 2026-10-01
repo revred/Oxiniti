@@ -223,6 +223,17 @@ export async function boot() {
     // results the capture already drew.
     if (!root || root.dataset.booted || window.__oxyPrerender) return;
     root.dataset.booted = "1";
+    try {
+        await start(root);
+    } finally {
+        // app.css keeps the markup hidden behind a loader until now, so the
+        // visitor never sees it before its stylesheets and scripts arrive.
+        // Revealed on failure too, so a broken start never leaves a blank page.
+        root.dataset.ready = "1";
+    }
+}
+
+async function start(root) {
 
     // Parked by the sync script so tools/Prerender does not read these live
     // regions as a page that is still loading.
@@ -240,10 +251,10 @@ export async function boot() {
     // size it must be in place first.
     await Promise.all(STYLES.map(loadStyle));
 
-    let start = null;
+    let onReady = null;
     const addEventListener = document.addEventListener;
     document.addEventListener = function (type, listener, options) {
-        if (type === "DOMContentLoaded") { start = listener; return; }
+        if (type === "DOMContentLoaded") { onReady = listener; return; }
         return addEventListener.call(this, type, listener, options);
     };
     try {
@@ -254,11 +265,11 @@ export async function boot() {
         document.addEventListener = addEventListener;
     }
 
-    if (typeof start !== "function") {
+    if (typeof onReady !== "function") {
         throw new Error("[yield-calculator] ui.js registered no DOMContentLoaded start-up");
     }
     applySiteCopy();
-    start.call(document, new Event("DOMContentLoaded"));
+    onReady.call(document, new Event("DOMContentLoaded"));
     watchAndTidy(root);
     pinResultsCard();
     mountMobileBar(root);

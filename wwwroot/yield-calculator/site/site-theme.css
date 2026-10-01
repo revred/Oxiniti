@@ -402,3 +402,28 @@
 #yc-root .oxy-sources ul {
   color: var(--fg-strong);
 }
+
+/* "Send request on WhatsApp" (the request dialog's last step): WhatsApp's own
+   green and logo, like the header's WhatsApp button (MainLayout.razor.css),
+   so a farmer sees at a glance that it opens WhatsApp. Only while it is the
+   primary action -- leads.js turns it into a ghost button once a request has
+   also reached the lead endpoint. The logo is the bootstrap-icons glyph
+   (bi-whatsapp) the site already loads. */
+#yc-root #lead-cta-whatsapp.btn-warm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25D366;
+  color: #ffffff;
+  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.32);
+}
+#yc-root #lead-cta-whatsapp.btn-warm:hover {
+  background: #1EBE5A;
+  box-shadow: 0 14px 34px rgba(37, 211, 102, 0.42);
+}
+#yc-root #lead-cta-whatsapp.btn-warm::before {
+  content: "\f618";
+  font-family: "bootstrap-icons";
+  font-size: 1.2em;
+  line-height: 1;
+}

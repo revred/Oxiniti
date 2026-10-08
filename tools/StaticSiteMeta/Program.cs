@@ -46,6 +46,9 @@ internal static class Program
         new("privacy", "Pages/Privacy.razor", []),
         new("terms", "Pages/Terms.razor", []),
         new("sitemap", "Pages/Sitemap.razor", []),
+        // Captured with the calculator's markup untouched; the static page
+        // starts it through marketingIslands.js (see yieldCalculator.js).
+        new("yield-calculator", "Pages/YieldCalculator.razor", []),
     ];
 
     private static int Main(string[] args)

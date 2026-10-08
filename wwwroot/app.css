@@ -199,6 +199,58 @@ code {
        the same --oxy-header-h token, so they cannot drift apart. */
     height: var(--oxy-header-h, 88px);
     background: #020817;
+
+    /* Same box as .site-header + .navbar-brand (MainLayout.razor.css,
+       NavMenu.razor.css), so the brand sits on the same pixels before and
+       after Blazor starts. */
+    display: flex;
+    align-items: center;
+    padding: 0 clamp(12px, 1.8vw, 28px);
+    box-sizing: border-box;
+}
+
+.shell-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.shell-brand-logo {
+    width: clamp(42px, 3.4vw, 50px);
+    height: clamp(42px, 3.4vw, 50px);
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.shell-brand-name {
+    color: #ffffff;
+    font-size: clamp(19px, 1.55vw, 23px);
+    font-weight: 750;
+    letter-spacing: -0.4px;
+    white-space: nowrap;
+}
+
+.shell-brand-tag {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(220, 242, 238, 0.72);
+    white-space: nowrap;
+}
+
+@media (max-width: 1150px) {
+    .shell-brand-tag {
+        letter-spacing: 0.06em;
+    }
+}
+
+@media (max-width: 520px) {
+    .shell-brand-tag {
+        display: none;
+    }
 }
 
 .shell-hero-wrap {
@@ -436,12 +488,13 @@ code {
    sticky header's height so the HOMEPAGE hero clone below it lands on the same
    pixel row after Blazor's swap. On an app route there is no hero clone to keep
    aligned -- the brand placeholder centres itself in the viewport -- so the
-   spacer reserves space for a header that is not painted yet and shows up as a
-   bare dark band across the top of an otherwise empty page. Hiding it here costs
-   the home-route alignment it was built for nothing, and removes the band. */
+   spacer used to be a bare dark band across the top of an otherwise empty page,
+   and was hidden here. It now carries the brand (logo, name, tagline) where the
+   real header puts it, so it stays: app routes boot under the same top bar
+   they end up with, rather than a bar-less page that grows one when Blazor
+   starts. */
 html.shell-app-route .shell-hero-wrap,
-html.shell-app-route .static-shell,
-html.shell-app-route .shell-header-spacer {
+html.shell-app-route .static-shell {
     display: none;
 }
 
@@ -457,13 +510,12 @@ html.shell-app-route .shell-route-loading {
     gap: 0.75rem;
 
     /* Fills the void the hidden hero leaves behind, so the boot state is
-       centred in the viewport rather than pinned under the header band.
+       centred in the space under the header band rather than pinned to it.
        80vh, not 100vh: bootstrap.min.css (which zeroes the UA's default 8px
        body margin) loads non-blocking here, so during the pre-boot shell the
-       body can still carry that margin and a full-viewport block would add a
-       scrollbar to a page that has nothing to scroll. 80vh also absorbs the
-       88px .shell-header-spacer hidden above, keeping the mark on roughly the
-       same pixel row it sat on before. */
+       body can still carry that margin, and header + 100vh would add a
+       scrollbar to a page that has nothing to scroll. The calculator page's
+       own loader (.yc-boot, below) uses this same box. */
     min-height: 80vh;
 
     color: #1A2C54;
@@ -555,9 +607,10 @@ html.shell-app-route .shell-route-loading {
    wwwroot/js/yieldCalculator.js has fetched the calculator's stylesheets and
    scripts, which showed the bare, unstyled page for a moment. Until that
    script sets data-ready, the markup is hidden (visibility, not display: the
-   map must keep its size for Leaflet to measure) and a loading track shows. */
+   map must keep its size for Leaflet to measure) and .yc-boot shows the same
+   Oxyniti loading mark as every other page (.shell-route-loading above; its
+   reduced-motion rules cover these classes too). */
 #yc-root:not([data-ready]) {
-    position: relative;
     min-height: 80vh;
 }
 
@@ -565,44 +618,30 @@ html.shell-app-route .shell-route-loading {
         visibility: hidden;
     }
 
-    #yc-root:not([data-ready])::before,
-    #yc-root:not([data-ready])::after {
-        content: "";
-        position: absolute;
-        top: 30vh;
-        left: 50%;
-        height: 3px;
-        border-radius: 2px;
-    }
+/* Fixed, just under the header and 80vh tall: exactly the box the app
+   shell's .shell-route-loading fills before Blazor starts (below the shell's
+   header band), so on a refresh the mark stays on the same pixel when Blazor
+   replaces one with the other. */
+.yc-boot {
+    position: fixed;
+    top: var(--oxy-header-h, 88px);
+    left: 0;
+    right: 0;
+    height: 80vh;
 
-    #yc-root:not([data-ready])::before {
-        width: 160px;
-        margin-left: -80px;
-        background: rgba(26, 44, 84, 0.12);
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
 
-    #yc-root:not([data-ready])::after {
-        width: 64px;
-        margin-left: -80px;
-        background: #2DE0E5;
-        animation: ycLoadingSlide 0.9s ease-in-out infinite alternate;
-    }
+    color: #1A2C54;
 
-@keyframes ycLoadingSlide {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(96px);
-    }
+    pointer-events: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    #yc-root:not([data-ready])::after {
-        animation: none;
-        width: 160px;
-    }
+#yc-root[data-ready] + .yc-boot {
+    display: none;
 }
 
 /* Apply offset to all section IDs on the page. Tracks the real header height

@@ -175,7 +175,18 @@
              the real hero exactly, Blazor's instant DOM swap is already
              invisible, and a transition would just be another way for a
              stuck element to hide the site. -->
-        <div class="shell-header-spacer" aria-hidden="true"></div>
+        <!-- The header band, with the brand exactly where NavMenu.razor puts
+             it, so the real header only adds its links and buttons when
+             Blazor starts instead of appearing out of nowhere. -->
+        <div class="shell-header-spacer" aria-hidden="true">
+            <span class="shell-brand">
+                <img src="/oxyniti.png" width="50" height="50" alt="" decoding="async" class="shell-brand-logo" />
+                <span>
+                    <span class="shell-brand-name">Oxyniti</span>
+                    <span class="shell-brand-tag">Nano-bubble aeration</span>
+                </span>
+            </span>
+        </div>
 
         <!-- What app routes (/login, /cart, /account, /orders) see while
              Blazor boots. Hidden by default; app.css reveals it only under
@@ -300,6 +311,33 @@
                 + '<a href="." class="reload">Reload</a>'
                 + '<span class="dismiss">🗙</span>';
             document.body.appendChild(el);
+        })();
+    </script>
+    <script>
+        (function () {
+            // One clock for every Oxyniti loading mark. A refresh on
+            // /yield-calculator shows this shell's .shell-route-loading, then
+            // Blazor swaps it for the page's own .yc-boot in the same spot
+            // (Pages/YieldCalculator.razor). Each CSS animation starts when its
+            // element appears, so the new mark restarted its pulse mid-fade --
+            // a visible blink. Pinning every one to the document timeline
+            // (startTime 0) makes the hand-over seamless. The observer stops as
+            // soon as .yc-boot has been synced, or after a minute.
+            if (!document.body.getAnimations) return;
+            var BOXES = ".shell-route-loading, .yc-boot";
+            function sync() {
+                Array.prototype.forEach.call(document.querySelectorAll(BOXES), function (box) {
+                    box.getAnimations({ subtree: true }).forEach(function (a) { a.startTime = 0; });
+                });
+            }
+            sync();
+            var observer = new MutationObserver(function () {
+                if (!document.querySelector(".yc-boot")) return;
+                sync();
+                observer.disconnect();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            setTimeout(function () { observer.disconnect(); }, 60000);
         })();
     </script>
     <script src="./js/i18nHelper.js" defer></script>

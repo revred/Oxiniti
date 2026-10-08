@@ -149,3 +149,46 @@ test("the header's calculator pill opens the calculator from another page", asyn
     await expect(page.locator("#res-harvest")).toContainText("kg");
     expect(errors).toEqual([]);
 });
+
+test("while the calculator loads, the page shows the Oxyniti loading mark, then the calculator", async ({ page }) => {
+    // Hold the calculator's own scripts back so the loading state can be seen.
+    await page.route("**/yield-calculator/js/**", async (route) => {
+        await new Promise((r) => setTimeout(r, 3000));
+        await route.continue();
+    });
+    await page.goto("/yield-calculator");
+    const boot = page.locator(".yc-boot");
+    await expect(boot).toBeVisible({ timeout: BOOT_TIMEOUT });
+    await expect(boot.locator("img[src='/oxyniti.png']")).toBeVisible();
+    await expect(boot).toContainText("Oxyniti");
+
+    await expect(page.locator("#yc-root[data-ready]")).toBeAttached({ timeout: BOOT_TIMEOUT });
+    await expect(boot).toBeHidden();
+    await expect(page.locator("#res-harvest")).toBeVisible();
+});
+
+test("on a refresh the loading mark stays in one place when the app takes over", async ({ page }) => {
+    await page.goto("/yield-calculator");
+    await expect(page.locator("#yc-root[data-ready]")).toBeAttached({ timeout: BOOT_TIMEOUT });
+
+    // Record where the shell's mark (index.html) and then the page's own
+    // .yc-boot mark first sit on screen during the reload.
+    await page.addInitScript(() => {
+        window.__marks = {};
+        const top = (sel) => { const el = document.querySelector(sel); if (!el) return null; const r = el.getBoundingClientRect(); return r.width && getComputedStyle(el).display !== "none" ? Math.round(r.top) : null; };
+        const tick = () => {
+            const shell = top(".shell-route-loading .shell-route-loading-mark");
+            const boot = top(".yc-boot img");
+            if (shell !== null) window.__marks.shell = shell;
+            if (boot !== null && window.__marks.boot === undefined) window.__marks.boot = boot;
+            if (!document.querySelector("#yc-root[data-ready]")) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    });
+    await page.reload();
+    await expect(page.locator("#yc-root[data-ready]")).toBeAttached({ timeout: BOOT_TIMEOUT });
+    const marks = await page.evaluate(() => window.__marks);
+    expect(marks.shell).toBeDefined();
+    expect(marks.boot).toBeDefined();
+    expect(Math.abs(marks.boot - marks.shell)).toBeLessThanOrEqual(2);
+});

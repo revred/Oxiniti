@@ -1,0 +1,536 @@
+/* =========================================================
+   YIELD CALCULATOR PROMO CARD
+
+   A slide-in card, not a modal: no backdrop, no scroll lock, nothing to
+   fight before the page is usable again. It sits bottom-right, beside the
+   floating WhatsApp / calculator buttons, and on a phone becomes a sheet
+   along the bottom edge. Colours are the header's navy with the logo's
+   teal-to-cyan and its orange bubble; wwwroot/js/yieldPromo.js opens it by
+   setting data-state="open".
+   ========================================================= */
+
+.yield-promo {
+    --yp-navy: #071321;
+    --yp-navy-2: #0d2238;
+    --yp-teal: #1dd9c8;
+    --yp-cyan: #5ce1ff;
+    --yp-orange: #ffa53d;
+
+    position: fixed;
+
+    /* Left of the 52px floating buttons (FloatingActionButtons.razor.css). */
+    right: calc(1.5rem + 52px + 1rem);
+    bottom: 1.5rem;
+
+    z-index: 1040;
+
+    width: min(380px, calc(100vw - 2rem));
+
+    box-sizing: border-box;
+
+    border-radius: 20px;
+
+    background: linear-gradient(160deg, var(--yp-navy-2) 0%, var(--yp-navy) 62%);
+
+    border: 1px solid rgba(29, 217, 200, 0.28);
+
+    box-shadow:
+        0 24px 60px rgba(2, 8, 23, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+
+    color: #e9f0f5;
+
+    overflow: hidden;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(28px) scale(0.97);
+    transform-origin: bottom right;
+    pointer-events: none;
+
+    transition:
+        opacity 0.35s ease,
+        transform 0.55s cubic-bezier(0.2, 0.9, 0.25, 1.15),
+        visibility 0s linear 0.55s;
+}
+
+
+.yield-promo[data-state="open"] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+
+    transition:
+        opacity 0.35s ease,
+        transform 0.55s cubic-bezier(0.2, 0.9, 0.25, 1.15),
+        visibility 0s;
+}
+
+
+/* ---- Close ------------------------------------------------------------ */
+
+.yp-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    z-index: 2;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(2, 8, 23, 0.45);
+
+    color: rgba(233, 240, 245, 0.8);
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+
+.yp-close:hover,
+.yp-close:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+
+    color: #ffffff;
+}
+
+
+/* ---- Visual: today vs with OXY-Nano ----------------------------------- */
+
+.yp-visual {
+    position: relative;
+
+    height: 128px;
+
+    padding: 18px 22px 0;
+
+    box-sizing: border-box;
+
+    background:
+        radial-gradient(120% 90% at 78% 100%, rgba(29, 217, 200, 0.28), transparent 60%),
+        radial-gradient(80% 70% at 10% 0%, rgba(92, 225, 255, 0.12), transparent 70%);
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    overflow: hidden;
+}
+
+
+.yp-bars {
+    position: relative;
+
+    z-index: 1;
+
+    height: 100%;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    gap: 26px;
+}
+
+
+.yp-bar {
+    position: relative;
+
+    width: 96px;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+
+.yp-bar-fill {
+    width: 100%;
+
+    border-radius: 10px 10px 0 0;
+
+    transform: scaleY(0);
+    transform-origin: bottom;
+
+    transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s;
+}
+
+
+/* Heights keep the calculator's ratio: its gain is capped at +18%
+   (uplift.ceiling_extra_kg_fraction), and 62% x 1.18 = 73%. */
+.yp-bar-now .yp-bar-fill {
+    height: 62%;
+
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+}
+
+
+.yp-bar-oxy .yp-bar-fill {
+    height: 73%;
+
+    background: linear-gradient(180deg, var(--yp-cyan), var(--yp-teal));
+
+    box-shadow: 0 0 24px rgba(29, 217, 200, 0.45);
+
+    transition-delay: 0.45s;
+}
+
+
+.yp-bar-label {
+    position: absolute;
+    bottom: 6px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+
+    color: rgba(233, 240, 245, 0.75);
+}
+
+
+.yp-bar-oxy .yp-bar-label {
+    color: #03201f;
+}
+
+
+.yp-bar-gain {
+    position: absolute;
+    top: calc(27% - 26px);
+
+    padding: 2px 8px;
+
+    border-radius: 999px;
+
+    background: var(--yp-orange);
+
+    color: #2a1300;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    opacity: 0;
+    transform: translateY(8px);
+
+    transition: opacity 0.4s ease 1.1s, transform 0.4s ease 1.1s;
+}
+
+
+.yield-promo[data-state="open"] .yp-bar-fill {
+    transform: scaleY(1);
+}
+
+
+.yield-promo[data-state="open"] .yp-bar-gain {
+    opacity: 1;
+    transform: none;
+}
+
+
+/* Nano-bubbles drifting up behind the bars, the logo's bubble ring loosened. */
+.yp-bubbles span {
+    position: absolute;
+    bottom: -14px;
+
+    border-radius: 50%;
+
+    background: var(--yp-cyan);
+
+    opacity: 0;
+
+    animation: ypRise 5.5s ease-in infinite;
+    animation-play-state: paused;
+}
+
+
+.yp-bubbles span:nth-child(1) { left: 12%; width: 8px;  height: 8px;  animation-delay: 0s; }
+.yp-bubbles span:nth-child(2) { left: 26%; width: 5px;  height: 5px;  animation-delay: 1.6s; background: var(--yp-teal); }
+.yp-bubbles span:nth-child(3) { left: 70%; width: 10px; height: 10px; animation-delay: 0.8s; }
+.yp-bubbles span:nth-child(4) { left: 84%; width: 6px;  height: 6px;  animation-delay: 2.7s; background: var(--yp-teal); }
+.yp-bubbles span:nth-child(5) { left: 92%; width: 4px;  height: 4px;  animation-delay: 3.6s; background: var(--yp-orange); }
+
+
+.yield-promo[data-state="open"] .yp-bubbles span {
+    animation-play-state: running;
+}
+
+
+@keyframes ypRise {
+
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 0.55;
+    }
+
+    100% {
+        transform: translateY(-150px);
+        opacity: 0;
+    }
+}
+
+
+/* ---- Copy ------------------------------------------------------------- */
+
+.yp-body {
+    padding: 18px 22px 20px;
+}
+
+
+.yp-eyebrow {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin: 0 0 8px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+
+    text-transform: uppercase;
+
+    color: var(--yp-teal);
+}
+
+
+.yp-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--yp-orange);
+
+    box-shadow: 0 0 0 4px rgba(255, 165, 61, 0.18);
+}
+
+
+.yp-title {
+    margin: 0 0 8px;
+
+    font-size: 21px;
+    font-weight: 800;
+
+    line-height: 1.22;
+
+    letter-spacing: -0.3px;
+
+    color: #ffffff;
+}
+
+
+.yp-text {
+    margin: 0 0 14px;
+
+    font-size: 13.5px;
+
+    line-height: 1.55;
+
+    color: rgba(233, 240, 245, 0.78);
+}
+
+
+.yp-chips {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin: 0 0 16px;
+    padding: 0;
+
+    list-style: none;
+}
+
+
+.yp-chips li {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 4px 10px;
+
+    border-radius: 999px;
+
+    background: rgba(29, 217, 200, 0.10);
+
+    border: 1px solid rgba(29, 217, 200, 0.22);
+
+    font-size: 11.5px;
+    font-weight: 600;
+
+    color: #d6faf6;
+}
+
+
+.yp-chips i {
+    font-size: 12px;
+
+    color: var(--yp-teal);
+}
+
+
+.yp-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.yp-cta {
+    flex: 1 1 auto;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 12px 18px;
+
+    border-radius: 12px;
+
+    background: linear-gradient(90deg, var(--yp-teal), var(--yp-cyan));
+
+    color: #021018;
+
+    font-size: 14.5px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    box-shadow: 0 10px 24px rgba(29, 217, 200, 0.28);
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+
+.yp-cta i {
+    transition: transform 0.2s ease;
+}
+
+
+.yp-cta:hover,
+.yp-cta:focus-visible {
+    color: #021018;
+
+    transform: translateY(-1px);
+
+    filter: brightness(1.06);
+
+    box-shadow: 0 14px 30px rgba(29, 217, 200, 0.38);
+}
+
+
+.yp-cta:hover i,
+.yp-cta:focus-visible i {
+    transform: translateX(3px);
+}
+
+
+.yp-later {
+    flex-shrink: 0;
+
+    padding: 6px 2px;
+
+    border: none;
+
+    background: none;
+
+    color: rgba(233, 240, 245, 0.6);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.yp-later:hover,
+.yp-later:focus-visible {
+    color: #ffffff;
+}
+
+
+/* ---- Phone: a sheet along the bottom ---------------------------------- */
+
+@media (max-width: 768px) {
+
+    .yield-promo {
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 0.75rem;
+
+        width: auto;
+
+        transform: translateY(110%);
+        transform-origin: bottom center;
+    }
+
+    .yp-visual {
+        height: 104px;
+
+        padding-top: 14px;
+    }
+
+    .yp-body {
+        padding: 14px 18px 18px;
+    }
+
+    .yp-title {
+        font-size: 19px;
+    }
+
+    .yp-text {
+        font-size: 13px;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .yield-promo,
+    .yield-promo[data-state="open"],
+    .yp-bar-fill,
+    .yp-bar-gain {
+        transition: opacity 0.2s ease, visibility 0s;
+    }
+
+    .yield-promo {
+        transform: none;
+    }
+
+    .yp-bar-fill {
+        transform: none;
+    }
+
+    .yp-bubbles {
+        display: none;
+    }
+}

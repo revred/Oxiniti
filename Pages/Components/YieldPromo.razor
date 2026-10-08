@@ -1,0 +1,89 @@
+@implements IDisposable
+@inject LocalizationService Loc
+
+@* Invitation to the yield calculator: a card that slides in a second
+   after a page opens. Markup only -- it starts hidden, and
+   wwwroot/js/yieldPromo.js decides when to open it (a timer: back again a
+   minute after every close, until the visitor goes to the calculator), so
+   it works the same on the prerendered marketing pages, which have no
+   Blazor runtime, as on the app routes. The script drives it through
+   data-state, an attribute Blazor never renders, so a re-render (a language
+   change) can't snap it shut. *@
+
+<aside id="yield-promo"
+       class="yield-promo"
+       role="dialog"
+       aria-modal="false"
+       aria-labelledby="yield-promo-title"
+       aria-hidden="true">
+
+    <button type="button"
+            class="yp-close"
+            data-yp-dismiss
+            aria-label="@Loc.T("promo.close", "Close")">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+
+    <div class="yp-visual" aria-hidden="true">
+        <div class="yp-bubbles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="yp-bars">
+            <div class="yp-bar yp-bar-now">
+                <span class="yp-bar-fill"></span>
+                <span class="yp-bar-label">@Loc.T("promo.barNow", "Today")</span>
+            </div>
+            <div class="yp-bar yp-bar-oxy">
+                <span class="yp-bar-gain">+18%</span>
+                <span class="yp-bar-fill"></span>
+                <span class="yp-bar-label">@Loc.T("promo.barOxy", "With OXY-Nano")</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="yp-body">
+        <p class="yp-eyebrow">
+            <span class="yp-dot" aria-hidden="true"></span>
+            @Loc.T("promo.eyebrow", "Free pond estimate")
+        </p>
+
+        <h2 id="yield-promo-title" class="yp-title">
+            @Loc.T("promo.title", "What could your pond really harvest?")
+        </h2>
+
+        <p class="yp-text">
+            @Loc.T("promo.text", "Pick your district, species and stocking. See your expected harvest, and how much more OXY-Nano could add: up to +18% more saleable fish where oxygen runs short.")
+        </p>
+
+        <ul class="yp-chips">
+            <li><i class="bi bi-check2" aria-hidden="true"></i>@Loc.T("promo.chipFree", "Free")</li>
+            <li><i class="bi bi-stopwatch" aria-hidden="true"></i>@Loc.T("promo.chipTime", "Under a minute")</li>
+            <li><i class="bi bi-unlock" aria-hidden="true"></i>@Loc.T("promo.chipNoSignup", "No sign-up")</li>
+        </ul>
+
+        <div class="yp-actions">
+            <a class="yp-cta" href="/yield-calculator" data-yp-go>
+                @Loc.T("promo.cta", "Calculate my harvest")
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+
+            <button type="button" class="yp-later" data-yp-dismiss>
+                @Loc.T("promo.later", "Not now")
+            </button>
+        </div>
+    </div>
+
+</aside>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Loc.OnChange -= StateHasChanged;
+    }
+}

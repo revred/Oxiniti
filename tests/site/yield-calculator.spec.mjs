@@ -23,9 +23,12 @@ test("renders inside the site layout with one header and one footer", async ({ p
     const errors = await openCalculator(page);
     await expect(page.locator("header.site-header")).toHaveCount(1);
     await expect(page.locator("footer.site-footer")).toHaveCount(1);
-    // Reached from the header's calculator icon, not a text link in the menu.
-    await expect(page.locator("header a.profit-btn[href='/yield-calculator']")).toBeVisible();
+    // Reached from the header's calculator pill, not a text link in the menu.
+    await expect(page.locator("header a.yield-pill[href='/yield-calculator']")).toBeVisible();
     await expect(page.locator(".nav-links a[href='/yield-calculator']")).toHaveCount(0);
+    // No floating calculator button on the calculator page; WhatsApp stays.
+    await expect(page.locator(".floating-btn-profit")).toBeHidden();
+    await expect(page.locator(".floating-btn-whatsapp")).toBeVisible();
     await expect(page.locator("#data-sources")).toBeAttached(); // ODbL attribution must stay on the page
     // White page background, like every other page (no tinted band under the header).
     await expect(page.locator("#yc-root")).toHaveCSS("background-color", "rgb(255, 255, 255)");
@@ -133,11 +136,11 @@ test("map popups keep their close button inside the card, clear of the title", a
     expect(content.right).toBeLessThanOrEqual(close.left + 1);
 });
 
-test("the header's calculator icon opens the calculator from another page", async ({ page }) => {
+test("the header's calculator pill opens the calculator from another page", async ({ page }) => {
     const errors = [];
     page.on("console", (msg) => { if (msg.type() === "error") errors.push(msg.text()); });
     await page.goto("/products");
-    const icon = page.locator("header a.profit-btn");
+    const icon = page.locator("header a.yield-pill");
     await expect(icon).toBeVisible({ timeout: BOOT_TIMEOUT });
     await page.waitForFunction(() => window.Blazor !== undefined); // let Blazor own the link
     await icon.click();

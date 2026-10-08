@@ -89,9 +89,6 @@
             @Loc.T("nav.footage", "Use Cases")
         </a>
 
-        <!-- The yield calculator has no text link here: the header's
-             calculator icon (MainLayout) reaches it at every width. -->
-
         <!-- 6. CONTACT -->
         <!-- Points at the standalone /contact page (the same target the
              footer uses), not the home page's #free-demo form. Like
@@ -105,6 +102,27 @@
             @Loc.T("nav.contact", "Contact Us")
         </NavLink>
     </nav>
+
+    <!-- Yield calculator — /yield-calculator. Right after Contact Us,
+         outside .nav-links so it stays in the bar (beside the menu
+         button) when the links fold into the mobile menu. The same
+         pill as the header's language control, with the
+         calculator's chart icon where that one has its globe, no
+         dropdown arrow. -->
+    <a class="yield-pill"
+       href="/yield-calculator"
+       title="@Loc.T("nav.calcTeaser", "See what your pond could harvest")"
+       aria-label="@Loc.T("nav.calc", "Yield Calculator")">
+
+        <span class="yield-pill-icon" aria-hidden="true">
+            <i class="bi bi-graph-up-arrow"></i>
+        </span>
+
+        <span class="yield-pill-text">
+            @Loc.T("nav.calc", "Yield Calculator")
+        </span>
+
+    </a>
 
 </div>
 

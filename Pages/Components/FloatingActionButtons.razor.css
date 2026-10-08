@@ -99,3 +99,20 @@
         display: none;
     }
 }
+
+/* The yield promo card (YieldPromo.razor) is a full-width sheet on a phone;
+   step these aside while it is up rather than stack them on top of it. */
+@media (max-width: 768px) {
+    :root[data-yield-promo="open"] .floating-actions {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* On the calculator page itself (#yc-root, Pages/YieldCalculator.razor) the
+   calculator button would link to the page already open; only WhatsApp stays.
+   Keyed on the calculator's own markup rather than the URL, so it holds for
+   the prerendered copy and every locale prefix alike. */
+:root:has(#yc-root) .floating-btn-profit {
+    display: none;
+}

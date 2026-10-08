@@ -113,24 +113,10 @@
 }
 
 
-/* Yield calculator — links to /yield-calculator/ */
-
-.profit-btn {
-    background: linear-gradient(135deg, #1A2C54, #3D8FB5);
-
-    /* Fluid: this was a 8/6/4/0px ladder across four media queries, and the
-       WhatsApp pull below was a matching -8/-6/-4/-3px one. Each step nudged
-       both buttons sideways at a breakpoint. */
-    margin-left: clamp(0px, 0.6vw, 8px);
-}
-
-
-/* WhatsApp — external chat, kept visually distinct from Profit */
+/* WhatsApp — external chat */
 
 .whatsapp-btn {
     background: #25D366;
-
-    margin-left: clamp(-8px, -0.6vw, 0px); /* pulls it closer to the profit button */
 }
 
 

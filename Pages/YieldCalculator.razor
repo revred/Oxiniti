@@ -13,8 +13,21 @@
     <meta name="description" content="Estimate the extra harvest from Oxyniti nano-bubble aeration for your pond, by species, district, stocking month and density, with a map of Tamil Nadu's aquaculture hotspots." />
 </HeadContent>
 
-<div id="yc-root" class="yc">
-    @((MarkupString)YieldCalculatorMarkup.Html)
+<div class="yc-page">
+    <div id="yc-root" class="yc">
+        @((MarkupString)YieldCalculatorMarkup.Html)
+    </div>
+
+    @* Shown over the hidden calculator until yieldCalculator.js sets
+       data-ready (app.css). The same mark, name and track as the app shell's
+       .shell-route-loading in wwwroot/index.html, so arriving here looks like
+       every other page loading. Boot chrome, not content: aria-hidden and
+       data-nosnippet. *@
+    <div class="yc-boot" aria-hidden="true" data-nosnippet>
+        <img src="/oxyniti.png" width="56" height="56" alt="" decoding="async" class="shell-route-loading-mark" />
+        <div class="shell-route-loading-brand">Oxyniti</div>
+        <div class="shell-route-loading-track"><span></span></div>
+    </div>
 </div>
 
 @code {

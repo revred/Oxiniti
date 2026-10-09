@@ -56,7 +56,7 @@ window.oxynitiMap = {
         if (marker) marker.on('dragend', () => fillPlace(marker.getLatLng()));
         map.on('click', (e) => placeMarker(e.latlng));
 
-        this._maps[elementId] = { map, getMarker: () => marker };
+        this._maps[elementId] = { map, getMarker: () => marker, setMarker: placeMarker };
     },
 
     // Returns fn(latlng) that looks up the tapped spot's village via OSM Nominatim and
@@ -130,6 +130,37 @@ window.oxynitiMap = {
         return [pos.lat, pos.lng];
     },
 
+    // Moves (or drops) the picker's marker, e.g. after "Use my location".
+    setPickerLocation: function (elementId, lat, lng) {
+        const entry = this._maps[elementId];
+        if (!entry || !entry.setMarker) return;
+        entry.setMarker(L.latLng(lat, lng));
+        entry.map.setView([lat, lng], 15);
+    },
+
+    // The device's GPS position as [lat, lng], or null if it is unavailable or refused.
+    currentPosition: function () {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) { resolve(null); return; }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve([pos.coords.latitude, pos.coords.longitude]),
+                () => resolve(null),
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+        });
+    },
+
+    focusPoint: function (elementId, lat, lng) {
+        const entry = this._maps[elementId];
+        if (!entry) return;
+        entry.map.setView([lat, lng], 13);
+        const marker = (entry.markers || []).find(m => {
+            const p = m.getLatLng();
+            return Math.abs(p.lat - lat) < 1e-9 && Math.abs(p.lng - lng) < 1e-9;
+        });
+        if (marker) marker.openPopup();
+        entry.map.getContainer().scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+
     initDisplay: function (elementId, points) {
         this._destroy(elementId);
 
@@ -144,9 +175,10 @@ window.oxynitiMap = {
 
         const markers = points.map(p => {
             const marker = L.marker([p.lat, p.lng]).addTo(map);
+            const details = [p.species, p.size].filter(Boolean).map(escapeHtml).join(' &middot; ');
             marker.bindPopup(
-                `<b>${escapeHtml(p.name)}</b><br/>${escapeHtml(p.place)}<br/>${escapeHtml(p.phone)}<br/>` +
-                `<span style="color:#666">${escapeHtml(p.species)} &middot; ${escapeHtml(p.size)}</span>`
+                `<b>${escapeHtml(p.name)}</b><br/>${escapeHtml(p.place)}<br/>${escapeHtml(p.phone)}` +
+                (details ? `<br/><span style="color:#666">${details}</span>` : '')
             );
             return marker;
         });
@@ -155,7 +187,7 @@ window.oxynitiMap = {
         map.fitBounds(group.getBounds().pad(0.2));
         if (points.length === 1) map.setZoom(13);
 
-        this._maps[elementId] = { map };
+        this._maps[elementId] = { map, markers };
     },
 
     _destroy: function (elementId) {

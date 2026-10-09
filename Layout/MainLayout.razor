@@ -148,16 +148,20 @@
                             *@
 
 
-                            <a href="/my-demos"
-                               class="user-menu-item">
+                            @* My Demos is the staff-only demo log (Pages/MyDemos.razor). *@
+                            @if (AuthenticationService.IsMakerAIUser == true)
+                            {
+                                <a href="/my-demos"
+                                   class="user-menu-item">
 
-                                <i class="bi bi-geo-alt"></i>
+                                    <i class="bi bi-geo-alt"></i>
 
-                                <span>
-                                    @Loc.T("menu.demos", "My Demos")
-                                </span>
+                                    <span>
+                                        @Loc.T("menu.demos", "My Demos")
+                                    </span>
 
-                            </a>
+                                </a>
+                            }
 
 
                             <a href="#"

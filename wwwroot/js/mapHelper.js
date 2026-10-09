@@ -59,16 +59,30 @@ window.oxynitiMap = {
         this._maps[elementId] = { map, getMarker: () => marker, setMarker: placeMarker };
     },
 
-    // Returns fn(latlng) that looks up the tapped spot's village via OSM Nominatim and
-    // writes it into the form's Village / Town box. It never overwrites text the user
-    // typed: only an empty box, or one this function filled last, is replaced.
+    // Returns fn(latlng) that looks up the tapped spot via OSM Nominatim and fills
+    // the form's place boxes: data-field="place" always, plus "district" and
+    // "state" when the form has them (the staff demo log does; the home page's
+    // free-demo form has only "place", so it gets "Village, Taluk" there).
+    // It never overwrites text the user typed: only an empty box, or one this
+    // function filled last, is replaced.
     _placeFiller: function (elementId) {
         const mapEl = document.getElementById(elementId);
         const form = mapEl && mapEl.closest('form');
-        const input = form && form.querySelector('[data-field="place"]');
-        if (!input) return () => {};
+        const box = (name) => form && form.querySelector(`[data-field="${name}"]`);
+        const fields = [
+            { input: box('place'), value: null, lastFilled: null },
+            { input: box('district'), value: null, lastFilled: null },
+            { input: box('state'), value: null, lastFilled: null },
+        ];
+        const [place, district, state] = fields;
+        if (!place.input) return () => {};
+        const splitPlace = !!district.input;
 
-        let lastFilled = null;
+        const isOurs = (f) => {
+            const current = f.input.value.trim();
+            return !current || current === f.lastFilled;
+        };
+
         let timer = null;
         let pending = null;
 
@@ -76,8 +90,8 @@ window.oxynitiMap = {
             clearTimeout(timer);
             // Debounce so repeated taps / drags make one lookup (Nominatim allows 1 req/s).
             timer = setTimeout(async () => {
-                const current = input.value.trim();
-                if (current && current !== lastFilled) return;
+                const present = fields.filter(f => f.input);
+                if (!present.some(isOurs)) return;
 
                 if (pending) pending.abort();
                 pending = new AbortController();
@@ -92,23 +106,31 @@ window.oxynitiMap = {
                         referrerPolicy: 'strict-origin-when-cross-origin'
                     });
                     if (!res.ok) return;
-                    const label = this._placeLabel((await res.json()).address);
-                    if (!label) return;
+                    const address = (await res.json()).address;
+                    place.value = splitPlace ? this._placePrimary(address) : this._placeLabel(address);
+                    district.value = this._placeDistrict(address);
+                    state.value = (address && address.state) || '';
 
-                    // Re-check: the user may have typed while the lookup was in flight.
-                    const now = input.value.trim();
-                    if (now && now !== lastFilled) return;
-
-                    input.value = label;
-                    lastFilled = label;
-                    // Blazor's InputText binds on 'change'; the static island reads .value.
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    // Re-check each box: the user may have typed while the lookup was in flight.
+                    for (const f of present) {
+                        if (!f.value || !isOurs(f)) continue;
+                        f.input.value = f.value;
+                        f.lastFilled = f.value;
+                        // Blazor binds on 'input' or 'change'; the static island reads .value.
+                        f.input.dispatchEvent(new Event('input', { bubbles: true }));
+                        f.input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
                 } catch (err) {
                     if (err.name !== 'AbortError') console.warn('[oxynitiMap] Place lookup failed:', err);
                 }
             }, 600);
         };
+    },
+
+    // The village / town itself (e.g. "Mettutteruvu").
+    _placePrimary: function (address) {
+        if (!address) return '';
+        return address.village || address.hamlet || address.suburb || address.town || address.city || address.county || '';
     },
 
     // "Village, Taluk" (e.g. "Mettutteruvu, Lalgudi"), falling back to town/city and district.
@@ -120,6 +142,12 @@ window.oxynitiMap = {
             ? address.county
             : address.state_district;
         return secondary && secondary !== primary ? `${primary}, ${secondary}` : primary;
+    },
+
+    // Indian districts come back as state_district, sometimes as "X District".
+    _placeDistrict: function (address) {
+        if (!address) return '';
+        return (address.state_district || '').replace(/\s+district$/i, '').trim();
     },
 
     getPickerLocation: function (elementId) {

@@ -333,7 +333,7 @@
                             }
                             else
                             {
-                                @Loc.T("demos.form.location.hint", "Tap the map to drop a pin on the pond — the village fills in by itself.")
+                                @Loc.T("demos.form.location.hint", "Tap the map to drop a pin on the pond — the village, district and state fill in by themselves.")
                             }
                         </p>
                         <div class="form-grid three">
@@ -343,11 +343,11 @@
                             </div>
                             <div class="field">
                                 <label for="demo-district">@Loc.T("demos.form.district", "District")</label>
-                                <InputText id="demo-district" @bind-Value="form.District" placeholder="@Loc.T("demos.form.district.ph", "e.g. Trichy")" />
+                                <InputText id="demo-district" data-field="district" @bind-Value="form.District" placeholder="@Loc.T("demos.form.district.ph", "e.g. Trichy")" />
                             </div>
                             <div class="field">
                                 <label for="demo-state">@Loc.T("demos.form.state", "State")</label>
-                                <input id="demo-state" @bind="form.State" @bind:event="oninput" list="demo-states" placeholder="@Loc.T("demos.form.state.ph", "e.g. Tamil Nadu")" />
+                                <input id="demo-state" data-field="state" @bind="form.State" @bind:event="oninput" list="demo-states" placeholder="@Loc.T("demos.form.state.ph", "e.g. Tamil Nadu")" />
                                 <datalist id="demo-states">
                                     <option value="Tamil Nadu"></option>
                                     <option value="Andhra Pradesh"></option>

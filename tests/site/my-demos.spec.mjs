@@ -192,3 +192,22 @@ test("the yield-calculator promo never covers the staff demo log", async ({ page
     await page.waitForTimeout(4000); // the promo opens about a second after a page loads
     await expect(page.locator("#yield-promo")).not.toHaveAttribute("data-state", "open");
 });
+
+test("tapping the map fills village, district and state separately, never over typed text", async ({ page }) => {
+    await signIn(page, { staff: true });
+    await mockDemoApi(page);
+    await page.route("**/nominatim.openstreetmap.org/**", (route) => route.fulfill({
+        json: { address: { city: "Tiruchirappalli", county: "Tiruchchirāppalli", state_district: "Tiruchirappalli District", state: "Tamil Nadu" } },
+    }));
+    await page.goto("/my-demos");
+    await expect(page.getByTestId("demo-card").first()).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await page.getByTestId("demos-add").click();
+    const form = page.locator("#demo-visit-form");
+    await form.locator("#demo-state").fill("Kerala"); // typed by hand: must survive
+    await form.locator(".demo-picker-map").click({ position: { x: 120, y: 120 } });
+
+    await expect(form.locator("#demo-place")).toHaveValue("Tiruchirappalli");
+    await expect(form.locator("#demo-district")).toHaveValue("Tiruchirappalli");
+    await expect(form.locator("#demo-state")).toHaveValue("Kerala");
+});

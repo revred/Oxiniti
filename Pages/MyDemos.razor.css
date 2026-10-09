@@ -267,6 +267,10 @@
     color: #5B6B7D;
 }
 
+    .map-legend b {
+        color: #1A2C54;
+    }
+
     .map-legend span {
         display: inline-flex;
         align-items: center;

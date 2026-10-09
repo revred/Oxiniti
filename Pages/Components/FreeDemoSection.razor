@@ -1,4 +1,5 @@
 @using System.ComponentModel.DataAnnotations
+@using System.Globalization
 @using Microsoft.JSInterop
 @using Oxyniti.Services
 @implements IAsyncDisposable
@@ -98,6 +99,16 @@
             {
                 <p class="form-status">@statusMessage</p>
             }
+            @* The request only reaches the team once the farmer sends this
+               pre-filled WhatsApp message -- there is no backend that stores
+               demo requests yet. wwwroot/js/marketingIslands.js fills the
+               same block on the prerendered, WASM-free home page. *@
+            <div class="form-wa" data-field="wa" hidden="@(whatsAppLink is null)">
+                <p class="form-wa-text">@Loc.T("f.wa.step", "One last step: send your request to our team on WhatsApp.")</p>
+                <a class="btn btn-wa" data-field="wa-link" href="@(whatsAppLink ?? "#")" target="_blank" rel="noopener">
+                    <i class="bi bi-whatsapp"></i> @Loc.T("f.wa.btn", "Send request on WhatsApp")
+                </a>
+            </div>
             <p class="form-note" data-field="note">@Loc.T("f.note", "We respect your privacy — no spam, ever.")</p>
         </EditForm>
         </div>
@@ -107,6 +118,7 @@
 @code {
     private readonly DemoRequest model = new();
     private string? statusMessage;
+    private string? whatsAppLink;
     private readonly string mapId = $"demo-picker-{Guid.NewGuid():N}";
     private bool _mapInitialized;
     private IJSObjectReference? _mapLoaderModule;
@@ -201,7 +213,28 @@
 
         statusMessage = accountResult.IsSuccess
             ? "Demo request received! Your login passcode has been sent to your WhatsApp."
-            : "Demo request received! We'll contact you shortly.";
+            : null;
+        whatsAppLink = SiteContact.WhatsAppLink(BuildWhatsAppMessage(model, lat, lng));
+    }
+
+    // Kept in step with buildDemoWhatsAppMessage in wwwroot/js/marketingIslands.js.
+    private static string BuildWhatsAppMessage(DemoRequest request, double? lat, double? lng)
+    {
+        var lines = new List<string>
+        {
+            "Hi, I'd like a free Oxyniti pond demo.",
+            $"Name: {request.Name.Trim()}",
+            $"Phone: {request.Phone.Trim()}",
+            $"Village / Town: {request.Place.Trim()}",
+            $"Pond size: {request.Size}",
+            $"Species: {request.Species}"
+        };
+        if (lat is not null && lng is not null)
+        {
+            lines.Add(string.Create(CultureInfo.InvariantCulture,
+                $"Pond location: https://www.google.com/maps?q={lat.Value:F6},{lng.Value:F6}"));
+        }
+        return string.Join("\n", lines);
     }
 
     private class DemoRequest

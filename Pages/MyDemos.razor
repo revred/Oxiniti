@@ -496,7 +496,6 @@
 @code {
     private enum PageState { Loading, NotStaff, Error, Ready }
 
-    private const string GivenByStorageKey = "oxyniti_demo_given_by";
     private const string MapOpenStorageKey = "oxyniti_demos_map_open";
     private const int MaxPhotos = 3;
     private static readonly string[] Outcomes = ["Interested", "Ordered", "Follow-up needed", "Not interested"];
@@ -663,10 +662,12 @@
         await WriteStorageAsync(MapOpenStorageKey, showMap ? "true" : "false");
     }
 
-    private async Task OpenAdd()
+    private void OpenAdd()
     {
         editing = null;
-        form = new StaffDemoForm { GivenByName = await ReadStorageAsync(GivenByStorageKey) ?? "" };
+        // Starts empty on purpose: several staff may share one device, so a
+        // remembered name could be saved against the wrong person.
+        form = new StaffDemoForm();
         OpenForm();
     }
 
@@ -774,7 +775,6 @@
             else
                 await StaffDemos.UpdateDemoAsync(editing.Id, form, newPhotos);
 
-            await WriteStorageAsync(GivenByStorageKey, form.GivenByName.Trim());
             var wasEdit = editing is not null;
             CloseForm();
             await LoadAsync();

@@ -166,9 +166,9 @@ test("staff can add a demo; the name and exact readings are sent", async ({ page
     expect(add.body.notes).toContain('"doAfter":7.25');
     expect(calls.filter((c) => c.name === "GetDemos").length).toBe(2);
 
-    // The name is remembered for next time.
+    // The next demo starts with an empty name (devices may be shared).
     await page.getByTestId("demos-add").click();
-    await expect(page.locator("#demo-given-by")).toHaveValue("Fazil");
+    await expect(page.locator("#demo-given-by")).toHaveValue("");
 });
 
 test("staff can delete a demo after confirming", async ({ page }) => {
@@ -214,4 +214,23 @@ test("tapping the map fills village, district and state separately, never over t
     await form.locator(".demo-picker-map").click({ position: { x: 200, y: 140 } });
     await page.waitForTimeout(1500);
     await expect(form.locator("#demo-state")).toHaveValue("Kerala");
+});
+
+test("editing a pinned demo fills a State left empty, keeping the saved village", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const demo = { ...savedDemos().demos[0], place: "Vanagiri", district: "Mayiladuthurai", state: "" };
+    await page.route("**/api/demo/**", (route) => route.fulfill({ json: { demos: [demo] } }));
+    await page.route("**/nominatim.openstreetmap.org/**", (route) => route.fulfill({
+        json: { address: { village: "Poompuhar", county: "Sirkali", state_district: "Mayiladuthurai", state: "Tamil Nadu" } },
+    }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    // The saved pin is looked up once when the form opens; only the empty box is filled.
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    await expect(form.locator("#demo-state")).toHaveValue("Tamil Nadu");
+    await expect(form.locator("#demo-place")).toHaveValue("Vanagiri");
+    await expect(form.locator("#demo-district")).toHaveValue("Mayiladuthurai");
 });

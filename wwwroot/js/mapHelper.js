@@ -53,7 +53,12 @@ window.oxynitiMap = {
             fillPlace(latlng);
         };
 
-        if (marker) marker.on('dragend', () => fillPlace(marker.getLatLng()));
+        if (marker) {
+            marker.on('dragend', () => fillPlace(marker.getLatLng()));
+            // Editing a saved pin: fill any place box still empty (e.g. a State
+            // left blank before auto-fill covered it). Filled boxes are kept.
+            fillPlace(marker.getLatLng());
+        }
         map.on('click', (e) => placeMarker(e.latlng));
 
         this._maps[elementId] = { map, getMarker: () => marker, setMarker: placeMarker };

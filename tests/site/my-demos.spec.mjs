@@ -204,10 +204,14 @@ test("tapping the map fills village, district and state separately, never over t
 
     await page.getByTestId("demos-add").click();
     const form = page.locator("#demo-visit-form");
-    await form.locator("#demo-state").fill("Kerala"); // typed by hand: must survive
     await form.locator(".demo-picker-map").click({ position: { x: 120, y: 120 } });
-
     await expect(form.locator("#demo-place")).toHaveValue("Tiruchirappalli");
     await expect(form.locator("#demo-district")).toHaveValue("Tiruchirappalli");
+    await expect(form.locator("#demo-state")).toHaveValue("Tamil Nadu");
+
+    // A box typed by hand survives the next tap; the others follow the pin.
+    await form.locator("#demo-state").fill("Kerala");
+    await form.locator(".demo-picker-map").click({ position: { x: 200, y: 140 } });
+    await page.waitForTimeout(1500);
     await expect(form.locator("#demo-state")).toHaveValue("Kerala");
 });

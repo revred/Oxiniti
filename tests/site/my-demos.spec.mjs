@@ -183,3 +183,12 @@ test("staff can delete a demo after confirming", async ({ page }) => {
     await first.getByRole("button", { name: "Yes, delete" }).click();
     await expect.poll(() => calls.find((c) => c.name === "DeleteDemo")?.body).toEqual({ demoBarID: 101 });
 });
+
+test("the yield-calculator promo never covers the staff demo log", async ({ page }) => {
+    await signIn(page, { staff: true });
+    await mockDemoApi(page);
+    await page.goto("/my-demos");
+    await expect(page.getByTestId("demo-card").first()).toBeVisible({ timeout: BOOT_TIMEOUT });
+    await page.waitForTimeout(4000); // the promo opens about a second after a page loads
+    await expect(page.locator("#yield-promo")).not.toHaveAttribute("data-state", "open");
+});

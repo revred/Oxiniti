@@ -9,7 +9,8 @@
 //
 //   Going to the calculator from the card keeps it away for the rest of that
 //   browser tab's session (sessionStorage); the next visit shows it again.
-//   Never shown on the calculator itself or the sign-in / checkout flows.
+//   Never shown on the calculator itself, the sign-in / checkout flows, or
+//   the staff-only demo log (/my-demos), where it would cover "Add demo".
 //
 // Plain JS with no Blazor dependency, so it runs the same on the prerendered
 // marketing pages (which ship without the Blazor runtime) as on the app
@@ -28,7 +29,7 @@
 
     var LOCALES = ["hi", "ta", "te", "kn", "ml", "bn"];
 
-    var QUIET_PAGES = /^\/(yield-calculator|login|register|cart|checkout|checkout-return|payment|verify|email-verification)(\/|$)/i;
+    var QUIET_PAGES = /^\/(yield-calculator|login|register|cart|checkout|checkout-return|payment|verify|email-verification|my-demos)(\/|$)/i;
 
     // Per-page state, reset whenever the path changes.
     var page = null;

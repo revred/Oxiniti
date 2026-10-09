@@ -48,9 +48,8 @@
         default:
             <header class="demos-hero">
                 <div>
-                    <span class="demos-kicker">@Loc.T("demos.kicker", "Maker team · Demo log")</span>
                     <h1>@Loc.T("demos.title", "My Demos")</h1>
-                    <p>@Loc.T("demos.subtitle", "Every pond demo the team has given — where, when, and what the DO meter said.")</p>
+                    <p>@Loc.T("demos.subtitle", "All the pond demos our team has given, and how each one went.")</p>
                 </div>
                 <button class="btn-oxy" data-testid="demos-add" @onclick="OpenAdd">
                     <i class="bi bi-plus-lg"></i> @Loc.T("demos.add", "Add demo")
@@ -299,7 +298,7 @@
                        suggestion does not reliably raise the change event InputText
                        binds on. *@
                     <fieldset class="form-section">
-                        <legend><span class="step">1</span>@Loc.T("demos.form.sec.who", "Who & when")</legend>
+                        <legend><span class="step">1</span>@Loc.T("demos.form.sec.who", "Your name & demo date")</legend>
                         <div class="form-grid">
                             <div class="field">
                                 <label for="demo-given-by">@Loc.T("demos.form.givenby", "Demo given by (your name)") <span class="req">*</span></label>
@@ -320,7 +319,7 @@
                     </fieldset>
 
                     <fieldset class="form-section">
-                        <legend><span class="step">2</span>@Loc.T("demos.form.sec.where", "Where")</legend>
+                        <legend><span class="step">2</span>@Loc.T("demos.form.sec.where", "Pond location")</legend>
                         <div class="picker-wrap">
                             <div id="@pickerMapId" class="demo-picker-map"></div>
                             <button type="button" class="locate-btn" disabled="@locating" @onclick="UseMyLocationAsync">
@@ -361,7 +360,7 @@
                     </fieldset>
 
                     <fieldset class="form-section">
-                        <legend><span class="step">3</span>@Loc.T("demos.form.sec.pond", "Farmer & pond")</legend>
+                        <legend><span class="step">3</span>@Loc.T("demos.form.sec.pond", "Farmer & pond details")</legend>
                         <div class="form-grid">
                             <div class="field">
                                 <label for="demo-farmer">@Loc.T("demos.form.farmer", "Farmer name")</label>
@@ -404,7 +403,7 @@
                     </fieldset>
 
                     <fieldset class="form-section">
-                        <legend><span class="step">4</span>@Loc.T("demos.form.sec.result", "Result")</legend>
+                        <legend><span class="step">4</span>@Loc.T("demos.form.sec.result", "Demo results")</legend>
                         <div class="form-grid three">
                             <div class="field">
                                 <label for="demo-do-before">@Loc.T("demos.form.dobefore", "DO before")</label>

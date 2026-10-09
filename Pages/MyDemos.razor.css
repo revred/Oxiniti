@@ -1,5 +1,7 @@
 /* Staff demo log. Palette follows the site: navy #1A2C54, deep #0B1F33,
-   teal #3D8FB5, aqua #27D0CA. */
+   teal #3D8FB5, aqua #27D0CA. Buttons, date tiles and step numbers use the
+   product pages' .btn-gradient (Contact us) so they match the shop, not the
+   footer navy. */
 
 .demos-page {
     max-width: 1120px;
@@ -23,13 +25,13 @@
     justify-content: center;
     gap: 0.5rem;
     border: none;
-    border-radius: 999px;
+    border-radius: 0.5rem;
     padding: 0.8rem 1.5rem;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: #fff;
-    background: linear-gradient(135deg, #1A2C54 0%, #2B5C8A 55%, #3D8FB5 100%);
-    box-shadow: 0 8px 20px rgba(26, 44, 84, 0.25);
+    background: linear-gradient(180deg, #3D8FB5 0%, #1C4E6E 100%);
+    box-shadow: 0 6px 16px rgba(28, 78, 110, 0.28);
     text-decoration: none;
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -38,7 +40,8 @@
     .btn-oxy:hover {
         color: #fff;
         transform: translateY(-1px);
-        box-shadow: 0 12px 26px rgba(26, 44, 84, 0.3);
+        background: linear-gradient(180deg, #489FB5 0%, #1C4E6E 100%);
+        box-shadow: 0 10px 22px rgba(28, 78, 110, 0.32);
     }
 
     .btn-oxy:disabled {
@@ -123,7 +126,7 @@
         font-size: clamp(1.9rem, 3vw, 2.5rem);
         font-weight: 800;
         letter-spacing: -0.02em;
-        margin: 0.25rem 0 0.35rem;
+        margin: 0 0 0.35rem;
         color: #0B1F33;
     }
 
@@ -132,14 +135,6 @@
         color: #5B6B7D;
         max-width: 560px;
     }
-
-.demos-kicker {
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #3D8FB5;
-}
 
 /* ---- Stats ---- */
 .demos-stats {
@@ -403,14 +398,14 @@
     flex: 0 0 72px;
     height: 84px;
     border-radius: 14px;
-    background: linear-gradient(160deg, #1A2C54, #2B5C8A);
+    background: linear-gradient(180deg, #3D8FB5 0%, #1C4E6E 100%);
     color: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     line-height: 1.1;
-    box-shadow: 0 6px 14px rgba(26, 44, 84, 0.25);
+    box-shadow: 0 6px 14px rgba(28, 78, 110, 0.25);
 }
 
     .demo-date-tile .day {
@@ -423,7 +418,7 @@
         font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: #8DDCEE;
+        color: #D4F3FF;
     }
 
     .demo-date-tile .yr {
@@ -821,7 +816,7 @@
     place-items: center;
     font-size: 0.78rem;
     color: #fff;
-    background: linear-gradient(135deg, #1A2C54, #3D8FB5);
+    background: linear-gradient(180deg, #3D8FB5 0%, #1C4E6E 100%);
 }
 
 .form-grid {

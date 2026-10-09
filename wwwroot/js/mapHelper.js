@@ -161,20 +161,29 @@ window.oxynitiMap = {
         entry.map.getContainer().scrollIntoView({ behavior: 'smooth', block: 'center' });
     },
 
-    // Brand pin (navy teardrop, teal core) -- styled by .oxy-pin in app.css.
-    _pinIcon: function () {
+    // Brand pin: navy teardrop whose core is coloured by the demo's outcome
+    // (same colours as the card badges and the legend in Pages/MyDemos.razor).
+    _pinCores: {
+        ordered: '#2ECC71',
+        interested: '#4FC3F7',
+        'follow-up': '#FFB020',
+        'not-interested': '#B0BAC5',
+    },
+
+    _pinIcon: function (outcome) {
+        const core = this._pinCores[outcome] || '#27D0CA';
         return L.divIcon({
             className: 'oxy-pin',
             html: '<svg viewBox="0 0 32 42" width="32" height="42" aria-hidden="true">' +
                 '<path d="M16 41s13-14.2 13-24.5C29 8.5 23.2 3 16 3S3 8.5 3 16.5C3 26.8 16 41 16 41z" fill="#1A2C54" stroke="#fff" stroke-width="2"/>' +
-                '<circle cx="16" cy="16.5" r="5.5" fill="#27D0CA"/></svg>',
+                `<circle cx="16" cy="16.5" r="5.5" fill="${core}"/></svg>`,
             iconSize: [32, 42],
             iconAnchor: [16, 41],
             popupAnchor: [0, -36],
         });
     },
 
-    // Demo-log map (Pages/MyDemos.razor). points: [{ lat, lng, title, date, lines: [] }].
+    // Demo-log map (Pages/MyDemos.razor). points: [{ lat, lng, title, date, outcome, lines: [] }].
     initDisplay: function (elementId, points) {
         this._destroy(elementId);
 
@@ -191,11 +200,10 @@ window.oxynitiMap = {
         if (!entry || !entry.layer) return;
         entry.layer.clearLayers();
 
-        const icon = this._pinIcon();
         entry.markers = (points || []).map(p => {
             const lines = (p.lines || []).filter(Boolean)
                 .map(l => `<div class="oxy-popup-line">${escapeHtml(l)}</div>`).join('');
-            return L.marker([p.lat, p.lng], { icon, title: p.title || '' })
+            return L.marker([p.lat, p.lng], { icon: this._pinIcon(p.outcome), title: p.title || '' })
                 .bindPopup(
                     `<div class="oxy-popup-date">${escapeHtml(p.date)}</div>` +
                     `<div class="oxy-popup-title">${escapeHtml(p.title)}</div>${lines}`,

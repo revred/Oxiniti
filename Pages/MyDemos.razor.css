@@ -256,6 +256,37 @@
     border: 1px solid #E6EDF3;
 }
 
+/* Pin core colours -- keep in step with _pinCores in wwwroot/js/mapHelper.js. */
+.map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    padding: 0.75rem 0.35rem 0.1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #5B6B7D;
+}
+
+    .map-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .map-legend .core {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 3px solid #1A2C54;
+        box-sizing: content-box;
+    }
+
+        .map-legend .core.ordered { background: #2ECC71; }
+        .map-legend .core.interested { background: #4FC3F7; }
+        .map-legend .core.follow-up { background: #FFB020; }
+        .map-legend .core.not-interested { background: #B0BAC5; }
+        .map-legend .core.none { background: #27D0CA; }
+
 /* ---- Inputs (filters + form) ---- */
 .demos-filters {
     display: grid;

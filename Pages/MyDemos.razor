@@ -114,6 +114,13 @@
                     @if (showMap)
                     {
                         <div id="@displayMapId" class="demos-map"></div>
+                        <div class="map-legend" data-testid="demos-map-legend">
+                            <span><i class="core ordered"></i>Ordered</span>
+                            <span><i class="core interested"></i>Interested</span>
+                            <span><i class="core follow-up"></i>Follow-up needed</span>
+                            <span><i class="core not-interested"></i>Not interested</span>
+                            <span><i class="core none"></i>@Loc.T("demos.map.nooutcome", "No outcome yet")</span>
+                        </div>
                     }
                 </section>
 
@@ -631,6 +638,7 @@
         lng = d.Longitude!.Value,
         title = Title(d),
         date = FormatDate(d.DemoDate),
+        outcome = string.IsNullOrWhiteSpace(d.Outcome) ? "" : OutcomeClass(d.Outcome),
         lines = new[]
         {
             Region(d),

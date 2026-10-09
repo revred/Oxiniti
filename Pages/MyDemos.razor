@@ -17,11 +17,11 @@
    the Maker API (Services/StaffDemoService.cs), which also refuses anyone
    whose login is not flagged IsMakerAI -- this page's own check only decides
    what to show. *@
-<div class="container-fluid px-3 px-md-4 py-4 py-md-5 demos-page">
+<div class="demos-page">
     @switch (state)
     {
         case PageState.Loading:
-            <div class="d-flex align-items-center gap-2 mt-3">
+            <div class="demos-loading">
                 <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
                 <span>@Loc.T("demos.loading", "Loading demos…")</span>
             </div>
@@ -29,166 +29,242 @@
 
         case PageState.NotStaff:
             <div class="demos-notice" data-testid="demos-not-staff">
-                <i class="bi bi-lock-fill"></i>
+                <span class="notice-icon"><i class="bi bi-lock-fill"></i></span>
                 <h2>@Loc.T("demos.staffonly.title", "This page is for the Maker team only")</h2>
                 <p>@Loc.T("demos.staffonly.body", "Sign in with the Maker staff account to see and add pond demos.")</p>
-                <a class="btn btn-primary" href="/">@Loc.T("demos.staffonly.home", "Back to home")</a>
+                <a class="btn-oxy" href="/">@Loc.T("demos.staffonly.home", "Back to home")</a>
             </div>
             break;
 
         case PageState.Error:
             <div class="demos-notice">
-                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span class="notice-icon warn"><i class="bi bi-exclamation-triangle-fill"></i></span>
                 <h2>@Loc.T("demos.error.title", "Couldn't load the demos")</h2>
                 <p>@loadError</p>
-                <button class="btn btn-primary" @onclick="LoadAsync">@Loc.T("demos.retry", "Try again")</button>
+                <button class="btn-oxy" @onclick="LoadAsync">@Loc.T("demos.retry", "Try again")</button>
             </div>
             break;
 
         default:
-            <div class="demos-header">
-                <h2 class="mb-0">@Loc.T("demos.title", "My Demos")</h2>
-                <button class="btn btn-primary" data-testid="demos-add" @onclick="OpenAdd">
+            <header class="demos-hero">
+                <div>
+                    <span class="demos-kicker">@Loc.T("demos.kicker", "Maker team · Demo log")</span>
+                    <h1>@Loc.T("demos.title", "My Demos")</h1>
+                    <p>@Loc.T("demos.subtitle", "Every pond demo the team has given — where, when, and what the DO meter said.")</p>
+                </div>
+                <button class="btn-oxy" data-testid="demos-add" @onclick="OpenAdd">
                     <i class="bi bi-plus-lg"></i> @Loc.T("demos.add", "Add demo")
                 </button>
-            </div>
+            </header>
 
-            <div class="demos-stats" data-testid="demos-stats">
-                <div class="stat"><b>@demos.Count</b><span>@Loc.T("demos.stat.demos", "demos")</span></div>
-                <div class="stat"><b>@CountDistinct(d => d.Place)</b><span>@Loc.T("demos.stat.places", "villages / towns")</span></div>
-                <div class="stat"><b>@CountDistinct(d => d.District)</b><span>@Loc.T("demos.stat.districts", "districts")</span></div>
-                <div class="stat"><b>@(demos.Count == 0 ? "–" : FormatDate(demos.Max(d => d.DemoDate)))</b><span>@Loc.T("demos.stat.latest", "latest demo")</span></div>
-            </div>
+            <section class="demos-stats" data-testid="demos-stats">
+                <div class="stat">
+                    <span class="stat-icon"><i class="bi bi-clipboard2-check"></i></span>
+                    <div><b>@demos.Count</b><span>@Loc.T("demos.stat.demos", "Demos given")</span></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon"><i class="bi bi-house-door"></i></span>
+                    <div><b>@CountDistinct(d => d.Place)</b><span>@Loc.T("demos.stat.places", "Villages / towns")</span></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon"><i class="bi bi-map"></i></span>
+                    <div><b>@CountDistinct(d => d.District)</b><span>@Loc.T("demos.stat.districts", "Districts")</span></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon"><i class="bi bi-calendar2-event"></i></span>
+                    <div><b>@(demos.Count == 0 ? "–" : FormatDate(demos.Max(d => d.DemoDate)))</b><span>@Loc.T("demos.stat.latest", "Latest demo")</span></div>
+                </div>
+            </section>
 
             @if (statusMessage is not null)
             {
-                <div class="alert alert-success py-2" role="status">@statusMessage</div>
+                <div class="demos-toast" role="status"><i class="bi bi-check-circle-fill"></i> @statusMessage</div>
             }
 
             @if (demos.Count == 0)
             {
                 <div class="demos-empty">
-                    <p>@Loc.T("demos.empty", "No demos logged yet. After a pond demo, tap “Add demo” to record it.")</p>
+                    <span class="notice-icon"><i class="bi bi-geo-alt"></i></span>
+                    <h2>@Loc.T("demos.empty.title", "No demos logged yet")</h2>
+                    <p>@Loc.T("demos.empty", "After a pond demo, tap “Add demo” to record it here.")</p>
                 </div>
             }
             else
             {
-                <div id="@displayMapId" class="demos-map mb-3"></div>
+                var filtered = FilteredDemos.ToList();
+                var pinned = filtered.Count(d => d.HasLocation);
+
+                <section class="demos-map-panel">
+                    <div class="map-panel-head">
+                        <div>
+                            <h2><i class="bi bi-geo-alt-fill"></i> @Loc.T("demos.map.title", "Demo map")</h2>
+                            <p data-testid="demos-map-count">
+                                @pinned @Loc.T("demos.map.of", "of") @filtered.Count @Loc.T("demos.map.pinned", "demos pinned")
+                                @if (pinned < filtered.Count)
+                                {
+                                    <span class="muted"> · @Loc.T("demos.map.nopin", "edit a demo to add its location")</span>
+                                }
+                            </p>
+                        </div>
+                        <button type="button" class="btn-ghost" @onclick="ToggleMapAsync" aria-expanded="@(showMap ? "true" : "false")">
+                            @(showMap ? Loc.T("demos.map.hide", "Hide map") : Loc.T("demos.map.show", "Show map"))
+                            <i class="bi @(showMap ? "bi-chevron-up" : "bi-chevron-down")"></i>
+                        </button>
+                    </div>
+                    @if (showMap)
+                    {
+                        <div id="@displayMapId" class="demos-map"></div>
+                    }
+                </section>
 
                 <div class="demos-filters">
-                    <input class="form-control" type="search" @bind="search" @bind:event="oninput"
-                           placeholder="@Loc.T("demos.search", "Search village, district or farmer")" />
-                    <select class="form-select" @bind="givenByFilter" data-testid="demos-filter-by">
-                        <option value="">@Loc.T("demos.filter.everyone", "Given by: everyone")</option>
-                        @foreach (var name in GivenByNames)
-                        {
-                            <option value="@name">@name</option>
-                        }
-                    </select>
+                    <div class="input-icon">
+                        <i class="bi bi-search"></i>
+                        <input class="oxy-input" type="search" @bind="search" @bind:event="oninput"
+                               placeholder="@Loc.T("demos.search", "Search village, district or farmer")" />
+                    </div>
+                    <div class="input-icon">
+                        <i class="bi bi-person"></i>
+                        <select class="oxy-input oxy-select" @bind="givenByFilter" data-testid="demos-filter-by">
+                            <option value="">@Loc.T("demos.filter.everyone", "Given by: everyone")</option>
+                            @foreach (var name in GivenByNames)
+                            {
+                                <option value="@name">@name</option>
+                            }
+                        </select>
+                    </div>
                 </div>
 
-                @if (!FilteredDemos.Any())
+                @if (filtered.Count == 0)
                 {
-                    <p class="text-muted">@Loc.T("demos.nomatch", "No demos match this search.")</p>
+                    <p class="demos-nomatch">@Loc.T("demos.nomatch", "No demos match this search.")</p>
                 }
 
                 <div class="demos-list">
-                    @foreach (var demo in FilteredDemos)
+                    @foreach (var demo in filtered)
                     {
                         <article class="demo-card" data-testid="demo-card" @key="demo.Id">
-                            <header class="demo-card-head">
-                                <div>
-                                    <div class="demo-date">@FormatDate(demo.DemoDate)</div>
-                                    <div class="demo-place">
-                                        @(string.IsNullOrWhiteSpace(demo.PlaceLine) ? "—" : demo.PlaceLine)
-                                        @if (demo.HasLocation)
-                                        {
-                                            <button class="btn btn-link btn-sm p-0 ms-1 align-baseline" title="@Loc.T("demos.showonmap", "Show on map")"
-                                                    @onclick="() => FocusOnMap(demo)">
-                                                <i class="bi bi-geo-alt-fill"></i>
-                                            </button>
-                                        }
-                                    </div>
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(demo.Outcome))
-                                {
-                                    <span class="demo-outcome @OutcomeClass(demo.Outcome)">@demo.Outcome</span>
-                                }
-                            </header>
+                            <div class="demo-date-tile" aria-label="@FormatDate(demo.DemoDate)">
+                                <span class="day">@demo.DemoDate.Day</span>
+                                <span class="mon">@demo.DemoDate.ToString("MMM", CultureInfo.InvariantCulture)</span>
+                                <span class="yr">@demo.DemoDate.Year</span>
+                            </div>
 
-                            <div class="demo-body">
-                                @if (!string.IsNullOrWhiteSpace(demo.FarmerName) || !string.IsNullOrWhiteSpace(demo.FarmerPhone))
-                                {
+                            <div class="demo-main">
+                                <div class="demo-top">
                                     <div>
-                                        <span class="label">@Loc.T("demos.farmer", "Farmer"):</span>
-                                        @demo.FarmerName
-                                        @if (!string.IsNullOrWhiteSpace(demo.FarmerPhone))
+                                        <h3 class="demo-title">@Title(demo)</h3>
+                                        @if (Region(demo) is { Length: > 0 } region)
                                         {
-                                            <a href="tel:@demo.FarmerPhone" class="ms-2 text-decoration-none"><i class="bi bi-telephone-fill"></i> @demo.FarmerPhone</a>
+                                            <div class="demo-region">@region</div>
                                         }
                                     </div>
-                                }
-                                @{
-                                    var pond = string.Join(" · ", new[] { demo.Species, demo.PondSize, demo.ProductUsed }.Where(s => !string.IsNullOrWhiteSpace(s)));
-                                }
-                                @if (pond.Length > 0)
+                                    @if (!string.IsNullOrWhiteSpace(demo.Outcome))
+                                    {
+                                        <span class="outcome-pill @OutcomeClass(demo.Outcome)"><span class="dot"></span>@demo.Outcome</span>
+                                    }
+                                </div>
+
+                                @if (new[] { demo.Species, demo.PondSize, demo.ProductUsed }.Any(s => !string.IsNullOrWhiteSpace(s)))
                                 {
-                                    <div><span class="label">@Loc.T("demos.pond", "Pond"):</span> @pond</div>
-                                }
-                                @if (demo.DoBefore is not null || demo.DoAfter is not null)
-                                {
-                                    <div class="demo-do">
-                                        <span class="label">DO:</span>
-                                        @(demo.DoBefore is null ? "?" : StaffDemo.FormatDo(demo.DoBefore.Value))
-                                        → @(demo.DoAfter is null ? "?" : StaffDemo.FormatDo(demo.DoAfter.Value)) mg/L
-                                        @if (demo.DoBefore is not null && demo.DoAfter is not null)
-                                        {
-                                            var change = demo.DoAfter.Value - demo.DoBefore.Value;
-                                            <span class="do-change @(change >= 0 ? "up" : "down")">
-                                                @(change >= 0 ? "▲ +" : "▼ ")@StaffDemo.FormatDo(change)
-                                            </span>
-                                        }
+                                    <div class="demo-chips">
+                                        @if (!string.IsNullOrWhiteSpace(demo.Species)) { <span class="chip"><i class="bi bi-water"></i>@demo.Species</span> }
+                                        @if (!string.IsNullOrWhiteSpace(demo.PondSize)) { <span class="chip"><i class="bi bi-bounding-box"></i>@demo.PondSize</span> }
+                                        @if (!string.IsNullOrWhiteSpace(demo.ProductUsed)) { <span class="chip"><i class="bi bi-box-seam"></i>@demo.ProductUsed</span> }
                                     </div>
                                 }
+
+                                <div class="demo-facts">
+                                    @if (!string.IsNullOrWhiteSpace(demo.FarmerName) || !string.IsNullOrWhiteSpace(demo.FarmerPhone))
+                                    {
+                                        <div class="fact">
+                                            <span class="avatar">@Initials(demo.FarmerName)</span>
+                                            <div>
+                                                <span class="fact-label">@Loc.T("demos.farmer", "Farmer")</span>
+                                                <span class="fact-value">@(string.IsNullOrWhiteSpace(demo.FarmerName) ? "—" : demo.FarmerName)</span>
+                                                @if (!string.IsNullOrWhiteSpace(demo.FarmerPhone))
+                                                {
+                                                    <a class="fact-link" href="tel:@demo.FarmerPhone"><i class="bi bi-telephone-fill"></i> @demo.FarmerPhone</a>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (demo.DoBefore is not null || demo.DoAfter is not null)
+                                    {
+                                        <div class="fact">
+                                            <span class="avatar do"><i class="bi bi-droplet-half"></i></span>
+                                            <div>
+                                                <span class="fact-label">@Loc.T("demos.do", "Dissolved oxygen")</span>
+                                                <span class="fact-value do-reading">
+                                                    @(demo.DoBefore is null ? "?" : StaffDemo.FormatDo(demo.DoBefore.Value))
+                                                    <i class="bi bi-arrow-right"></i>
+                                                    @(demo.DoAfter is null ? "?" : StaffDemo.FormatDo(demo.DoAfter.Value)) <small>mg/L</small>
+                                                    @if (demo.DoBefore is not null && demo.DoAfter is not null)
+                                                    {
+                                                        var change = demo.DoAfter.Value - demo.DoBefore.Value;
+                                                        <span class="do-change @(change >= 0 ? "up" : "down")">
+                                                            <i class="bi @(change >= 0 ? "bi-arrow-up-short" : "bi-arrow-down-short")"></i>@StaffDemo.FormatDo(Math.Abs(change))
+                                                        </span>
+                                                    }
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
                                 @if (!string.IsNullOrWhiteSpace(demo.Notes))
                                 {
-                                    <div class="demo-notes">@demo.Notes</div>
+                                    <p class="demo-notes">@demo.Notes</p>
                                 }
-                                @if (demo.PhotoUrls.Count > 0 || !string.IsNullOrWhiteSpace(demo.VideoUrl))
+
+                                @if (demo.PhotoUrls.Count > 0 || IsWebLink(demo.VideoUrl))
                                 {
                                     <div class="demo-media">
                                         @foreach (var url in demo.PhotoUrls)
                                         {
                                             <a href="@url" target="_blank" rel="noopener"><img src="@url" alt="@Loc.T("demos.photo", "Demo photo")" loading="lazy" /></a>
                                         }
-                                        @if (!string.IsNullOrWhiteSpace(demo.VideoUrl))
+                                        @if (IsWebLink(demo.VideoUrl))
                                         {
-                                            <a class="demo-video" href="@demo.VideoUrl" target="_blank" rel="noopener"><i class="bi bi-play-circle-fill"></i> @Loc.T("demos.video", "Video")</a>
+                                            <a class="video-tile" href="@demo.VideoUrl" target="_blank" rel="noopener">
+                                                <i class="bi bi-play-fill"></i><span>@Loc.T("demos.video", "Video")</span>
+                                            </a>
                                         }
                                     </div>
                                 }
-                            </div>
 
-                            <footer class="demo-card-foot">
-                                <span class="demo-by" data-testid="demo-given-by">
-                                    <i class="bi bi-person-badge"></i> @Loc.T("demos.givenby", "Given by"): <b>@(string.IsNullOrWhiteSpace(demo.GivenByDisplay) ? "—" : demo.GivenByDisplay)</b>
-                                </span>
-                                @if (confirmDeleteId == demo.Id)
-                                {
-                                    <span class="demo-actions">
-                                        <span class="text-danger small me-1">@Loc.T("demos.delete.confirm", "Delete this demo?")</span>
-                                        <button class="btn btn-danger btn-sm" disabled="@busy" @onclick="() => DeleteAsync(demo)">@Loc.T("demos.delete.yes", "Yes, delete")</button>
-                                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => confirmDeleteId = null">@Loc.T("demos.cancel", "Cancel")</button>
+                                <footer class="demo-foot">
+                                    <span class="given-by" data-testid="demo-given-by">
+                                        <span class="avatar sm">@Initials(demo.GivenByDisplay)</span>
+                                        <span>@Loc.T("demos.givenby", "Given by") <b>@(string.IsNullOrWhiteSpace(demo.GivenByDisplay) ? "—" : demo.GivenByDisplay)</b></span>
                                     </span>
-                                }
-                                else
-                                {
-                                    <span class="demo-actions">
-                                        <button class="btn btn-outline-primary btn-sm" @onclick="() => OpenEdit(demo)"><i class="bi bi-pencil"></i> @Loc.T("demos.edit", "Edit")</button>
-                                        <button class="btn btn-outline-danger btn-sm" @onclick="() => confirmDeleteId = demo.Id"><i class="bi bi-trash"></i> @Loc.T("demos.delete", "Delete")</button>
-                                    </span>
-                                }
-                            </footer>
+
+                                    @if (confirmDeleteId == demo.Id)
+                                    {
+                                        <span class="demo-actions confirm">
+                                            <span class="confirm-text">@Loc.T("demos.delete.confirm", "Delete this demo?")</span>
+                                            <button class="btn-pill danger solid" disabled="@busy" @onclick="() => DeleteAsync(demo)">@Loc.T("demos.delete.yes", "Yes, delete")</button>
+                                            <button class="btn-pill" @onclick="() => confirmDeleteId = null">@Loc.T("demos.cancel", "Cancel")</button>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="demo-actions">
+                                            @if (demo.HasLocation)
+                                            {
+                                                <button class="btn-pill" title="@Loc.T("demos.showonmap", "Show on map")" @onclick="() => FocusOnMapAsync(demo)">
+                                                    <i class="bi bi-geo-alt-fill"></i><span>@Loc.T("demos.map", "Map")</span>
+                                                </button>
+                                                <a class="btn-pill" href="@DirectionsUrl(demo)" target="_blank" rel="noopener" title="@Loc.T("demos.directions.title", "Directions in Google Maps")">
+                                                    <i class="bi bi-sign-turn-right-fill"></i><span>@Loc.T("demos.directions", "Directions")</span>
+                                                </a>
+                                            }
+                                            <button class="btn-pill" @onclick="() => OpenEdit(demo)"><i class="bi bi-pencil"></i><span>@Loc.T("demos.edit", "Edit")</span></button>
+                                            <button class="btn-pill danger" @onclick="() => confirmDeleteId = demo.Id"><i class="bi bi-trash3"></i><span>@Loc.T("demos.delete", "Delete")</span></button>
+                                        </span>
+                                    }
+                                </footer>
+                            </div>
                         </article>
                     }
                 </div>
@@ -203,166 +279,205 @@
         <div class="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demo-form-title">
             <EditForm Model="form" OnSubmit="SaveAsync" id="demo-visit-form">
                 <div class="demo-modal-head">
-                    <h3 id="demo-form-title">@(editing is null ? Loc.T("demos.form.addtitle", "Add demo") : Loc.T("demos.form.edittitle", "Edit demo"))</h3>
-                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseForm"></button>
+                    <div>
+                        <h3 id="demo-form-title">@(editing is null ? Loc.T("demos.form.addtitle", "Add demo") : Loc.T("demos.form.edittitle", "Edit demo"))</h3>
+                        <p>@Loc.T("demos.form.subtitle", "Fields marked * are required. Everything else can be added later.")</p>
+                    </div>
+                    <button type="button" class="icon-close" aria-label="Close" @onclick="CloseForm"><i class="bi bi-x-lg"></i></button>
                 </div>
 
-                @* Fields with a suggestion list (datalist) bind on input: picking a
-                   suggestion does not reliably raise the change event InputText
-                   binds on. *@
-                <div class="demo-form-grid">
-                    <div class="field">
-                        <label for="demo-given-by">@Loc.T("demos.form.givenby", "Demo given by (your name)") <span class="req">*</span></label>
-                        <input id="demo-given-by" @bind="form.GivenByName" @bind:event="oninput" list="demo-given-by-names" autocomplete="name"
-                                   placeholder="@Loc.T("demos.form.givenby.ph", "e.g. Fazil")" />
-                        <datalist id="demo-given-by-names">
-                            @foreach (var name in GivenByNames)
+                <div class="demo-modal-body">
+                    @* Fields with a suggestion list (datalist) bind on input: picking a
+                       suggestion does not reliably raise the change event InputText
+                       binds on. *@
+                    <fieldset class="form-section">
+                        <legend><span class="step">1</span>@Loc.T("demos.form.sec.who", "Who & when")</legend>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="demo-given-by">@Loc.T("demos.form.givenby", "Demo given by (your name)") <span class="req">*</span></label>
+                                <input id="demo-given-by" @bind="form.GivenByName" @bind:event="oninput" list="demo-given-by-names" autocomplete="name"
+                                       placeholder="@Loc.T("demos.form.givenby.ph", "e.g. Fazil")" />
+                                <datalist id="demo-given-by-names">
+                                    @foreach (var name in GivenByNames)
+                                    {
+                                        <option value="@name"></option>
+                                    }
+                                </datalist>
+                            </div>
+                            <div class="field">
+                                <label for="demo-date">@Loc.T("demos.form.date", "Demo date") <span class="req">*</span></label>
+                                <InputDate id="demo-date" @bind-Value="form.DemoDate" />
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend><span class="step">2</span>@Loc.T("demos.form.sec.where", "Where")</legend>
+                        <div class="picker-wrap">
+                            <div id="@pickerMapId" class="demo-picker-map"></div>
+                            <button type="button" class="locate-btn" disabled="@locating" @onclick="UseMyLocationAsync">
+                                <i class="bi bi-crosshair"></i> @(locating ? Loc.T("demos.form.locating", "Finding you…") : Loc.T("demos.form.mylocation", "Use my location"))
+                            </button>
+                        </div>
+                        <p class="field-hint">
+                            @if (locationMessage is not null)
                             {
-                                <option value="@name"></option>
+                                <span class="text-danger">@locationMessage</span>
                             }
-                        </datalist>
-                    </div>
-                    <div class="field">
-                        <label for="demo-date">@Loc.T("demos.form.date", "Demo date") <span class="req">*</span></label>
-                        <InputDate id="demo-date" @bind-Value="form.DemoDate" />
-                    </div>
-
-                    <div class="field full">
-                        <label>@Loc.T("demos.form.location", "Pond location (tap the map, or use your location)")</label>
-                        <div id="@pickerMapId" class="demo-picker-map"></div>
-                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" disabled="@locating" @onclick="UseMyLocationAsync">
-                            <i class="bi bi-crosshair"></i> @(locating ? Loc.T("demos.form.locating", "Finding you…") : Loc.T("demos.form.mylocation", "Use my location"))
-                        </button>
-                        @if (locationMessage is not null)
-                        {
-                            <small class="text-danger ms-2">@locationMessage</small>
-                        }
-                    </div>
-
-                    <div class="field">
-                        <label for="demo-place">@Loc.T("demos.form.place", "Village / Town") <span class="req">*</span></label>
-                        <InputText id="demo-place" data-field="place" @bind-Value="form.Place" />
-                    </div>
-                    <div class="field">
-                        <label for="demo-district">@Loc.T("demos.form.district", "District")</label>
-                        <InputText id="demo-district" @bind-Value="form.District" />
-                    </div>
-                    <div class="field">
-                        <label for="demo-state">@Loc.T("demos.form.state", "State")</label>
-                        <input id="demo-state" @bind="form.State" @bind:event="oninput" list="demo-states" />
-                        <datalist id="demo-states">
-                            <option value="Tamil Nadu"></option>
-                            <option value="Andhra Pradesh"></option>
-                            <option value="Telangana"></option>
-                            <option value="Karnataka"></option>
-                            <option value="Kerala"></option>
-                        </datalist>
-                    </div>
-
-                    <div class="field">
-                        <label for="demo-farmer">@Loc.T("demos.form.farmer", "Farmer name")</label>
-                        <InputText id="demo-farmer" @bind-Value="form.FarmerName" />
-                    </div>
-                    <div class="field">
-                        <label for="demo-farmer-phone">@Loc.T("demos.form.phone", "Farmer phone")</label>
-                        <InputText id="demo-farmer-phone" type="tel" @bind-Value="form.FarmerPhone" placeholder="+91 ..." />
-                    </div>
-
-                    <div class="field">
-                        <label for="demo-species">@Loc.T("demos.form.species", "Species")</label>
-                        <input id="demo-species" @bind="form.Species" @bind:event="oninput" list="demo-species-list" />
-                        <datalist id="demo-species-list">
-                            <option value="Tilapia / GIFT"></option>
-                            <option value="Murrel (Viral meen)"></option>
-                            <option value="Pangasius"></option>
-                            <option value="Freshwater prawn"></option>
-                            <option value="Vannamei shrimp"></option>
-                            <option value="Carp polyculture"></option>
-                            <option value="Biofloc / RAS"></option>
-                        </datalist>
-                    </div>
-                    <div class="field">
-                        <label for="demo-pond-size">@Loc.T("demos.form.pondsize", "Pond size")</label>
-                        <input id="demo-pond-size" @bind="form.PondSize" @bind:event="oninput" list="demo-pond-sizes" />
-                        <datalist id="demo-pond-sizes">
-                            <option value="Under ½ acre"></option>
-                            <option value="½ – 1 acre"></option>
-                            <option value="1 – 3 acres"></option>
-                            <option value="3+ acres / multiple ponds"></option>
-                        </datalist>
-                    </div>
-                    <div class="field">
-                        <label for="demo-product">@Loc.T("demos.form.product", "Product used")</label>
-                        <InputText id="demo-product" @bind-Value="form.ProductUsed" />
-                    </div>
-
-                    <div class="field">
-                        <label for="demo-do-before">@Loc.T("demos.form.dobefore", "DO before (mg/L)")</label>
-                        <InputNumber id="demo-do-before" @bind-Value="form.DoBefore" step="any" min="0" inputmode="decimal" />
-                    </div>
-                    <div class="field">
-                        <label for="demo-do-after">@Loc.T("demos.form.doafter", "DO after (mg/L)")</label>
-                        <InputNumber id="demo-do-after" @bind-Value="form.DoAfter" step="any" min="0" inputmode="decimal" />
-                    </div>
-                    <div class="field">
-                        <label for="demo-outcome">@Loc.T("demos.form.outcome", "Outcome")</label>
-                        <InputSelect id="demo-outcome" @bind-Value="form.Outcome">
-                            <option value="">@Loc.T("demos.form.outcome.choose", "Choose…")</option>
-                            @foreach (var outcome in Outcomes)
+                            else
                             {
-                                <option value="@outcome">@outcome</option>
+                                @Loc.T("demos.form.location.hint", "Tap the map to drop a pin on the pond — the village fills in by itself.")
                             }
-                        </InputSelect>
-                    </div>
+                        </p>
+                        <div class="form-grid three">
+                            <div class="field">
+                                <label for="demo-place">@Loc.T("demos.form.place", "Village / Town") <span class="req">*</span></label>
+                                <InputText id="demo-place" data-field="place" @bind-Value="form.Place" placeholder="@Loc.T("demos.form.place.ph", "e.g. Lalgudi")" />
+                            </div>
+                            <div class="field">
+                                <label for="demo-district">@Loc.T("demos.form.district", "District")</label>
+                                <InputText id="demo-district" @bind-Value="form.District" placeholder="@Loc.T("demos.form.district.ph", "e.g. Trichy")" />
+                            </div>
+                            <div class="field">
+                                <label for="demo-state">@Loc.T("demos.form.state", "State")</label>
+                                <input id="demo-state" @bind="form.State" @bind:event="oninput" list="demo-states" placeholder="@Loc.T("demos.form.state.ph", "e.g. Tamil Nadu")" />
+                                <datalist id="demo-states">
+                                    <option value="Tamil Nadu"></option>
+                                    <option value="Andhra Pradesh"></option>
+                                    <option value="Telangana"></option>
+                                    <option value="Karnataka"></option>
+                                    <option value="Kerala"></option>
+                                </datalist>
+                            </div>
+                        </div>
+                    </fieldset>
 
-                    <div class="field full">
-                        <label for="demo-notes">@Loc.T("demos.form.notes", "Notes")</label>
-                        <InputTextArea id="demo-notes" rows="3" @bind-Value="form.Notes" />
-                    </div>
+                    <fieldset class="form-section">
+                        <legend><span class="step">3</span>@Loc.T("demos.form.sec.pond", "Farmer & pond")</legend>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="demo-farmer">@Loc.T("demos.form.farmer", "Farmer name")</label>
+                                <InputText id="demo-farmer" @bind-Value="form.FarmerName" />
+                            </div>
+                            <div class="field">
+                                <label for="demo-farmer-phone">@Loc.T("demos.form.phone", "Farmer phone")</label>
+                                <InputText id="demo-farmer-phone" type="tel" @bind-Value="form.FarmerPhone" placeholder="+91 ..." />
+                            </div>
+                        </div>
+                        <div class="form-grid three">
+                            <div class="field">
+                                <label for="demo-species">@Loc.T("demos.form.species", "Species")</label>
+                                <input id="demo-species" @bind="form.Species" @bind:event="oninput" list="demo-species-list" placeholder="@Loc.T("demos.form.choose.type", "Choose or type")" />
+                                <datalist id="demo-species-list">
+                                    <option value="Tilapia / GIFT"></option>
+                                    <option value="Murrel (Viral meen)"></option>
+                                    <option value="Pangasius"></option>
+                                    <option value="Freshwater prawn"></option>
+                                    <option value="Vannamei shrimp"></option>
+                                    <option value="Carp polyculture"></option>
+                                    <option value="Biofloc / RAS"></option>
+                                </datalist>
+                            </div>
+                            <div class="field">
+                                <label for="demo-pond-size">@Loc.T("demos.form.pondsize", "Pond size")</label>
+                                <input id="demo-pond-size" @bind="form.PondSize" @bind:event="oninput" list="demo-pond-sizes" placeholder="@Loc.T("demos.form.choose.type", "Choose or type")" />
+                                <datalist id="demo-pond-sizes">
+                                    <option value="Under ½ acre"></option>
+                                    <option value="½ – 1 acre"></option>
+                                    <option value="1 – 3 acres"></option>
+                                    <option value="3+ acres / multiple ponds"></option>
+                                </datalist>
+                            </div>
+                            <div class="field">
+                                <label for="demo-product">@Loc.T("demos.form.product", "Product used")</label>
+                                <InputText id="demo-product" @bind-Value="form.ProductUsed" />
+                            </div>
+                        </div>
+                    </fieldset>
 
-                    <div class="field full">
-                        <label for="demo-photos">@Loc.T("demos.form.photos", "Photos (up to 3)")</label>
-                        @if (editing is { PhotoUrls.Count: > 0 })
-                        {
-                            <div class="demo-media mb-2">
+                    <fieldset class="form-section">
+                        <legend><span class="step">4</span>@Loc.T("demos.form.sec.result", "Result")</legend>
+                        <div class="form-grid three">
+                            <div class="field">
+                                <label for="demo-do-before">@Loc.T("demos.form.dobefore", "DO before")</label>
+                                <div class="input-suffix">
+                                    <InputNumber id="demo-do-before" @bind-Value="form.DoBefore" step="any" min="0" inputmode="decimal" placeholder="0.0" />
+                                    <span>mg/L</span>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label for="demo-do-after">@Loc.T("demos.form.doafter", "DO after")</label>
+                                <div class="input-suffix">
+                                    <InputNumber id="demo-do-after" @bind-Value="form.DoAfter" step="any" min="0" inputmode="decimal" placeholder="0.0" />
+                                    <span>mg/L</span>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label for="demo-outcome">@Loc.T("demos.form.outcome", "Outcome")</label>
+                                <InputSelect id="demo-outcome" @bind-Value="form.Outcome">
+                                    <option value="">@Loc.T("demos.form.outcome.choose", "Choose…")</option>
+                                    @foreach (var outcome in Outcomes)
+                                    {
+                                        <option value="@outcome">@outcome</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="demo-notes">@Loc.T("demos.form.notes", "Notes")</label>
+                            <InputTextArea id="demo-notes" rows="3" @bind-Value="form.Notes" placeholder="@Loc.T("demos.form.notes.ph", "What the farmer said, next steps…")" />
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend><span class="step">5</span>@Loc.T("demos.form.sec.media", "Photos & video")</legend>
+                        <div class="photo-row">
+                            @if (editing is not null)
+                            {
                                 @foreach (var url in editing.PhotoUrls)
                                 {
-                                    <img src="@url" alt="" />
+                                    <span class="photo-thumb"><img src="@url" alt="" /></span>
                                 }
+                            }
+                            @foreach (var photo in newPhotos)
+                            {
+                                <span class="photo-thumb">
+                                    <img src="data:image/jpeg;base64,@photo.Base64" alt="" />
+                                    <button type="button" class="photo-remove" aria-label="Remove photo" @onclick="() => newPhotos.Remove(photo)"><i class="bi bi-x"></i></button>
+                                </span>
+                            }
+                            @if (PhotoSlotsLeft > 0)
+                            {
+                                <label class="photo-drop" for="demo-photos">
+                                    <i class="bi bi-camera"></i>
+                                    <span>@Loc.T("demos.form.addphoto", "Add photo")</span>
+                                    <small>@PhotoSlotsLeft @Loc.T("demos.form.photosleft", "left")</small>
+                                    <InputFile id="demo-photos" class="visually-hidden" accept="image/*" multiple OnChange="AddPhotosAsync" />
+                                </label>
+                            }
+                        </div>
+                        <div class="field mt-3">
+                            <label for="demo-video">@Loc.T("demos.form.video", "Video link")</label>
+                            <div class="input-icon">
+                                <i class="bi bi-youtube"></i>
+                                <InputText id="demo-video" type="url" @bind-Value="form.VideoUrl" placeholder="https://youtube.com/…" />
                             </div>
-                        }
-                        @if (PhotoSlotsLeft > 0)
-                        {
-                            <InputFile id="demo-photos" accept="image/*" multiple OnChange="AddPhotosAsync" />
-                        }
-                        @if (newPhotos.Count > 0)
-                        {
-                            <div class="demo-media mt-2">
-                                @foreach (var photo in newPhotos)
-                                {
-                                    <span class="photo-preview">
-                                        <img src="data:image/jpeg;base64,@photo.Base64" alt="" />
-                                        <button type="button" class="btn-close btn-close-white" aria-label="Remove photo" @onclick="() => newPhotos.Remove(photo)"></button>
-                                    </span>
-                                }
-                            </div>
-                        }
-                    </div>
+                        </div>
+                    </fieldset>
 
-                    <div class="field full">
-                        <label for="demo-video">@Loc.T("demos.form.video", "Video link (YouTube, Drive…)")</label>
-                        <InputText id="demo-video" type="url" @bind-Value="form.VideoUrl" placeholder="https://" />
-                    </div>
+                    @if (formError is not null)
+                    {
+                        <div class="form-error" role="alert" data-testid="demo-form-error"><i class="bi bi-exclamation-circle-fill"></i> @formError</div>
+                    }
                 </div>
 
-                @if (formError is not null)
-                {
-                    <div class="alert alert-danger py-2 mt-3" role="alert" data-testid="demo-form-error">@formError</div>
-                }
-
                 <div class="demo-modal-foot">
-                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseForm">@Loc.T("demos.cancel", "Cancel")</button>
-                    <button type="submit" class="btn btn-primary" disabled="@busy">
+                    <button type="button" class="btn-pill lg" @onclick="CloseForm">@Loc.T("demos.cancel", "Cancel")</button>
+                    <button type="submit" class="btn-oxy" disabled="@busy">
+                        @if (busy)
+                        {
+                            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        }
                         @(busy ? Loc.T("demos.form.saving", "Saving…") : Loc.T("demos.form.save", "Save demo"))
                     </button>
                 </div>
@@ -375,6 +490,7 @@
     private enum PageState { Loading, NotStaff, Error, Ready }
 
     private const string GivenByStorageKey = "oxyniti_demo_given_by";
+    private const string MapOpenStorageKey = "oxyniti_demos_map_open";
     private const int MaxPhotos = 3;
     private static readonly string[] Outcomes = ["Interested", "Ordered", "Follow-up needed", "Not interested"];
 
@@ -386,6 +502,7 @@
     private string? statusMessage;
     private ulong? confirmDeleteId;
     private bool busy;
+    private bool showMap = true;
 
     private StaffDemoForm? form;
     private StaffDemo? editing;
@@ -398,6 +515,8 @@
     private readonly string pickerMapId = $"demo-picker-{Guid.NewGuid():N}";
     private IJSObjectReference? _mapLoaderModule;
     private bool _displayMapStale;
+    private string? _displayedPinsKey;
+    private StaffDemo? _pendingFocus;
     private bool _pickerMapPending;
 
     private IEnumerable<string> GivenByNames => demos
@@ -432,6 +551,7 @@
             return;
         }
 
+        showMap = await ReadStorageAsync(MapOpenStorageKey) != "false";
         await LoadAsync();
     }
 
@@ -464,21 +584,28 @@
     {
         try
         {
-            if (_displayMapStale && state == PageState.Ready && demos.Count > 0)
+            if (state == PageState.Ready && demos.Count > 0 && showMap)
             {
-                _displayMapStale = false;
-                await EnsureMapLoadedAsync();
-                var points = demos.Where(d => d.HasLocation).Select(d => new
+                // The map shows the same demos as the list below it.
+                var pins = FilteredDemos.Where(d => d.HasLocation).ToList();
+                var pinsKey = string.Join(",", pins.Select(d => d.Id));
+                if (_displayMapStale)
                 {
-                    lat = d.Latitude!.Value,
-                    lng = d.Longitude!.Value,
-                    name = string.IsNullOrWhiteSpace(d.PlaceLine) ? FormatDate(d.DemoDate) : d.PlaceLine,
-                    place = string.Join(" · ", new[] { FormatDate(d.DemoDate), d.FarmerName }.Where(s => !string.IsNullOrWhiteSpace(s))),
-                    phone = string.IsNullOrWhiteSpace(d.GivenByDisplay) ? "" : $"{Loc.T("demos.givenby", "Given by")}: {d.GivenByDisplay}",
-                    species = d.Species,
-                    size = d.PondSize,
-                }).ToArray();
-                await JS.InvokeVoidAsync("oxynitiMap.initDisplay", displayMapId, points);
+                    _displayMapStale = false;
+                    _displayedPinsKey = pinsKey;
+                    await EnsureMapLoadedAsync();
+                    await JS.InvokeVoidAsync("oxynitiMap.initDisplay", displayMapId, MapPoints(pins));
+                    if (_pendingFocus is { } focus)
+                    {
+                        _pendingFocus = null;
+                        await JS.InvokeVoidAsync("oxynitiMap.focusPoint", displayMapId, focus.Latitude!.Value, focus.Longitude!.Value);
+                    }
+                }
+                else if (pinsKey != _displayedPinsKey)
+                {
+                    _displayedPinsKey = pinsKey;
+                    await JS.InvokeVoidAsync("oxynitiMap.setDisplayPoints", displayMapId, MapPoints(pins));
+                }
             }
 
             if (_pickerMapPending && form is not null)
@@ -498,16 +625,40 @@
         }
     }
 
+    private object[] MapPoints(IEnumerable<StaffDemo> pins) => pins.Select(d => (object)new
+    {
+        lat = d.Latitude!.Value,
+        lng = d.Longitude!.Value,
+        title = Title(d),
+        date = FormatDate(d.DemoDate),
+        lines = new[]
+        {
+            Region(d),
+            d.FarmerName,
+            d.DoBefore is not null && d.DoAfter is not null
+                ? $"DO {StaffDemo.FormatDo(d.DoBefore.Value)} → {StaffDemo.FormatDo(d.DoAfter.Value)} mg/L"
+                : "",
+            string.IsNullOrWhiteSpace(d.GivenByDisplay) ? "" : $"{Loc.T("demos.givenby", "Given by")} {d.GivenByDisplay}",
+        },
+    }).ToArray();
+
     private async Task EnsureMapLoadedAsync()
     {
         _mapLoaderModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mapLoader.js");
         await _mapLoaderModule.InvokeVoidAsync("ensureLoaded");
     }
 
+    private async Task ToggleMapAsync()
+    {
+        showMap = !showMap;
+        _displayMapStale = showMap;
+        await WriteStorageAsync(MapOpenStorageKey, showMap ? "true" : "false");
+    }
+
     private async Task OpenAdd()
     {
         editing = null;
-        form = new StaffDemoForm { GivenByName = await ReadRememberedNameAsync() };
+        form = new StaffDemoForm { GivenByName = await ReadStorageAsync(GivenByStorageKey) ?? "" };
         OpenForm();
     }
 
@@ -615,7 +766,7 @@
             else
                 await StaffDemos.UpdateDemoAsync(editing.Id, form, newPhotos);
 
-            await RememberNameAsync(form.GivenByName.Trim());
+            await WriteStorageAsync(GivenByStorageKey, form.GivenByName.Trim());
             var wasEdit = editing is not null;
             CloseForm();
             await LoadAsync();
@@ -668,9 +819,16 @@
         }
     }
 
-    private async Task FocusOnMap(StaffDemo demo)
+    private async Task FocusOnMapAsync(StaffDemo demo)
     {
         if (!demo.HasLocation) return;
+        if (!showMap)
+        {
+            // The map is created on the next render; focus it once it exists.
+            _pendingFocus = demo;
+            await ToggleMapAsync();
+            return;
+        }
         try
         {
             await JS.InvokeVoidAsync("oxynitiMap.focusPoint", displayMapId, demo.Latitude!.Value, demo.Longitude!.Value);
@@ -681,27 +839,27 @@
         }
     }
 
-    private async Task<string> ReadRememberedNameAsync()
+    private async Task<string?> ReadStorageAsync(string key)
     {
         try
         {
-            return await JS.InvokeAsync<string?>("localStorage.getItem", GivenByStorageKey) ?? "";
+            return await JS.InvokeAsync<string?>("localStorage.getItem", key);
         }
         catch (JSException)
         {
-            return "";
+            return null;
         }
     }
 
-    private async Task RememberNameAsync(string name)
+    private async Task WriteStorageAsync(string key, string value)
     {
         try
         {
-            await JS.InvokeVoidAsync("localStorage.setItem", GivenByStorageKey, name);
+            await JS.InvokeVoidAsync("localStorage.setItem", key, value);
         }
         catch (JSException)
         {
-            // Remembering the name is a convenience; a blocked storage just means retyping it.
+            // A convenience only; blocked storage just means choosing again next time.
         }
     }
 
@@ -711,6 +869,31 @@
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .Count();
 
+    private static string Title(StaffDemo d) =>
+        !string.IsNullOrWhiteSpace(d.Place) ? d.Place
+        : !string.IsNullOrWhiteSpace(d.District) ? d.District
+        : "—";
+
+    private static string Region(StaffDemo d) => string.Join(", ",
+        new[] { string.IsNullOrWhiteSpace(d.Place) ? "" : d.District, d.State }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
+    private static string Initials(string name)
+    {
+        var parts = (name ?? "").Split([' ', '.', '@'], StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0][..1].ToUpperInvariant(),
+            _ => (parts[0][..1] + parts[1][..1]).ToUpperInvariant(),
+        };
+    }
+
+    private static bool IsWebLink(string url) =>
+        Uri.TryCreate(url?.Trim(), UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
+
+    private static string DirectionsUrl(StaffDemo d) => string.Create(CultureInfo.InvariantCulture,
+        $"https://www.google.com/maps/dir/?api=1&destination={d.Latitude:F6},{d.Longitude:F6}");
+
     private static string FormatDate(DateOnly date) => date.ToString("d MMM yyyy", CultureInfo.InvariantCulture);
 
     private static string OutcomeClass(string outcome) => outcome switch
@@ -718,7 +901,8 @@
         "Ordered" => "ordered",
         "Interested" => "interested",
         "Not interested" => "not-interested",
-        _ => "follow-up",
+        "Follow-up needed" => "follow-up",
+        _ => "other",
     };
 
     public async ValueTask DisposeAsync()

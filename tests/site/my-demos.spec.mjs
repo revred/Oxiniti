@@ -40,7 +40,7 @@ const savedDemos = () => ({
             doAfter: 7,
             outcome: "Interested",
             notes: 'Farmer wants a quote.\n\n[[oxyniti:{"by":"Fazil","lat":10.8705,"lng":78.8211,"doBefore":3.2,"doAfter":6.8}]]',
-            videoUrl: "",
+            videoUrl: "https://youtube.com/watch?v=demo",
             photos: [],
             givenBy: "staff@example.com",
         },
@@ -61,7 +61,7 @@ const savedDemos = () => ({
             doAfter: 0,
             outcome: "Ordered",
             notes: "",
-            videoUrl: "",
+            videoUrl: "string",
             photos: [],
             givenBy: "staff@example.com",
         },
@@ -107,7 +107,8 @@ test("staff see every demo with who gave it and the exact DO readings", async ({
 
     await expect(page.getByTestId("demos-stats")).toContainText("2");
     const first = cards.first();
-    await expect(first).toContainText("Lalgudi, Trichy, Tamil Nadu");
+    await expect(first.locator(".demo-title")).toHaveText("Lalgudi");
+    await expect(first).toContainText("Trichy, Tamil Nadu");
     await expect(first).toContainText("3.2");
     await expect(first).toContainText("6.8");
     await expect(first).toContainText("Farmer wants a quote.");
@@ -116,10 +117,19 @@ test("staff see every demo with who gave it and the exact DO readings", async ({
     // A demo with no trailer falls back to the login that saved it.
     await expect(cards.nth(1).getByTestId("demo-given-by")).toContainText("staff@example.com");
     // The server's 0 means "not recorded", not 0 mg/L.
-    await expect(cards.nth(1)).not.toContainText("DO:");
+    await expect(cards.nth(1)).not.toContainText("mg/L");
+
+    // Only real web links get a Video tile; the API's "string" placeholder does not.
+    await expect(first.locator(".video-tile")).toHaveCount(1);
+    await expect(cards.nth(1).locator(".video-tile")).toHaveCount(0);
+
+    // Only the first demo has a location (the second was saved as 0, 0).
+    await expect(page.getByTestId("demos-map-count")).toContainText("1 of 2 demos pinned");
+    await expect(page.locator(".oxy-pin")).toHaveCount(1);
 
     await page.getByTestId("demos-filter-by").selectOption("Fazil");
     await expect(cards).toHaveCount(1);
+    await expect(page.getByTestId("demos-map-count")).toContainText("1 of 1 demos pinned");
 });
 
 test("staff can add a demo; the name and exact readings are sent", async ({ page }) => {

@@ -152,7 +152,7 @@ window.oxynitiMap = {
     focusPoint: function (elementId, lat, lng) {
         const entry = this._maps[elementId];
         if (!entry) return;
-        entry.map.setView([lat, lng], 13);
+        entry.map.setView([lat, lng], 12);
         const marker = (entry.markers || []).find(m => {
             const p = m.getLatLng();
             return Math.abs(p.lat - lat) < 1e-9 && Math.abs(p.lng - lng) < 1e-9;
@@ -161,33 +161,54 @@ window.oxynitiMap = {
         entry.map.getContainer().scrollIntoView({ behavior: 'smooth', block: 'center' });
     },
 
+    // Brand pin (navy teardrop, teal core) -- styled by .oxy-pin in app.css.
+    _pinIcon: function () {
+        return L.divIcon({
+            className: 'oxy-pin',
+            html: '<svg viewBox="0 0 32 42" width="32" height="42" aria-hidden="true">' +
+                '<path d="M16 41s13-14.2 13-24.5C29 8.5 23.2 3 16 3S3 8.5 3 16.5C3 26.8 16 41 16 41z" fill="#1A2C54" stroke="#fff" stroke-width="2"/>' +
+                '<circle cx="16" cy="16.5" r="5.5" fill="#27D0CA"/></svg>',
+            iconSize: [32, 42],
+            iconAnchor: [16, 41],
+            popupAnchor: [0, -36],
+        });
+    },
+
+    // Demo-log map (Pages/MyDemos.razor). points: [{ lat, lng, title, date, lines: [] }].
     initDisplay: function (elementId, points) {
         this._destroy(elementId);
 
-        const map = L.map(elementId, this._mapOptions);
+        const map = L.map(elementId, Object.assign({ scrollWheelZoom: false }, this._mapOptions));
         this._addTiles(map);
+        const layer = L.layerGroup().addTo(map);
+        this._maps[elementId] = { map, layer, markers: [] };
+        this.setDisplayPoints(elementId, points);
+    },
 
-        if (!points || !points.length) {
-            map.setView([this._defaultLat, this._defaultLng], this._defaultZoom);
-            this._maps[elementId] = { map };
-            return;
-        }
+    // Replaces the pins (e.g. when the list is filtered) and refits the view.
+    setDisplayPoints: function (elementId, points) {
+        const entry = this._maps[elementId];
+        if (!entry || !entry.layer) return;
+        entry.layer.clearLayers();
 
-        const markers = points.map(p => {
-            const marker = L.marker([p.lat, p.lng]).addTo(map);
-            const details = [p.species, p.size].filter(Boolean).map(escapeHtml).join(' &middot; ');
-            marker.bindPopup(
-                `<b>${escapeHtml(p.name)}</b><br/>${escapeHtml(p.place)}<br/>${escapeHtml(p.phone)}` +
-                (details ? `<br/><span style="color:#666">${details}</span>` : '')
-            );
-            return marker;
+        const icon = this._pinIcon();
+        entry.markers = (points || []).map(p => {
+            const lines = (p.lines || []).filter(Boolean)
+                .map(l => `<div class="oxy-popup-line">${escapeHtml(l)}</div>`).join('');
+            return L.marker([p.lat, p.lng], { icon, title: p.title || '' })
+                .bindPopup(
+                    `<div class="oxy-popup-date">${escapeHtml(p.date)}</div>` +
+                    `<div class="oxy-popup-title">${escapeHtml(p.title)}</div>${lines}`,
+                    { className: 'oxy-popup', closeButton: false })
+                .addTo(entry.layer);
         });
 
-        const group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.2));
-        if (points.length === 1) map.setZoom(13);
-
-        this._maps[elementId] = { map, markers };
+        if (!entry.markers.length) {
+            entry.map.setView([this._defaultLat, this._defaultLng], 6);
+            return;
+        }
+        // Never closer than district level, so town names stay on screen.
+        entry.map.fitBounds(L.featureGroup(entry.markers).getBounds().pad(0.3), { maxZoom: 9 });
     },
 
     _destroy: function (elementId) {

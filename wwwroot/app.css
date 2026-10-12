@@ -660,3 +660,47 @@ html.shell-app-route .shell-route-loading {
         padding-bottom: 5.5rem;
     }
 }
+
+/* Map pins and popups for the staff demo log (wwwroot/js/mapHelper.js).
+   Global because Leaflet creates these outside any component's CSS scope. */
+.oxy-pin {
+    background: none;
+    border: none;
+    filter: drop-shadow(0 3px 4px rgba(11, 31, 51, 0.35));
+    transition: transform 0.15s ease;
+}
+
+    .oxy-pin:hover {
+        transform: translateY(-3px);
+    }
+
+.oxy-popup .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(11, 31, 51, 0.22);
+}
+
+.oxy-popup .leaflet-popup-content {
+    margin: 12px 16px;
+    font-family: inherit;
+    color: #1A2C54;
+    min-width: 170px;
+}
+
+.oxy-popup-date {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3D8FB5;
+}
+
+.oxy-popup-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin: 2px 0 4px;
+}
+
+.oxy-popup-line {
+    font-size: 0.82rem;
+    color: #5B6B7D;
+}

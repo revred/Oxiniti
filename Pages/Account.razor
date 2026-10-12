@@ -27,9 +27,12 @@ else
                 <span class="sidebar-item active">
                     <i class="bi bi-person-fill"></i> @Loc.T("account.nav.profile", "Profile")
                 </span>
-                <a class="sidebar-item" href="/my-demos">
-                    <i class="bi bi-geo-alt-fill"></i> @Loc.T("account.nav.demos", "My Demos")
-                </a>
+                @if (AuthenticationService.IsMakerAIUser == true)
+                {
+                    <a class="sidebar-item" href="/my-demos">
+                        <i class="bi bi-geo-alt-fill"></i> @Loc.T("account.nav.demos", "My Demos")
+                    </a>
+                }
                 @* My Orders hidden for now (ordering is paused); the /orders page still exists.
                 <a class="sidebar-item" href="/orders">
                     <i class="bi bi-box-seam-fill"></i> @Loc.T("account.nav.orders", "My Orders")

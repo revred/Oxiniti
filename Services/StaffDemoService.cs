@@ -16,21 +16,15 @@ namespace Oxyniti.Services;
 /// staff member has given, stored on the Maker API (/api/demo/*). The server
 /// refuses anyone whose login is not flagged IsMakerAI.
 ///
-/// Why this calls the API directly instead of IMakerClient's AddDemoAsync /
-/// GetDemosAsync / UpdateDemoAsync / DeleteDemoAsync (Maker.RampEdgeV1 1.0.11):
-///   - all four are declared to return StringReply, so the generated client
-///     drops the DemoVisit / DemoListResponse the server actually sends -- the
-///     demo list always comes back empty;
-///   - DeleteDemo answers 204, which the client does not expect.
-/// Switch to IMakerClient once the package declares the real response types.
+/// This calls the API directly rather than through IMakerClient, the same way
+/// ProductApiClient does, so it keeps its own error mapping (401 / 403 / 404).
 ///
-/// Two values the API cannot hold yet ride in a small JSON trailer at the end
-/// of Notes (see <see cref="DemoNotesMeta"/>), and are stripped back out on read:
-///   - the staff member's name -- everyone signs in with one shared staff
-///     account, so the server's GivenBy (the login email) cannot tell them apart;
-///   - the exact map pin and DO readings -- the request types them as whole
-///     numbers (long), which would move a pin by up to ~100 km and turn
-///     4.5 mg/L into 4. The rounded values still go in the real fields.
+/// The staff member's name (GivenByName -- everyone signs in with one shared
+/// staff account, so GivenBy, the login email, cannot tell them apart) and the
+/// exact map pin and DO readings go in the API's real fields. Demos saved before
+/// the API had them carry those values in a JSON trailer at the end of Notes
+/// (see <see cref="DemoNotesMeta"/>); it is only read as a fallback and is never
+/// written again.
 /// </summary>
 public sealed class StaffDemoService
 {
@@ -112,14 +106,6 @@ public sealed class StaffDemoService
 
     private static object ToWire(StaffDemoForm form, IReadOnlyList<DemoPhotoUpload> photos, ulong? demoBarId)
     {
-        var meta = new DemoNotesMeta
-        {
-            By = form.GivenByName.Trim(),
-            Lat = form.Latitude,
-            Lng = form.Longitude,
-            DoBefore = form.DoBefore,
-            DoAfter = form.DoAfter,
-        };
         var wire = new Dictionary<string, object?>
         {
             // Date-only: noon UTC stays on the same calendar day in every Indian time zone.
@@ -127,33 +113,30 @@ public sealed class StaffDemoService
             ["place"] = form.Place.Trim(),
             ["district"] = form.District.Trim(),
             ["state"] = form.State.Trim(),
-            ["latitude"] = Whole(form.Latitude),
-            ["longitude"] = Whole(form.Longitude),
+            ["latitude"] = form.Latitude,
+            ["longitude"] = form.Longitude,
             ["farmerName"] = form.FarmerName.Trim(),
             ["farmerPhone"] = form.FarmerPhone.Trim(),
             ["species"] = form.Species.Trim(),
             ["pondSize"] = form.PondSize.Trim(),
             ["productUsed"] = form.ProductUsed.Trim(),
-            ["doBefore"] = Whole(form.DoBefore),
-            ["doAfter"] = Whole(form.DoAfter),
+            ["doBefore"] = form.DoBefore,
+            ["doAfter"] = form.DoAfter,
             ["outcome"] = form.Outcome.Trim(),
-            ["notes"] = DemoNotesMeta.Append(form.Notes.Trim(), meta),
+            ["notes"] = form.Notes.Trim(),
             ["videoUrl"] = string.IsNullOrWhiteSpace(form.VideoUrl) ? null : form.VideoUrl.Trim(),
+            ["givenByName"] = form.GivenByName.Trim(),
             ["photos"] = photos.Select(p => new { fileBytes = p.Base64, fileName = p.FileName }).ToList(),
         };
         if (demoBarId is not null) wire["demoBarID"] = demoBarId.Value;
         return wire;
     }
 
-    private static long? Whole(double? value) => value is null ? null : (long)Math.Round(value.Value, MidpointRounding.AwayFromZero);
-
     private static StaffDemo FromWire(DemoWire w)
     {
         var (notes, meta) = DemoNotesMeta.Split(w.Notes);
-        // The server stores a missing pin / reading as 0, so 0 from the real
-        // field means "not recorded" unless the trailer says otherwise.
-        var lat = meta?.Lat ?? NonZero(w.Latitude);
-        var lng = meta?.Lng ?? NonZero(w.Longitude);
+        var lat = NonZero(Pick(w.Latitude, meta?.Lat, meta));
+        var lng = NonZero(Pick(w.Longitude, meta?.Lng, meta));
         return new StaffDemo
         {
             Id = w.BarID,
@@ -168,18 +151,34 @@ public sealed class StaffDemoService
             Species = w.Species ?? "",
             PondSize = w.PondSize ?? "",
             ProductUsed = w.ProductUsed ?? "",
-            DoBefore = meta is not null ? meta.DoBefore : NonZero(w.DoBefore),
-            DoAfter = meta is not null ? meta.DoAfter : NonZero(w.DoAfter),
+            DoBefore = NonZero(Pick(w.DoBefore, meta?.DoBefore, meta)),
+            DoAfter = NonZero(Pick(w.DoAfter, meta?.DoAfter, meta)),
             Outcome = w.Outcome ?? "",
             Notes = notes,
             VideoUrl = w.VideoUrl ?? "",
             PhotoUrls = (w.Photos ?? []).Select(p => p.Url).Where(u => !string.IsNullOrWhiteSpace(u)).Cast<string>().ToList(),
-            GivenByName = meta?.By ?? "",
+            GivenByName = !string.IsNullOrWhiteSpace(w.GivenByName) ? w.GivenByName : meta?.By ?? "",
             LoginEmail = w.GivenBy ?? "",
         };
     }
 
+    // Demos saved before 1.0.12 hold 0 for "not recorded"; a real pin or DO reading is never exactly 0.
     private static double? NonZero(double? value) => value is null or 0 ? null : value;
+
+    /// <summary>
+    /// Chooses between a real field and the old Notes trailer. Demos saved before
+    /// the API kept decimals hold the value rounded to a whole number (0 when not
+    /// recorded) and the exact value in the trailer. The server keeps that old
+    /// trailer when such a demo is edited, so the trailer only wins while the real
+    /// field still holds exactly its rounded copy; an edited value wins over it.
+    /// </summary>
+    private static double? Pick(double? real, double? legacy, DemoNotesMeta? meta)
+    {
+        if (meta is null) return real;
+        if (real is null or 0) return legacy;
+        if (legacy is not null && Math.Round(legacy.Value, MidpointRounding.AwayFromZero) == real) return legacy;
+        return real;
+    }
 
     private sealed class DemoListWire
     {
@@ -207,6 +206,7 @@ public sealed class StaffDemoService
         public string? VideoUrl { get; set; }
         public List<PhotoWire>? Photos { get; set; }
         public string? GivenBy { get; set; }
+        public string? GivenByName { get; set; }
     }
 
     private sealed class PhotoWire
@@ -216,9 +216,9 @@ public sealed class StaffDemoService
 }
 
 /// <summary>
-/// Values the demo API has no field for yet, kept as one machine-readable line
-/// at the end of Notes: <c>[[oxyniti:{"by":"Fazil","lat":10.8051,...}]]</c>.
-/// See <see cref="StaffDemoService"/> for why.
+/// The machine-readable line demos saved before Maker.RampEdgeV1 1.0.12 carry at
+/// the end of Notes: <c>[[oxyniti:{"by":"Fazil","lat":10.8051,...}]]</c>. Read
+/// only, so those demos still show their name and exact values; never written.
 /// </summary>
 public sealed class DemoNotesMeta
 {
@@ -234,12 +234,6 @@ public sealed class DemoNotesMeta
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
-
-    public static string Append(string notes, DemoNotesMeta meta)
-    {
-        var line = "[[oxyniti:" + JsonSerializer.Serialize(meta, Options) + "]]";
-        return string.IsNullOrEmpty(notes) ? line : notes + "\n\n" + line;
-    }
 
     public static (string Notes, DemoNotesMeta? Meta) Split(string? notes)
     {

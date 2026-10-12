@@ -65,6 +65,29 @@ const savedDemos = () => ({
             photos: [],
             givenBy: "staff@example.com",
         },
+        {
+            // Saved since Maker.RampEdgeV1 1.0.12: the name and exact values are real fields.
+            barID: 103,
+            demoDateUtc: "2026-09-01T12:00:00Z",
+            place: "Kaikaluru",
+            district: "Eluru",
+            state: "Andhra Pradesh",
+            latitude: 16.5512,
+            longitude: 81.2131,
+            farmerName: "Ramesh",
+            farmerPhone: "",
+            species: "Vannamei shrimp",
+            pondSize: "",
+            productUsed: "",
+            doBefore: 4.5,
+            doAfter: 7.25,
+            outcome: "Interested",
+            notes: "Second visit next week.",
+            videoUrl: "",
+            photos: [],
+            givenBy: "staff@example.com",
+            givenByName: "Ravi",
+        },
     ],
 });
 
@@ -101,11 +124,11 @@ test("staff see every demo with who gave it and the exact DO readings", async ({
     await page.goto("/my-demos");
 
     const cards = page.getByTestId("demo-card");
-    await expect(cards).toHaveCount(2, { timeout: BOOT_TIMEOUT });
+    await expect(cards).toHaveCount(3, { timeout: BOOT_TIMEOUT });
     expect(calls[0].name).toBe("GetDemos");
     expect(calls[0].auth).toMatch(/^Bearer /);
 
-    await expect(page.getByTestId("demos-stats")).toContainText("2");
+    await expect(page.getByTestId("demos-stats")).toContainText("3");
     const first = cards.first();
     await expect(first.locator(".demo-title")).toHaveText("Lalgudi");
     await expect(first).toContainText("Trichy, Tamil Nadu");
@@ -114,7 +137,12 @@ test("staff see every demo with who gave it and the exact DO readings", async ({
     await expect(first).toContainText("Farmer wants a quote.");
     await expect(first).not.toContainText("[[oxyniti:");
     await expect(first.getByTestId("demo-given-by")).toContainText("Fazil");
-    // A demo with no trailer falls back to the login that saved it.
+    // A demo saved with the real fields shows them as they are.
+    const third = cards.nth(2);
+    await expect(third.getByTestId("demo-given-by")).toContainText("Ravi");
+    await expect(third).toContainText("4.5");
+    await expect(third).toContainText("7.25");
+    // A demo with no name at all falls back to the login that saved it.
     await expect(cards.nth(1).getByTestId("demo-given-by")).toContainText("staff@example.com");
     // The server's 0 means "not recorded", not 0 mg/L.
     await expect(cards.nth(1)).not.toContainText("mg/L");
@@ -123,9 +151,9 @@ test("staff see every demo with who gave it and the exact DO readings", async ({
     await expect(first.locator(".video-tile")).toHaveCount(1);
     await expect(cards.nth(1).locator(".video-tile")).toHaveCount(0);
 
-    // Only the first demo has a location (the second was saved as 0, 0).
-    await expect(page.getByTestId("demos-map-count")).toContainText("1 of 2 demos pinned");
-    await expect(page.locator(".oxy-pin")).toHaveCount(1);
+    // The second demo has no location (it was saved as 0, 0).
+    await expect(page.getByTestId("demos-map-count")).toContainText("2 of 3 demos pinned");
+    await expect(page.locator(".oxy-pin")).toHaveCount(2);
 
     await page.getByTestId("demos-filter-by").selectOption("Fazil");
     await expect(cards).toHaveCount(1);
@@ -136,7 +164,7 @@ test("staff can add a demo; the name and exact readings are sent", async ({ page
     await signIn(page, { staff: true });
     const calls = await mockDemoApi(page);
     await page.goto("/my-demos");
-    await expect(page.getByTestId("demo-card")).toHaveCount(2, { timeout: BOOT_TIMEOUT });
+    await expect(page.getByTestId("demo-card")).toHaveCount(3, { timeout: BOOT_TIMEOUT });
 
     await page.getByTestId("demos-add").click();
     const form = page.locator("#demo-visit-form");
@@ -158,17 +186,31 @@ test("staff can add a demo; the name and exact readings are sent", async ({ page
     await expect(form).toBeHidden();
     const add = calls.find((c) => c.name === "AddDemo");
     expect(add.body.place).toBe("Musiri");
-    expect(add.body.doBefore).toBe(5); // the API only takes whole numbers today...
-    expect(add.body.doAfter).toBe(7);
-    expect(add.body.notes).toContain("Two ponds.");
-    expect(add.body.notes).toContain('"by":"Fazil"'); // ...so the exact values ride in the notes trailer
-    expect(add.body.notes).toContain('"doBefore":4.5');
-    expect(add.body.notes).toContain('"doAfter":7.25');
+    expect(add.body.givenByName).toBe("Fazil");
+    expect(add.body.doBefore).toBe(4.5);
+    expect(add.body.doAfter).toBe(7.25);
+    expect(add.body.notes).toBe("Two ponds."); // no [[oxyniti: trailer any more
     expect(calls.filter((c) => c.name === "GetDemos").length).toBe(2);
 
     // The next demo starts with an empty name (devices may be shared).
     await page.getByTestId("demos-add").click();
     await expect(page.locator("#demo-given-by")).toHaveValue("");
+});
+
+test("an old demo edited after the fix shows the edited values, not its stale trailer", async ({ page }) => {
+    await signIn(page, { staff: true });
+    // The server keeps the old trailer on update, so only the real fields change.
+    const demo = { ...savedDemos().demos[0], latitude: 12.3456, longitude: 79.1234, doBefore: 2.5, doAfter: 7, givenByName: "Ravi" };
+    await page.route("**/api/demo/**", (route) => route.fulfill({ json: { demos: [demo] } }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await expect(card.getByTestId("demo-given-by")).toContainText("Ravi");
+    await expect(card).toContainText("2.5"); // edited
+    await expect(card).toContainText("6.8"); // untouched: 7 is still the trailer's 6.8 rounded
+    await expect(card).not.toContainText("3.2");
+    await expect(card).not.toContainText("[[oxyniti:");
 });
 
 test("staff can delete a demo after confirming", async ({ page }) => {

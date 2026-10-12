@@ -314,12 +314,38 @@
                 console.error("[marketingIslands] Error saving demo booking:", err);
             }
 
-            // Services/DemoAccountService.cs's own fallback message for an
-            // unconfigured OxynitiApi:BaseAddress -- which is this app's
-            // actual state today (see this file's header comment).
-            showFormStatus(form, "Demo request received! We'll contact you shortly.");
+            // The request only reaches the team once the farmer sends this
+            // pre-filled WhatsApp message (no backend stores demo requests
+            // yet) -- same as FreeDemoSection.razor's whatsAppLink block.
+            showDemoWhatsAppStep(form, buildDemoWhatsAppMessage(booking));
             form.reset();
         });
+    }
+
+    // Kept in step with BuildWhatsAppMessage in FreeDemoSection.razor.
+    function buildDemoWhatsAppMessage(booking) {
+        var lines = [
+            "Hi, I'd like a free Oxyniti pond demo.",
+            "Name: " + booking.Name,
+            "Phone: " + booking.Phone,
+            "Village / Town: " + booking.Place,
+            "Pond size: " + booking.Size,
+            "Species: " + booking.Species,
+        ];
+        if (booking.Latitude != null && booking.Longitude != null) {
+            lines.push("Pond location: https://www.google.com/maps?q=" +
+                booking.Latitude.toFixed(6) + "," + booking.Longitude.toFixed(6));
+        }
+        return lines.join("\n");
+    }
+
+    function showDemoWhatsAppStep(form, message) {
+        var block = form.querySelector('[data-field="wa"]');
+        var link = form.querySelector('[data-field="wa-link"]');
+        if (!block || !link) return;
+        // Matches SiteContact.WhatsAppNumber (C#).
+        link.href = "https://wa.me/919659727477?text=" + encodeURIComponent(message);
+        block.hidden = false;
     }
 
     function fieldValue(form, name) {

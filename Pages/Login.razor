@@ -10,6 +10,11 @@
         <h2>@Loc.T("login.title", "Welcome Back 👋")</h2>
         <p class="subtitle">@Loc.T("login.subtitle1", "Today is a new day. It's your day. You shape it.")<br />@Loc.T("login.subtitle2", "Sign in to start managing your projects.")</p>
 
+        @* WhatsApp passcode login is hidden until it exists end to end: no
+           backend creates the account or sends the passcode yet (see
+           Services/DemoAccountService.cs), so every passcode login failed.
+           With the toggle gone usePasscode stays false and only email +
+           password shows. Restore this block once passcodes are really sent.
         <div class="login-mode-toggle">
             <button type="button" class="mode-btn @(usePasscode ? "" : "active")" @onclick="() => SwitchMode(false)">
                 @Loc.T("login.mode.password", "Email")
@@ -18,6 +23,7 @@
                 @Loc.T("login.mode.passcode", "WhatsApp")
             </button>
         </div>
+        *@
 
         @if (!usePasscode)
         {

@@ -316,6 +316,50 @@ test("a saved photo is kept when the edit is cancelled", async ({ page }) => {
     await expect(page.locator("#demo-visit-form").getByTestId("saved-photo")).toHaveCount(1);
 });
 
+test("moving a saved pin on Edit updates its place names and saves the new pin, keeping a box typed in this edit", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const demo = { ...savedDemos().demos[2] }; // Kaikaluru, Eluru, Andhra Pradesh, pinned
+    const calls = [];
+    await page.route("**/api/demo/**", (route) => {
+        const req = route.request();
+        calls.push({ name: new URL(req.url()).pathname.split("/").pop(), body: req.postDataJSON() });
+        return route.fulfill({ json: { demos: [demo] } });
+    });
+    const places = [
+        { village: "Palakollu", state_district: "West Godavari District", state: "Andhra Pradesh" },
+        { village: "Kovvur", state_district: "East Godavari District", state: "Andhra Pradesh" },
+    ];
+    let lookups = 0;
+    await page.route("**/nominatim.openstreetmap.org/**", (route) => route.fulfill({ json: { address: places[Math.min(lookups++, 1)] } }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    await expect(form.locator(".demo-picker-map.leaflet-container")).toBeVisible();
+    await page.waitForTimeout(1000); // opening a fully named pin looks nothing up
+    expect(lookups).toBe(0);
+    await expect(form.locator("#demo-place")).toHaveValue("Kaikaluru");
+
+    await form.locator(".demo-picker-map").click({ position: { x: 120, y: 120 } });
+    await expect(form.locator("#demo-place")).toHaveValue("Palakollu");
+    await expect(form.locator("#demo-district")).toHaveValue("West Godavari");
+
+    // A box typed during this edit survives the next move.
+    await form.locator("#demo-district").fill("Godavari delta");
+    await form.locator(".demo-picker-map").click({ position: { x: 200, y: 140 } });
+    await expect(form.locator("#demo-place")).toHaveValue("Kovvur");
+    await expect(form.locator("#demo-district")).toHaveValue("Godavari delta");
+
+    await form.locator('button[type="submit"]').click();
+    await expect(form).toBeHidden();
+    const update = calls.find((c) => c.name === "UpdateDemo");
+    expect(update.body.place).toBe("Kovvur");
+    expect(update.body.latitude).not.toBe(16.5512);
+    expect(update.body.longitude).not.toBe(81.2131);
+});
+
 test("editing a pinned demo fills a State left empty, keeping the saved village", async ({ page }) => {
     await signIn(page, { staff: true });
     const demo = { ...savedDemos().demos[0], place: "Vanagiri", district: "Mayiladuthurai", state: "" };

@@ -41,7 +41,9 @@ window.oxynitiMap = {
 
         let marker = hasStart ? L.marker([startLat, startLng], { draggable: true }).addTo(map) : null;
 
-        const fillPlace = this._placeFiller(elementId);
+        // Editing a saved pin: the saved names belong to that pin, so moving it
+        // replaces them (a box typed into during this edit is still kept).
+        const fillPlace = this._placeFiller(elementId, hasStart);
 
         const placeMarker = (latlng) => {
             if (marker) {
@@ -55,9 +57,9 @@ window.oxynitiMap = {
 
         if (marker) {
             marker.on('dragend', () => fillPlace(marker.getLatLng()));
-            // Editing a saved pin: fill any place box still empty (e.g. a State
+            // Opening a saved pin: fill only boxes still empty (e.g. a State
             // left blank before auto-fill covered it). Filled boxes are kept.
-            fillPlace(marker.getLatLng());
+            fillPlace(marker.getLatLng(), { onlyEmpty: true });
         }
         map.on('click', (e) => placeMarker(e.latlng));
 
@@ -69,8 +71,10 @@ window.oxynitiMap = {
     // "state" when the form has them (the staff demo log does; the home page's
     // free-demo form has only "place", so it gets "Village, Taluk" there).
     // It never overwrites text the user typed: only an empty box, or one this
-    // function filled last, is replaced.
-    _placeFiller: function (elementId) {
+    // function filled last, is replaced. adoptExisting treats the text already
+    // in the boxes (a saved demo's names) as filled by it; { onlyEmpty: true }
+    // on a call fills empty boxes only.
+    _placeFiller: function (elementId, adoptExisting) {
         const mapEl = document.getElementById(elementId);
         const form = mapEl && mapEl.closest('form');
         const box = (name) => form && form.querySelector(`[data-field="${name}"]`);
@@ -82,6 +86,11 @@ window.oxynitiMap = {
         const [place, district, state] = fields;
         if (!place.input) return () => {};
         const splitPlace = !!district.input;
+        if (adoptExisting) {
+            for (const f of fields) {
+                if (f.input && f.input.value.trim()) f.lastFilled = f.input.value.trim();
+            }
+        }
 
         const isOurs = (f) => {
             const current = f.input.value.trim();
@@ -91,12 +100,13 @@ window.oxynitiMap = {
         let timer = null;
         let pending = null;
 
-        return (latlng) => {
+        return (latlng, { onlyEmpty = false } = {}) => {
             clearTimeout(timer);
+            const fillable = (f) => onlyEmpty ? !f.input.value.trim() : isOurs(f);
             // Debounce so repeated taps / drags make one lookup (Nominatim allows 1 req/s).
             timer = setTimeout(async () => {
                 const present = fields.filter(f => f.input);
-                if (!present.some(isOurs)) return;
+                if (!present.some(fillable)) return;
 
                 if (pending) pending.abort();
                 pending = new AbortController();
@@ -118,7 +128,7 @@ window.oxynitiMap = {
 
                     // Re-check each box: the user may have typed while the lookup was in flight.
                     for (const f of present) {
-                        if (!f.value || !isOurs(f)) continue;
+                        if (!f.value || !fillable(f)) continue;
                         f.input.value = f.value;
                         f.lastFilled = f.value;
                         // Blazor binds on 'input' or 'change'; the static island reads .value.

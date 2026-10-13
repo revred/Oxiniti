@@ -57,10 +57,11 @@ public sealed class StaffDemoService
     }
 
     public Task AddDemoAsync(StaffDemoForm form, IReadOnlyList<DemoPhotoUpload> photos) =>
-        PostAsync("api/demo/AddDemo", ToWire(form, photos, demoBarId: null));
+        PostAsync("api/demo/AddDemo", ToWire(form, photos, removePhotoPaths: [], demoBarId: null));
 
-    public Task UpdateDemoAsync(ulong demoBarId, StaffDemoForm form, IReadOnlyList<DemoPhotoUpload> photos) =>
-        PostAsync("api/demo/UpdateDemo", ToWire(form, photos, demoBarId));
+    /// <param name="removePhotoPaths">Storage paths (<see cref="DemoPhoto.Path"/>) of saved photos to delete.</param>
+    public Task UpdateDemoAsync(ulong demoBarId, StaffDemoForm form, IReadOnlyList<DemoPhotoUpload> photos, IReadOnlyCollection<string> removePhotoPaths) =>
+        PostAsync("api/demo/UpdateDemo", ToWire(form, photos, removePhotoPaths, demoBarId));
 
     public Task DeleteDemoAsync(ulong demoBarId) =>
         PostAsync("api/demo/DeleteDemo", new { demoBarID = demoBarId });
@@ -104,7 +105,7 @@ public sealed class StaffDemoService
         }
     }
 
-    private static object ToWire(StaffDemoForm form, IReadOnlyList<DemoPhotoUpload> photos, ulong? demoBarId)
+    private static object ToWire(StaffDemoForm form, IReadOnlyList<DemoPhotoUpload> photos, IReadOnlyCollection<string> removePhotoPaths, ulong? demoBarId)
     {
         var wire = new Dictionary<string, object?>
         {
@@ -128,7 +129,12 @@ public sealed class StaffDemoService
             ["givenByName"] = form.GivenByName.Trim(),
             ["photos"] = photos.Select(p => new { fileBytes = p.Base64, fileName = p.FileName }).ToList(),
         };
-        if (demoBarId is not null) wire["demoBarID"] = demoBarId.Value;
+        if (demoBarId is not null)
+        {
+            wire["demoBarID"] = demoBarId.Value;
+            // The server matches these against the stored paths, not the signed URLs it hands out.
+            wire["removePhotoUrls"] = removePhotoPaths.ToList();
+        }
         return wire;
     }
 
@@ -156,7 +162,10 @@ public sealed class StaffDemoService
             Outcome = w.Outcome ?? "",
             Notes = notes,
             VideoUrl = w.VideoUrl ?? "",
-            PhotoUrls = (w.Photos ?? []).Select(p => p.Url).Where(u => !string.IsNullOrWhiteSpace(u)).Cast<string>().ToList(),
+            Photos = (w.Photos ?? [])
+                .Where(p => !string.IsNullOrWhiteSpace(p.Url))
+                .Select(p => new DemoPhoto(p.Url!, string.IsNullOrWhiteSpace(p.Path) ? null : p.Path))
+                .ToList(),
             GivenByName = !string.IsNullOrWhiteSpace(w.GivenByName) ? w.GivenByName : meta?.By ?? "",
             LoginEmail = w.GivenBy ?? "",
         };
@@ -212,6 +221,7 @@ public sealed class StaffDemoService
     private sealed class PhotoWire
     {
         public string? Url { get; set; }
+        public string? Path { get; set; }
     }
 }
 
@@ -271,7 +281,7 @@ public sealed class StaffDemo
     public string Outcome { get; init; } = "";
     public string Notes { get; init; } = "";
     public string VideoUrl { get; init; } = "";
-    public List<string> PhotoUrls { get; init; } = [];
+    public List<DemoPhoto> Photos { get; init; } = [];
     /// <summary>The name typed in "Demo given by". Empty for a demo saved outside this page.</summary>
     public string GivenByName { get; init; } = "";
     /// <summary>The login that saved it (the server's GivenBy) -- the shared staff account today.</summary>
@@ -329,6 +339,13 @@ public sealed class StaffDemoForm
 }
 
 public sealed record DemoPhotoUpload(string FileName, string Base64);
+
+/// <summary>
+/// A saved photo: <paramref name="Url"/> is the signed link to show it;
+/// <paramref name="Path"/> is its storage path, which removing it needs. Path is
+/// null from a server older than Maker.RampEdgeV1 1.0.13, and then it cannot be removed.
+/// </summary>
+public sealed record DemoPhoto(string Url, string? Path);
 
 public enum StaffDemoError { NotSignedIn, NotStaff, NotFound, Network, Server }
 

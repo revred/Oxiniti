@@ -224,12 +224,12 @@
                                     <p class="demo-notes">@demo.Notes</p>
                                 }
 
-                                @if (demo.PhotoUrls.Count > 0 || IsWebLink(demo.VideoUrl))
+                                @if (demo.Photos.Count > 0 || IsWebLink(demo.VideoUrl))
                                 {
                                     <div class="demo-media">
-                                        @foreach (var url in demo.PhotoUrls)
+                                        @foreach (var photo in demo.Photos)
                                         {
-                                            <a href="@url" target="_blank" rel="noopener"><img src="@url" alt="@Loc.T("demos.photo", "Demo photo")" loading="lazy" /></a>
+                                            <a href="@photo.Url" target="_blank" rel="noopener"><img src="@photo.Url" alt="@Loc.T("demos.photo", "Demo photo")" loading="lazy" /></a>
                                         }
                                         @if (IsWebLink(demo.VideoUrl))
                                         {
@@ -441,9 +441,15 @@
                         <div class="photo-row">
                             @if (editing is not null)
                             {
-                                @foreach (var url in editing.PhotoUrls)
+                                @foreach (var photo in KeptPhotos)
                                 {
-                                    <span class="photo-thumb"><img src="@url" alt="" /></span>
+                                    <span class="photo-thumb" data-testid="saved-photo">
+                                        <img src="@photo.Url" alt="" />
+                                        @if (photo.Path is { } path)
+                                        {
+                                            <button type="button" class="photo-remove" aria-label="Remove photo" @onclick="() => removedPhotoPaths.Add(path)"><i class="bi bi-x"></i></button>
+                                        }
+                                    </span>
                                 }
                             }
                             @foreach (var photo in newPhotos)
@@ -513,6 +519,8 @@
     private StaffDemoForm? form;
     private StaffDemo? editing;
     private readonly List<DemoPhotoUpload> newPhotos = [];
+    // Saved photos marked for removal; deleted on the server only when the edit is saved.
+    private readonly HashSet<string> removedPhotoPaths = new(StringComparer.Ordinal);
     private string? formError;
     private bool locating;
     private string? locationMessage;
@@ -536,7 +544,10 @@
         (search.Trim().Length == 0 || new[] { d.Place, d.District, d.State, d.FarmerName, d.FarmerPhone, d.GivenByDisplay }
             .Any(s => s.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase))));
 
-    private int PhotoSlotsLeft => MaxPhotos - (editing?.PhotoUrls.Count ?? 0) - newPhotos.Count;
+    private IEnumerable<DemoPhoto> KeptPhotos =>
+        editing?.Photos.Where(p => p.Path is null || !removedPhotoPaths.Contains(p.Path)) ?? [];
+
+    private int PhotoSlotsLeft => MaxPhotos - KeptPhotos.Count() - newPhotos.Count;
 
     protected override async Task OnInitializedAsync()
     {
@@ -681,6 +692,7 @@
     private void OpenForm()
     {
         newPhotos.Clear();
+        removedPhotoPaths.Clear();
         formError = null;
         locationMessage = null;
         statusMessage = null;
@@ -693,6 +705,7 @@
         form = null;
         editing = null;
         newPhotos.Clear();
+        removedPhotoPaths.Clear();
     }
 
     private async Task UseMyLocationAsync()
@@ -773,7 +786,7 @@
             if (editing is null)
                 await StaffDemos.AddDemoAsync(form, newPhotos);
             else
-                await StaffDemos.UpdateDemoAsync(editing.Id, form, newPhotos);
+                await StaffDemos.UpdateDemoAsync(editing.Id, form, newPhotos, removedPhotoPaths);
 
             var wasEdit = editing is not null;
             CloseForm();

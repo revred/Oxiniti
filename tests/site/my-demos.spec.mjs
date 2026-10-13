@@ -246,6 +246,8 @@ test("tapping the map fills village, district and state separately, never over t
 
     await page.getByTestId("demos-add").click();
     const form = page.locator("#demo-visit-form");
+    // A tap before Leaflet has set up the map is lost (seen on the phone size).
+    await expect(form.locator(".demo-picker-map.leaflet-container")).toBeVisible();
     await form.locator(".demo-picker-map").click({ position: { x: 120, y: 120 } });
     await expect(form.locator("#demo-place")).toHaveValue("Tiruchirappalli");
     await expect(form.locator("#demo-district")).toHaveValue("Tiruchirappalli");
@@ -256,6 +258,62 @@ test("tapping the map fills village, district and state separately, never over t
     await form.locator(".demo-picker-map").click({ position: { x: 200, y: 140 } });
     await page.waitForTimeout(1500);
     await expect(form.locator("#demo-state")).toHaveValue("Kerala");
+});
+
+test("staff can remove a saved photo; its storage path is sent on save", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const pixel = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+    const demo = {
+        ...savedDemos().demos[0],
+        photos: [
+            { url: `${pixel}#a`, path: "demos/101/a.jpg" },
+            { url: `${pixel}#b`, path: "demos/101/b.jpg" },
+        ],
+    };
+    const calls = [];
+    await page.route("**/api/demo/**", (route) => {
+        const req = route.request();
+        calls.push({ name: new URL(req.url()).pathname.split("/").pop(), body: req.postDataJSON() });
+        return route.fulfill({ json: { demos: [demo] } });
+    });
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    const saved = form.getByTestId("saved-photo");
+    await expect(saved).toHaveCount(2);
+    await expect(form.locator(".photo-drop small")).toContainText("1");
+
+    await saved.first().getByRole("button", { name: "Remove photo" }).click();
+    await expect(saved).toHaveCount(1);
+    await expect(form.locator(".photo-drop small")).toContainText("2"); // the slot is free again
+
+    await form.locator("#demo-given-by").fill("Fazil");
+    await form.locator('button[type="submit"]').click();
+    await expect(form).toBeHidden();
+    const update = calls.find((c) => c.name === "UpdateDemo");
+    expect(update.body.removePhotoUrls).toEqual(["demos/101/a.jpg"]);
+});
+
+test("a saved photo is kept when the edit is cancelled", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const demo = { ...savedDemos().demos[0], photos: [{ url: "data:image/gif;base64,R0lGODlhAQABAAAAACw=", path: "demos/101/a.jpg" }] };
+    await page.route("**/api/demo/**", (route) => route.fulfill({ json: { demos: [demo] } }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    await form.getByTestId("saved-photo").getByRole("button", { name: "Remove photo" }).click();
+    await expect(form.getByTestId("saved-photo")).toHaveCount(0);
+    await form.getByRole("button", { name: "Cancel" }).click();
+    await expect(form).toBeHidden();
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    await expect(page.locator("#demo-visit-form").getByTestId("saved-photo")).toHaveCount(1);
 });
 
 test("editing a pinned demo fills a State left empty, keeping the saved village", async ({ page }) => {

@@ -34,6 +34,9 @@ test("a valid demo request offers a pre-filled WhatsApp message to the team", as
     expect(text).toContain("Pond size: 1 – 3 acres");
     expect(text).toContain("Species: Tilapia / GIFT");
     expect(text).not.toContain("Pond location");
+
+    // The farmer's name and phone are no longer left behind in this browser.
+    expect(await page.evaluate(() => localStorage.getItem("oxyniti_demos"))).toBeNull();
 });
 
 test("an incomplete demo request does not offer the WhatsApp step", async ({ page }) => {

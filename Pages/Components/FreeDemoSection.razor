@@ -5,7 +5,6 @@
 @implements IAsyncDisposable
 @inject LocalizationService Loc
 @inject IJSRuntime JS
-@inject DemoService DemoService
 @inject IDemoAccountService DemoAccountService
 
 <div class="free-demo-section" id="free-demo">
@@ -183,19 +182,6 @@
         {
             Console.WriteLine($"[FreeDemoSection] Error reading picked location: {ex}");
         }
-
-        // Demo bookings aren't persisted server-side yet — saved locally
-        // (see DemoService) so they show up on the "My Demos" page.
-        await DemoService.AddDemo(new DemoBooking
-        {
-            Name = model.Name,
-            Phone = model.Phone,
-            Place = model.Place,
-            Size = model.Size,
-            Species = model.Species,
-            Latitude = lat,
-            Longitude = lng
-        });
 
         // This is the user's entry point — no signup/login required first.
         // Ask the (not-yet-deployed) Oxyniti backend to create their account

@@ -17,7 +17,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSingleton<CartService>();
 builder.Services.AddSingleton<AuthReadyGate>();
-builder.Services.AddSingleton<DemoService>();
 builder.Services.AddSingleton<StaffDemoService>();
 builder.Services.AddSingleton<BusinessInfoService>();
 builder.Services.AddSingleton<ProductCatalogService>();

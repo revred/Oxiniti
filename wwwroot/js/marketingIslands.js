@@ -291,10 +291,7 @@
 
             var location_ = readPickedMapLocation();
 
-            // Matches Services/DemoBooking.cs's shape exactly -- Pages/MyDemos.razor
-            // reads this same localStorage key back through Services/DemoService.cs.
             var booking = {
-                Id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())).replace(/-/g, ""),
                 Name: name,
                 Phone: phone,
                 Place: place,
@@ -302,17 +299,7 @@
                 Species: fieldValue(form, "species") || "Tilapia / GIFT",
                 Latitude: location_ ? location_[0] : null,
                 Longitude: location_ ? location_[1] : null,
-                CreatedAtUtc: new Date().toISOString(),
             };
-
-            try {
-                var existingJson = window.localStorage.getItem("oxyniti_demos");
-                var existing = existingJson ? JSON.parse(existingJson) : [];
-                existing.push(booking);
-                window.localStorage.setItem("oxyniti_demos", JSON.stringify(existing));
-            } catch (err) {
-                console.error("[marketingIslands] Error saving demo booking:", err);
-            }
 
             // The request only reaches the team once the farmer sends this
             // pre-filled WhatsApp message (no backend stores demo requests

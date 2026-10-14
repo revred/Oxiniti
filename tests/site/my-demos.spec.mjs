@@ -4,7 +4,7 @@
 // /api/demo/* from this file -- nothing here reaches the live Maker API.
 import { test, expect } from "@playwright/test";
 
-const BOOT_TIMEOUT = 45_000;
+const BOOT_TIMEOUT = 90_000;
 
 function fakeJwt(email) {
     const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");

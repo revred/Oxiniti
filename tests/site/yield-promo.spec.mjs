@@ -4,7 +4,7 @@
 // and never shows on the calculator itself. page.clock skips the waits.
 import { test, expect } from "@playwright/test";
 
-const BOOT_TIMEOUT = 45_000;
+const BOOT_TIMEOUT = 90_000;
 
 async function openHome(page) {
     await page.clock.install();

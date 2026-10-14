@@ -4,6 +4,7 @@
 @inject IAuthenticationService AuthenticationService
 @inject CartService CartService
 @inject LocalizationService Loc
+@inject AuthReadyGate AuthReady
 
 <div class="login-container">
     <div class="login-form">
@@ -105,9 +106,17 @@
     private string successMessage = string.Empty;
     private bool isBusy;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Loc.OnChange += StateHasChanged;
+
+        // Already signed in (MainLayout has rehydrated -- and, for an expired
+        // token, renewed or dropped -- the session by the time Ready fires):
+        // there's nothing to do here, so go home like a fresh login does.
+        // replace keeps Back from returning to this page and bouncing again.
+        await AuthReady.Ready;
+        if (AuthenticationService.IsAuthenticated)
+            Nav.NavigateTo("/", replace: true);
     }
 
     private void SwitchMode(bool passcodeMode)

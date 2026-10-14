@@ -33,6 +33,9 @@ test("an expired session the server won't renew shows the guest icon on /login",
     await page.goto("/login");
     await expect(page.locator(".header-actions .login-avatar")).toBeVisible({ timeout: BOOT_TIMEOUT });
     await expect(page.locator(".header-actions .user-avatar")).toHaveCount(0);
+    // A guest stays on the sign-in form.
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
     expect(await page.evaluate(() => localStorage.getItem("maker_access_token"))).toBeNull();
 });
 
@@ -48,10 +51,12 @@ test("an expired session is renewed when the refresh token still works", async (
 
     await page.goto("/login");
     await expect(page.locator(".header-actions .user-avatar")).toHaveText("S", { timeout: BOOT_TIMEOUT });
+    // Signed in, so /login has nothing to offer and sends the visitor home.
+    await expect(page).toHaveURL(/\/$/);
     expect(await page.evaluate(() => localStorage.getItem("maker_access_token"))).toBe(fresh);
 });
 
-test("a live session still shows the account initial without a refresh call", async ({ page }) => {
+test("a signed-in visitor opening /login is sent home, with no refresh call", async ({ page }) => {
     let refreshed = false;
     await page.route("**/api/public/authentication/refresh-token", (route) => {
         refreshed = true;
@@ -60,6 +65,7 @@ test("a live session still shows the account initial without a refresh call", as
     await plantSession(page, fakeJwt("farmer@example.com", 3600));
 
     await page.goto("/login");
-    await expect(page.locator(".header-actions .user-avatar")).toHaveText("F", { timeout: BOOT_TIMEOUT });
+    await expect(page).toHaveURL(/\/$/, { timeout: BOOT_TIMEOUT });
+    await expect(page.locator(".header-actions .user-avatar")).toHaveText("F");
     expect(refreshed).toBe(false);
 });

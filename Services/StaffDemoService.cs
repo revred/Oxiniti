@@ -4,7 +4,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Maker.RampEdge.Configuration;
 using Maker.RampEdge.Services.Contracts;
 using Microsoft.Extensions.Options;
@@ -238,7 +237,10 @@ public sealed class DemoNotesMeta
     [JsonPropertyName("doBefore")] public double? DoBefore { get; set; }
     [JsonPropertyName("doAfter")] public double? DoAfter { get; set; }
 
-    private static readonly Regex Trailer = new(@"\s*\[\[oxyniti:(\{.*\})\]\]\s*$", RegexOptions.Singleline);
+    // The trailer is "[[oxyniti:{json}]]" at the very end of Notes (trailing
+    // whitespace allowed). Matched by hand rather than with a Regex so the app
+    // doesn't ship System.Text.RegularExpressions (~90 KB) for this alone.
+    private const string TrailerStart = "[[oxyniti:{";
 
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -248,12 +250,18 @@ public sealed class DemoNotesMeta
     public static (string Notes, DemoNotesMeta? Meta) Split(string? notes)
     {
         if (string.IsNullOrEmpty(notes)) return ("", null);
-        var match = Trailer.Match(notes);
-        if (!match.Success) return (notes, null);
+        var body = notes.TrimEnd();
+        var at = notes.IndexOf(TrailerStart, StringComparison.Ordinal);
+        var jsonStart = at + TrailerStart.Length - 1; // the "{"
+        if (at < 0 || !body.EndsWith("}]]", StringComparison.Ordinal) || jsonStart >= body.Length - 3)
+            return (notes, null);
+        var json = body[jsonStart..^2];
+        var cut = at;
+        while (cut > 0 && char.IsWhiteSpace(notes[cut - 1])) cut--;
         try
         {
-            var meta = JsonSerializer.Deserialize<DemoNotesMeta>(match.Groups[1].Value, Options);
-            return (notes[..match.Index], meta);
+            var meta = JsonSerializer.Deserialize<DemoNotesMeta>(json, Options);
+            return (notes[..cut], meta);
         }
         catch (JsonException)
         {

@@ -35,6 +35,12 @@
     .product-row .product-info .text-purple:hover {
         text-decoration: underline;
     }
+    /* The product name's .stretched-link covers the whole row; the action
+       button sits above it so "Contact us" still goes to /contact. */
+    .product-row .product-action {
+        position: relative;
+        z-index: 2;
+    }
 
 .pagination .page-item .page-link {
     color: #4a809a;

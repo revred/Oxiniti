@@ -1,5 +1,4 @@
 ﻿@page "/products/{FilterType}/{Slug}"
-@inject NavigationManager Nav
 @inject CartService CartService
 @inject IMakerClient MakerClient
 @inject ProductApiClient ProductApi
@@ -8,7 +7,15 @@
 @inject IJSRuntime JS
 @inject LocalizationService Loc
 
-<div class="container-fluid px-4 py-5">
+<PageTitle>@Slug | Oxyniti</PageTitle>
+
+@* tools/Prerender also ships this page as static HTML for every product type
+   linked from /products, so the most common route to a product never waits
+   for the WASM runtime. Everything here must therefore work without Blazor:
+   each product is a real link, and the data-product-* hooks let
+   wwwroot/js/marketingIslands.js run search, sort and the type filter on the
+   static copy. *@
+<div class="container-fluid px-4 py-5" data-product-type-page>
 
     <!-- Top Section: Title / Subtitle / Search & Filters -->
     <div class="top-section d-flex justify-content-between align-items-start mb-5">
@@ -21,6 +28,7 @@
             <div class="search-wrapper">
                 <i class="bi bi-search search-icon"></i>
                 <input value="@SearchQuery"
+                       data-product-search
                        @oninput="HandleSearchInput"
                        class="form-control search-input"
                        placeholder="@Loc.T("productsfilter.searchplaceholder", "Search for products by name, type, or application")" />
@@ -32,7 +40,7 @@
         <div class="filter-panel p-4 rounded-3">
             <div class="mb-4">
                 <label class="form-label mb-1">@Loc.T("productsfilter.sortby", "Sort By")</label>
-                <select class="form-select w-100" @onchange="OnSortChanged">
+                <select class="form-select w-100" data-product-sort @onchange="OnSortChanged">
                     <option value="">–</option>
                     <option value="name">@Loc.T("productsfilter.sort.name", "Name")</option>
                     @* Price sorting hidden along with prices.
@@ -43,7 +51,7 @@
             </div>
             <div>
                 <label class="form-label mb-1">@Loc.T("productsfilter.filtertypes", "Filter Product Types")</label>
-                <select class="form-select w-100" @onchange="OnFilterChanged">
+                <select class="form-select w-100" data-product-filter @onchange="OnFilterChanged">
                     <option value="">@Loc.T("productsfilter.selecttypes", "Select Product Types")</option>
                     @foreach (var type in AllTypes)
                     {
@@ -92,13 +100,16 @@
     }
     else if (!FilteredProducts.Any())
     {
-        <p>@Loc.T("productsfilter.noresults", "No products found.")</p>
+        @* A failed load must never be frozen into the static copy as "no
+           products"; data-prerender-incomplete makes tools/Prerender skip it. *@
+        <p data-prerender-incomplete="@(LoadFailed ? "load-failed" : null)">@Loc.T("productsfilter.noresults", "No products found.")</p>
     }
     else
     {
+        <p data-product-none hidden>@Loc.T("productsfilter.noresults", "No products found.")</p>
         @foreach (var p in FilteredProducts)
         {
-            <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light" @onclick="() => NavigateToDetail(p.Slug)">
+            <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light" data-product-row data-name="@p.Name">
 
                 @* Admin FID: TOP-LEFT of the whole product element *@
                 @if (AuthenticationService.IsMakerAIUser == true)
@@ -126,7 +137,8 @@
                     <img src="@p.Asset?.Url" class="img-fluid rounded" alt="@p.Name" style="width:200px;" />
                 </div>
                 <div class="product-info col">
-                <h5 class="mb-1">@p.Name</h5>
+                @* stretched-link makes the whole row the link, like the old row @onclick. *@
+                <h5 class="mb-1"><a href="/product/@p.Slug" class="stretched-link text-reset text-decoration-none">@p.Name</a></h5>
                 <p class="text-muted mb-2 description">
                     @Shorten(p.Description, 150)
                 </p>
@@ -147,24 +159,28 @@
                                     )
                 </button>
                 *@
-                <a href="/contact" @onclick:stopPropagation class="btn btn-gradient btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
+                <a href="/contact" class="btn btn-gradient btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
             </div>
         </div>
 
         }
 
-        <!-- Pager -->
-        <nav class="mt-4 text-center" aria-label="@Loc.T("productsfilter.pagenav", "Page navigation")">
-            <ul class="pagination justify-content-center mb-0">
-                @for (int i = 1; i <= TotalPages; i++)
-                {
-                    var pageIndex = i;
-                    <li class="page-item @(CurrentPage == pageIndex ? "active" : "")">
-                        <a class="page-link" @onclick="() => ChangePage(pageIndex)">@pageIndex</a>
-                    </li>
-                }
-            </ul>
-        </nav>
+        <!-- Pager. Only when there is more than one page -- and then the static
+             copy can't page (it has no API), so tools/Prerender skips it. -->
+        @if (TotalPages > 1)
+        {
+            <nav class="mt-4 text-center" data-prerender-incomplete="multi-page" aria-label="@Loc.T("productsfilter.pagenav", "Page navigation")">
+                <ul class="pagination justify-content-center mb-0">
+                    @for (int i = 1; i <= TotalPages; i++)
+                    {
+                        var pageIndex = i;
+                        <li class="page-item @(CurrentPage == pageIndex ? "active" : "")">
+                            <a class="page-link" @onclick="() => ChangePage(pageIndex)">@pageIndex</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
     }
 
 </div>
@@ -186,6 +202,7 @@
     private int PageSize { get; set; } = 10;
     private int CurrentPage { get; set; } = 1;
     private int TotalPages { get; set; } = 1;
+    private bool LoadFailed;
 
     // copy feedback per product (slug -> hint text)
     private readonly Dictionary<string, string?> CopyHints = new();
@@ -249,12 +266,14 @@
             var result = await ProductApi.ProductsBySlugAsync(request);
             FilteredProducts = result.Products.ToList();
             TotalPages = result.TotalPages;
+            LoadFailed = false;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Products] Error loading products: {ex}");
             FilteredProducts = [];
             TotalPages = 1;
+            LoadFailed = true;
         }
     }
 
@@ -336,9 +355,6 @@
             Console.WriteLine($"[Products] HandleSearchInput -> LoadProducts failed: {ex}");
         }
     }
-
-    private void NavigateToDetail(string productSlug)
-        => Nav.NavigateTo($"/product/{productSlug}");
 
     private async Task AddToCart(ProductData product)
     {

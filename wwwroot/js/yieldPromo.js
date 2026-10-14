@@ -3,14 +3,18 @@
 // back on the same page after a pause, and again on every page visited, until
 // the visitor actually goes to the calculator.
 //
-//   Purely on a timer -- scrolling plays no part. First shown FIRST_MS after
-//   the page opens; after each close, back REOPEN_MS (one minute) later, for
-//   as long as the visitor stays on the page.
+//   First shown once the visitor has scrolled at least SCROLL_FRACTION of the
+//   way down the page -- a sign they are reading, not a box thrown at them the
+//   moment the page opens (a page too short to scroll never shows it). After
+//   each close, back REOPEN_MS (one minute) later, for as long as the visitor
+//   stays on the page.
 //
 //   Going to the calculator from the card keeps it away for the rest of that
 //   browser tab's session (sessionStorage); the next visit shows it again.
-//   Never shown on the calculator itself, the sign-in / checkout flows, or
-//   the staff-only demo log (/my-demos), where it would cover "Add demo".
+//   Never shown on the calculator itself, the sign-in / checkout flows, the
+//   staff-only demo log (/my-demos), where it would cover "Add demo", or the
+//   product and contact pages, where the visitor is already acting and it
+//   would cover each product's "Contact us".
 //
 // Plain JS with no Blazor dependency, so it runs the same on the prerendered
 // marketing pages (which ship without the Blazor runtime) as on the app
@@ -23,20 +27,20 @@
 
     var STORE_KEY = "oxy.yieldPromo.visited";
 
-    var FIRST_MS = 1000;
+    var SCROLL_FRACTION = 0.5;
 
     var REOPEN_MS = 60000;
 
     var LOCALES = ["hi", "ta", "te", "kn", "ml", "bn"];
 
-    var QUIET_PAGES = /^\/(yield-calculator|login|register|cart|checkout|checkout-return|payment|verify|email-verification|my-demos)(\/|$)/i;
+    var QUIET_PAGES = /^\/(yield-calculator|login|register|cart|checkout|checkout-return|payment|verify|email-verification|my-demos|products?|contact)(\/|$)/i;
 
     // Per-page state, reset whenever the path changes.
     var page = null;
 
     function syncPage() {
         if (page && page.path === location.pathname) return;
-        page = { path: location.pathname, start: Date.now(), shows: 0, closedAt: 0 };
+        page = { path: location.pathname, shows: 0, closedAt: 0 };
     }
 
     function read(key) {
@@ -99,18 +103,23 @@
         page.closedAt = Date.now();
     }
 
-    // ---- Trigger: a once-a-second tick -------------------------------------
+    function scrolledFarEnough() {
+        var scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        return scrollable > 0 && window.scrollY >= scrollable * SCROLL_FRACTION;
+    }
+
+    // ---- Trigger: a once-a-second tick, plus scrolling ---------------------
 
     function tick() {
         syncPage();
         if (isOpen() || !allowed()) return;
 
-        var now = Date.now();
-        var due = page.shows === 0 ? now - page.start >= FIRST_MS : now - page.closedAt >= REOPEN_MS;
+        var due = page.shows === 0 ? scrolledFarEnough() : Date.now() - page.closedAt >= REOPEN_MS;
         if (due) open();
     }
 
     setInterval(tick, 1000);
+    window.addEventListener("scroll", tick, { passive: true });
 
     // ---- Card controls (delegated: the card may be rendered after this runs) --
 

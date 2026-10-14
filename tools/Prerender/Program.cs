@@ -99,17 +99,15 @@ internal static partial class Program
 
         using var downloader = new HttpClient();
         var failures = new List<string>();
+        var productTypeLinks = new SortedSet<string>(StringComparer.Ordinal);
 
         foreach (var route in routes)
         {
             try
             {
-                var html = await CaptureAsync(browser, server.BaseAddress, route.Path);
-                html = await RehostSignedImagesAsync(downloader, browser, wwwroot, route.Path, html);
-                var outputPath = Path.Combine(wwwroot, route.OutputRelPath.Replace('/', Path.DirectorySeparatorChar));
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
-                WriteHtmlFile(outputPath, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(html));
-                Console.WriteLine($"[prerender] {route.Path} -> {route.OutputRelPath} ({html.Length:N0} chars)");
+                var html = await CaptureAndWriteAsync(browser, server.BaseAddress, downloader, wwwroot, route.Path, route.OutputRelPath);
+                foreach (Match link in ProductTypeLinkRegex().Matches(html))
+                    productTypeLinks.Add(link.Groups[1].Value);
             }
             catch (Exception ex)
             {
@@ -126,8 +124,61 @@ internal static partial class Program
         }
 
         Console.WriteLine($"[prerender] Wrote {routes.Count} prerendered page(s).");
+
+        // The product-type lists (/products/type/{slug}) that the pages above
+        // link to -- in practice the /products grid. They are not in the route
+        // table because the types come from the catalogue API, not the repo.
+        // Without a static copy, tapping a type card on the static /products
+        // page booted the whole 2.7 MB WASM runtime (~22 s on a slow 3G phone)
+        // to show a couple of products. Best effort, unlike the routes above:
+        // a type that can't be captured cleanly (API down, more than one page
+        // of products -- see Pages/ProductsByFilter.razor's
+        // data-prerender-incomplete) simply keeps falling back to the app, as
+        // every type did before, so it warns instead of failing the deploy.
+        var typePages = 0;
+        foreach (var link in productTypeLinks)
+        {
+            var slug = Uri.UnescapeDataString(link);
+            if (!SafeProductTypeSlugRegex().IsMatch(slug))
+            {
+                Console.WriteLine($"::warning::[prerender] Skipping product type '{slug}': not a safe file name.");
+                continue;
+            }
+
+            var path = "/products/type/" + link;
+            try
+            {
+                await CaptureAndWriteAsync(browser, server.BaseAddress, downloader, wwwroot, path, $"products/type/{slug}/index.html");
+                typePages++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"::warning::[prerender] Product type '{slug}' stays app-rendered: {ex.Message}");
+            }
+        }
+
+        Console.WriteLine($"[prerender] Wrote {typePages} of {productTypeLinks.Count} product type page(s).");
         return 0;
     }
+
+    private static async Task<string> CaptureAndWriteAsync(IBrowser browser, string baseAddress, HttpClient downloader, string wwwroot, string routePath, string outputRelPath)
+    {
+        var html = await CaptureAsync(browser, baseAddress, routePath);
+        html = await RehostSignedImagesAsync(downloader, browser, wwwroot, routePath, html);
+        var outputPath = Path.Combine(wwwroot, outputRelPath.Replace('/', Path.DirectorySeparatorChar));
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+        WriteHtmlFile(outputPath, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(html));
+        Console.WriteLine($"[prerender] {routePath} -> {outputRelPath} ({html.Length:N0} chars)");
+        return html;
+    }
+
+    // href="/products/type/{slug}" as Razor renders it (the slug URL-escaped).
+    [GeneratedRegex("""href="/products/type/([^"/?#]+)"(?=[\s>])""")]
+    private static partial Regex ProductTypeLinkRegex();
+
+    // The decoded slug becomes a folder name: letters, digits, spaces, - and _.
+    [GeneratedRegex("""^[A-Za-z0-9][A-Za-z0-9 _-]*$""")]
+    private static partial Regex SafeProductTypeSlugRegex();
 
     // Guards the pre-boot shell -- what every visitor stares at until the
     // 2.7 MB WASM payload boots.
@@ -578,6 +629,16 @@ internal static partial class Program
         html = ReplaceMetaContent(html, "og:url", WebUtility.HtmlEncode(canonicalUrl));
         html = ReplaceMetaContent(html, "twitter:title", title);
         html = ReplaceMetaContent(html, "twitter:description", description);
+
+        // App.razor's canonical is built from NavigationManager.Uri, which at
+        // capture time is this tool's local server. Where it is the only one
+        // left (pages without their own canonical, e.g. the product type
+        // lists), drop it so the production URL below replaces it.
+        var existingCanonical = CanonicalLinkRegex().Match(html);
+        if (existingCanonical.Success && !existingCanonical.Value.Contains($"href=\"{Origin}/", StringComparison.Ordinal))
+        {
+            html = html.Replace(existingCanonical.Value, "");
+        }
 
         if (!CanonicalLinkRegex().IsMatch(html))
         {

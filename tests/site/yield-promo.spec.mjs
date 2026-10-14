@@ -1,7 +1,8 @@
 // The yield-calculator promo card (Pages/Components/YieldPromo.razor,
-// wwwroot/js/yieldPromo.js): opens a second into a page without any
-// scrolling, comes back a minute after each close, stops once they have been to the calculator,
-// and never shows on the calculator itself. page.clock skips the waits.
+// wwwroot/js/yieldPromo.js): a small card that opens once the visitor has
+// scrolled halfway down a page, comes back a minute after each close, stops
+// once they have been to the calculator, and never shows on the calculator,
+// product or contact pages. page.clock skips the waits.
 import { test, expect } from "@playwright/test";
 
 const BOOT_TIMEOUT = 90_000;
@@ -18,11 +19,24 @@ async function scrollTo(page, fraction) {
     await page.evaluate((f) => window.scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * f), fraction);
 }
 
-test("opens straight away on the home page, without scrolling, and links to the calculator", async ({ page }) => {
+async function scrollUntilOpen(page, card) {
+    await scrollTo(page, 0.6);
+    await page.clock.fastForward("00:02");
+    await expect(card).toHaveAttribute("data-state", "open");
+}
+
+test("stays closed until the visitor scrolls halfway down, then opens as a small card linking to the calculator", async ({ page }) => {
     const card = await openHome(page);
 
-    await page.clock.fastForward("00:06");
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    // Not on a timer: a page left at the top never shows it.
+    await page.clock.fastForward("00:30");
+    await expect(card).not.toHaveAttribute("data-state", "open");
+    await scrollTo(page, 0.3);
+    await page.clock.fastForward("00:02");
+    await expect(card).not.toHaveAttribute("data-state", "open");
+
+    await scrollTo(page, 0.6);
+    await page.clock.fastForward("00:02");
     await expect(card).toHaveAttribute("data-state", "open");
     await expect(card).toBeVisible();
     await expect(card.locator("a.yp-cta")).toHaveAttribute("href", "/yield-calculator");
@@ -38,12 +52,15 @@ test("opens straight away on the home page, without scrolling, and links to the 
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
     expect(box.y + box.height).toBeLessThanOrEqual(vp.height);
+
+    // Small: no bar picture or chips, and well under half the screen tall.
+    await expect(card.locator(".yp-visual, .yp-chips")).toHaveCount(0);
+    expect(box.height).toBeLessThan(260);
 });
 
 test("closing it is only for now: it comes back every minute, scrolling or not", async ({ page }) => {
     const card = await openHome(page);
-    await page.clock.fastForward("00:06");
-    await expect(card).toHaveAttribute("data-state", "open");
+    await scrollUntilOpen(page, card);
 
     // Stop the page clock: from here only runFor() moves it, so a slow
     // machine can't let a real minute slip by between two steps.
@@ -69,8 +86,7 @@ test("closing it is only for now: it comes back every minute, scrolling or not",
 
 test("after going to the calculator from it, it stays away", async ({ page }) => {
     const card = await openHome(page);
-    await page.clock.fastForward("00:06");
-    await expect(card).toHaveAttribute("data-state", "open");
+    await scrollUntilOpen(page, card);
     await page.evaluate(() => document.querySelector("#yield-promo .yp-cta").addEventListener("click", (e) => e.preventDefault()));
     await card.locator(".yp-cta").click();
     await expect(card).toBeHidden();
@@ -88,7 +104,9 @@ test("a visit in a new browser session shows it again, even after going to the c
         try { localStorage.setItem("oxy.yieldPromo.visitedUntil", String(Date.now() + 864e5)); } catch (e) { /* ignore */ }
     });
     await page.goto("/");
-    await expect(page.locator("#yield-promo")).toHaveAttribute("data-state", "open", { timeout: BOOT_TIMEOUT });
+    await expect(page.locator("#yield-promo")).toBeAttached({ timeout: BOOT_TIMEOUT });
+    await scrollTo(page, 0.6);
+    await expect(page.locator("#yield-promo")).toHaveAttribute("data-state", "open");
 });
 
 test("never opens on the calculator page", async ({ page }) => {
@@ -100,3 +118,15 @@ test("never opens on the calculator page", async ({ page }) => {
     await page.waitForTimeout(500);
     await expect(page.locator("#yield-promo")).not.toHaveAttribute("data-state", "open");
 });
+
+for (const path of ["/products", "/contact"]) {
+    test(`never opens on ${path}, however far the visitor scrolls`, async ({ page }) => {
+        await page.clock.install();
+        await page.goto(path);
+        await expect(page.locator("#yield-promo")).toBeAttached({ timeout: BOOT_TIMEOUT });
+        await scrollTo(page, 0.9);
+        await page.clock.fastForward("01:30");
+        await page.waitForTimeout(300);
+        await expect(page.locator("#yield-promo")).not.toHaveAttribute("data-state", "open");
+    });
+}

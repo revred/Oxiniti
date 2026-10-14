@@ -5,7 +5,7 @@
 import { test, expect } from "@playwright/test";
 
 // The first loads after `dotnet run` starts can take 20s+ (a cold dev server).
-const BOOT_TIMEOUT = 45_000;
+const BOOT_TIMEOUT = 90_000;
 
 async function openCalculator(page) {
     const errors = [];

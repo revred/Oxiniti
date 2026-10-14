@@ -7,7 +7,7 @@ import { test, expect } from "@playwright/test";
 test("a valid demo request offers a pre-filled WhatsApp message to the team", async ({ page }) => {
     await page.goto("/?scrollTo=free-demo");
     const form = page.locator("#free-demo-form");
-    await expect(form).toBeVisible({ timeout: 45_000 });
+    await expect(form).toBeVisible({ timeout: 90_000 });
 
     const waBlock = form.locator('[data-field="wa"]');
     await expect(waBlock).toBeHidden();
@@ -42,7 +42,7 @@ test("a valid demo request offers a pre-filled WhatsApp message to the team", as
 test("an incomplete demo request does not offer the WhatsApp step", async ({ page }) => {
     await page.goto("/?scrollTo=free-demo");
     const form = page.locator("#free-demo-form");
-    await expect(form).toBeVisible({ timeout: 45_000 });
+    await expect(form).toBeVisible({ timeout: 90_000 });
 
     await form.locator("#demo-name").fill("Murugan");
     // Focus + Enter rather than a click: the sticky header / yield promo card

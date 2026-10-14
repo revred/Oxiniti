@@ -7,7 +7,12 @@ const BASE_URL = process.env.OXY_BASE_URL || `http://localhost:${PORT}`;
 
 export default defineConfig({
     testDir: ".",
-    timeout: 60_000,
+    // Every test boots the Blazor WASM app from the Debug dev server, which
+    // slows sharply once several boots run at once: past ~4 parallel pages a
+    // first load could miss a 45s wait (and the home-section test boots
+    // twice). Two workers and 90s boot waits keep a full run from flaking.
+    timeout: 150_000,
+    workers: 2,
     expect: { timeout: 15_000 },
     retries: process.env.CI ? 1 : 0,
     reporter: [["list"]],

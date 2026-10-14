@@ -292,6 +292,7 @@
         try
         {
             await AuthenticationService.InitializeAsync();
+            await DropExpiredSessionAsync();
         }
         catch (Exception ex)
         {
@@ -335,6 +336,29 @@
 
 
         // await UpdateCartCountAsync(); // feeds the header cart badge, hidden for the duration
+    }
+
+
+    // Maker.RampEdge's InitializeAsync marks the visitor signed in whenever ANY
+    // token is in localStorage -- it never looks at the expiry. A session left
+    // over from days ago therefore showed the account initial (and opened the
+    // signed-in pages) while the prerendered home header, which does check
+    // exp in marketingIslands.js, showed the guest icon: click it and /login
+    // appeared with an "O" avatar on top. Try the refresh token once; if that
+    // can't renew the session, sign out so every page agrees it's a guest.
+    private async Task DropExpiredSessionAsync()
+    {
+        if (!AuthenticationService.IsAuthenticated)
+            return;
+
+        var expiry = await AuthenticationService.GetAccessTokenExpiryAsync();
+        if (expiry is { } exp && exp > DateTime.UtcNow)
+            return;
+
+        // RefreshTokenAsync signs out on its own when the server rejects the
+        // token, but only returns false when there's no refresh token at all.
+        if (!await AuthenticationService.RefreshTokenAsync())
+            await AuthenticationService.LogoutAsync();
     }
 
 

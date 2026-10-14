@@ -1,6 +1,7 @@
 // Issue #63: the marketing routes (home, about, technology,
 // aquaculture-oxygenation, ras-oxygenation, products, faqs, contact,
-// privacy, terms, sitemap) are prerendered at build time
+// privacy, terms, sitemap -- plus every /products/type/{slug} list the
+// /products grid links to) are prerendered at build time
 // (tools/Prerender) and shipped WITHOUT the Blazor WASM runtime -- see that
 // tool's own comment for why. Everything on those pages that used to be a
 // Blazor @onclick/@oninput/@bind handler is wired here instead, in plain JS,
@@ -40,6 +41,59 @@
         initOxyNanoClickToPlay();
         initFaqAccordion();
         initYieldCalculator();
+        initProductTypePage();
+    }
+
+    // ---- Product type list (/products/type/{slug}) ---------------------------
+    // Pages/ProductsByFilter.razor asks the API again for every search, sort
+    // and type change. The static copy has every product of the type on the
+    // page already (tools/Prerender only ships single-page lists), so the same
+    // three controls work on those rows here: search hides rows that don't
+    // contain the text, "Name" sorts them, and a type change opens that type.
+    function initProductTypePage() {
+        var root = document.querySelector("[data-product-type-page]");
+        if (!root) return;
+
+        var rows = Array.prototype.slice.call(root.querySelectorAll("[data-product-row]"));
+        var none = root.querySelector("[data-product-none]");
+        var search = root.querySelector("[data-product-search]");
+        var sort = root.querySelector("[data-product-sort]");
+        var filter = root.querySelector("[data-product-filter]");
+
+        if (filter) {
+            filter.addEventListener("change", function () {
+                if (filter.value) location.href = "/products/type/" + encodeURIComponent(filter.value);
+            });
+        }
+
+        if (!rows.length) return;
+        var parent = rows[0].parentNode;
+        var after = rows[rows.length - 1].nextSibling;
+
+        if (sort) {
+            sort.addEventListener("change", function () {
+                var ordered = rows.slice();
+                if (sort.value === "name") {
+                    ordered.sort(function (a, b) {
+                        return (a.getAttribute("data-name") || "").localeCompare(b.getAttribute("data-name") || "");
+                    });
+                }
+                ordered.forEach(function (row) { parent.insertBefore(row, after); });
+            });
+        }
+
+        if (search) {
+            search.addEventListener("input", function () {
+                var q = search.value.trim().toLowerCase();
+                var shown = 0;
+                rows.forEach(function (row) {
+                    var match = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+                    row.hidden = !match;
+                    if (match) shown++;
+                });
+                if (none) none.hidden = shown > 0;
+            });
+        }
     }
 
     // ---- Yield calculator (/yield-calculator) -------------------------------

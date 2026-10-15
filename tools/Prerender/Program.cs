@@ -136,6 +136,7 @@ internal static partial class Program
         // data-prerender-incomplete) simply keeps falling back to the app, as
         // every type did before, so it warns instead of failing the deploy.
         var typePages = 0;
+        var productLinks = new SortedSet<string>(StringComparer.Ordinal);
         foreach (var link in productTypeLinks)
         {
             var slug = Uri.UnescapeDataString(link);
@@ -148,7 +149,9 @@ internal static partial class Program
             var path = "/products/type/" + link;
             try
             {
-                await CaptureAndWriteAsync(browser, server.BaseAddress, downloader, wwwroot, path, $"products/type/{slug}/index.html");
+                var html = await CaptureAndWriteAsync(browser, server.BaseAddress, downloader, wwwroot, path, $"products/type/{slug}/index.html");
+                foreach (Match product in ProductLinkRegex().Matches(html))
+                    productLinks.Add(product.Groups[1].Value);
                 typePages++;
             }
             catch (Exception ex)
@@ -158,6 +161,42 @@ internal static partial class Program
         }
 
         Console.WriteLine($"[prerender] Wrote {typePages} of {productTypeLinks.Count} product type page(s).");
+
+        // The product pages (/product/{slug}) those lists link to. They used to
+        // be the one stop on the Home -> Products -> type -> product path that
+        // still booted the whole WASM runtime: the static copy from
+        // tools/StaticProductPages showed the specs at once but only a bare
+        // header band, with the real header, menu and footer arriving 3-5 s
+        // later on 4G and about a minute later on slow 3G. Cart and checkout
+        // are paused (Pages/ProductDetails.razor), so nothing on the page needs
+        // the app any more. Best effort, like the type pages: a product that
+        // can't be captured (API down, or a 3D model -- see the
+        // data-prerender-incomplete marker in ProductDetails.razor) keeps
+        // tools/StaticProductPages' copy, which still boots the app. That tool
+        // runs after this one and leaves any page written here alone.
+        var productPages = 0;
+        foreach (var link in productLinks)
+        {
+            var slug = Uri.UnescapeDataString(link);
+            if (!SafeProductSlugRegex().IsMatch(slug))
+            {
+                Console.WriteLine($"::warning::[prerender] Skipping product '{slug}': not a safe file name.");
+                continue;
+            }
+
+            var path = "/product/" + link;
+            try
+            {
+                await CaptureAndWriteAsync(browser, server.BaseAddress, downloader, wwwroot, path, $"product/{slug}/index.html");
+                productPages++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"::warning::[prerender] Product '{slug}' stays app-rendered: {ex.Message}");
+            }
+        }
+
+        Console.WriteLine($"[prerender] Wrote {productPages} of {productLinks.Count} product page(s).");
         return 0;
     }
 
@@ -179,6 +218,15 @@ internal static partial class Program
     // The decoded slug becomes a folder name: letters, digits, spaces, - and _.
     [GeneratedRegex("""^[A-Za-z0-9][A-Za-z0-9 _-]*$""")]
     private static partial Regex SafeProductTypeSlugRegex();
+
+    // href="/product/{slug}" on a product type list.
+    [GeneratedRegex("""href="/product/([^"/?#]+)"(?=[\s>])""")]
+    private static partial Regex ProductLinkRegex();
+
+    // Product slugs also carry dots ("nano-bubble-generator-1.5-HP"); a
+    // leading letter or digit still rules out "." and "..".
+    [GeneratedRegex("""^[A-Za-z0-9][A-Za-z0-9._-]*$""")]
+    private static partial Regex SafeProductSlugRegex();
 
     // Guards the pre-boot shell -- what every visitor stares at until the
     // 2.7 MB WASM payload boots.
@@ -473,6 +521,11 @@ internal static partial class Program
 
             var localUrl = "/images/prerendered/" + fileName;
             rewritten = rewritten.Replace(match.Value, match.Value.Replace(encodedUrl, localUrl));
+            // A product page also names the image in its JSON-LD
+            // (ProductDetails.razor's BuildProductJsonLd), JSON-escaped and
+            // absolute; point that at the same copy, or the structured data
+            // ships a link that dies with its token.
+            rewritten = Regex.Replace(rewritten, "\"" + Regex.Escape(objectPath) + "[^\"]*\"", "\"" + Origin + localUrl + "\"");
             Console.WriteLine($"[prerender] {routePath}: re-hosted signed image -> {localUrl}");
         }
 
@@ -666,7 +719,10 @@ internal static partial class Program
     [GeneratedRegex("""<title>(.*?)</title>""")]
     private static partial Regex TitleRegex();
 
-    [GeneratedRegex("""<meta name="description" content="([^"]*)"\s*/?>""")]
+    // [^>]* rather than \s*/?>: a page's own <HeadContent> tags carry its
+    // scoped-CSS attribute (b-xxxxxxxxxx), and a missed match left both
+    // descriptions in place.
+    [GeneratedRegex("""<meta name="description" content="([^"]*)"[^>]*>""")]
     private static partial Regex MetaDescriptionRegex();
 
     [GeneratedRegex("""<link[^>]*rel="canonical"[^>]*>""")]
@@ -768,11 +824,16 @@ internal sealed class LocalWwwrootServer : IAsyncDisposable
             ContentTypeProvider = contentTypeProvider,
             ServeUnknownFileTypes = true,
         });
-        app.MapFallback(async context =>
+        RequestDelegate serveAppShell = async context =>
         {
             context.Response.ContentType = "text/html; charset=utf-8";
             await context.Response.SendFileAsync(spaFallbackPath);
-        });
+        };
+        app.MapFallback(serveAppShell);
+        // MapFallback's default pattern skips any path that looks like a file
+        // name, and product slugs can carry a dot ("...-1.5-HP"), which 404'd
+        // here. Static Web Apps' navigationFallback has no such rule.
+        app.MapFallback("product/{**slug}", serveAppShell);
 
         await app.StartAsync();
 

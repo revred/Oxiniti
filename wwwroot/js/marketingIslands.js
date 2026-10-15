@@ -1,7 +1,8 @@
 // Issue #63: the marketing routes (home, about, technology,
 // aquaculture-oxygenation, ras-oxygenation, products, faqs, contact,
 // privacy, terms, sitemap -- plus every /products/type/{slug} list the
-// /products grid links to) are prerendered at build time
+// /products grid links to, and every /product/{slug} those lists link to)
+// are prerendered at build time
 // (tools/Prerender) and shipped WITHOUT the Blazor WASM runtime -- see that
 // tool's own comment for why. Everything on those pages that used to be a
 // Blazor @onclick/@oninput/@bind handler is wired here instead, in plain JS,
@@ -23,8 +24,8 @@
 // call that would never succeed anyway. If that backend ships, this file
 // needs a matching fetch() added -- it will NOT pick that up automatically.
 //
-// App routes (/cart, /account, /checkout, /login, /product/{slug}, etc.)
-// still boot the real Blazor app and never load this file.
+// App routes (/cart, /account, /checkout, /login, etc.) still boot the
+// real Blazor app and never load this file.
 (function () {
     "use strict";
 
@@ -42,6 +43,22 @@
         initFaqAccordion();
         initYieldCalculator();
         initProductTypePage();
+        initProductDetailPage();
+    }
+
+    // ---- Product page (/product/{slug}) --------------------------------------
+    // The thumbnails switch slides through Bootstrap's own data-bs-slide-to
+    // (Pages/ProductDetails.razor); this only keeps the highlighted thumbnail
+    // in step with the slide, as the page's attachCarouselEvent does in the app.
+    function initProductDetailPage() {
+        var carousel = document.getElementById("carouselExampleControls");
+        if (!carousel) return;
+        carousel.addEventListener("slid.bs.carousel", function (event) {
+            var thumbs = document.querySelectorAll(".thumb-box");
+            Array.prototype.forEach.call(thumbs, function (t, i) {
+                t.classList.toggle("active", i === event.to);
+            });
+        });
     }
 
     // ---- Product type list (/products/type/{slug}) ---------------------------

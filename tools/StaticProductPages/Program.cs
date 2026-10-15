@@ -99,14 +99,26 @@ internal static class Program
                 continue;
             }
 
-            var images = await RehostProductImagesAsync(downloader, wwwroot, slug, detail.Assets);
-
             var pageDir = Path.Combine(wwwroot, "product", slug);
-            Directory.CreateDirectory(pageDir);
-            File.WriteAllText(
-                Path.Combine(pageDir, "index.html"),
-                ProductPageTemplate.Render(detail, images),
-                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var pagePath = Path.Combine(pageDir, "index.html");
+
+            // tools/Prerender (the step before this one) already wrote the full
+            // page -- header, menu, footer, no WASM -- for every product it
+            // could capture. Keep that; this template is only the fallback for
+            // the ones it skipped. The sitemap entry is still added below.
+            if (File.Exists(pagePath))
+            {
+                Console.WriteLine($"[static-product-pages] '{slug}' already prerendered, keeping it.");
+            }
+            else
+            {
+                var images = await RehostProductImagesAsync(downloader, wwwroot, slug, detail.Assets);
+                Directory.CreateDirectory(pageDir);
+                File.WriteAllText(
+                    pagePath,
+                    ProductPageTemplate.Render(detail, images),
+                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            }
 
             generated.Add((slug, today));
         }
@@ -127,7 +139,7 @@ internal static class Program
             Console.Error.WriteLine($"[static-product-pages] sitemap.xml not found at '{sitemapPath}', skipping sitemap update.");
         }
 
-        Console.WriteLine($"[static-product-pages] Wrote {generated.Count} product page(s) under {Path.Combine(wwwroot, "product")}.");
+        Console.WriteLine($"[static-product-pages] {generated.Count} product page(s) under {Path.Combine(wwwroot, "product")} and in sitemap.xml.");
         return 0;
     }
 

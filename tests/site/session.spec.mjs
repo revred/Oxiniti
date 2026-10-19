@@ -69,3 +69,64 @@ test("a signed-in visitor opening /login is sent home, with no refresh call", as
     await expect(page.locator(".header-actions .user-avatar")).toHaveText("F");
     expect(refreshed).toBe(false);
 });
+
+// Idle on a staff page. The access token runs out an hour after sign-in; the next
+// demo-log call used to send it anyway (StaffDemoService never renewed it),
+// got a 401 and bounced to /login while the header still showed the account
+// initial. page.clock moves the browser's time -- and .NET's DateTime.UtcNow
+// with it -- past the token's expiry without the test actually waiting.
+async function idleOnMyDemos(page, refreshReply) {
+    await page.clock.install();
+    const stale = fakeJwt("oxyniti@example.com", 60 * 60);
+    const fresh = fakeJwt("oxyniti@example.com", 120 * 60);
+    let idle = false;
+    const calls = [];
+    await page.route("**/api/public/authentication/refresh-token", (route) => refreshReply(route, fresh));
+    await page.route("**/api/demo/**", (route) => {
+        const req = route.request();
+        const name = new URL(req.url()).pathname.split("/").pop();
+        const auth = req.headers()["authorization"];
+        calls.push({ name, auth });
+        // The server only refuses the old token once it has actually expired.
+        if (idle && auth === `Bearer ${stale}`) return route.fulfill({ status: 401, body: "" });
+        if (name === "GetDemos")
+            return route.fulfill({ json: { demos: [{ barID: 101, demoDateUtc: "2026-10-05T12:00:00Z", place: "Lalgudi", state: "Tamil Nadu", photos: [] }] } });
+        return route.fulfill({ status: 204, body: "" });
+    });
+    await page.addInitScript(([token]) => {
+        localStorage.setItem("maker_access_token", token);
+        localStorage.setItem("maker_refresh_token", "refresh");
+        localStorage.setItem("is_maker_user", "true");
+    }, [stale]);
+
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await page.clock.fastForward("01:01:00");
+    idle = true;
+    await card.getByRole("button", { name: "Delete" }).click();
+    await card.getByRole("button", { name: "Yes, delete" }).click();
+    return { calls, fresh };
+}
+
+test("staff idle past the token's expiry stay signed in when the session renews", async ({ page }) => {
+    const { calls, fresh } = await idleOnMyDemos(page, (route, fresh) => route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ token: fresh, refreshToken: "refresh-2", isMakerAI: true }),
+    }));
+
+    await expect.poll(() => calls.find((c) => c.name === "DeleteDemo")?.auth).toBe(`Bearer ${fresh}`);
+    await expect(page).toHaveURL(/\/my-demos$/);
+    await expect(page.locator(".header-actions .user-avatar")).toHaveText("O");
+});
+
+test("staff idle past the token's expiry land on /login signed out when it can't renew", async ({ page }) => {
+    await idleOnMyDemos(page, (route) => route.fulfill({ status: 401, body: "" }));
+
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.locator(".header-actions .login-avatar")).toBeVisible();
+    await expect(page.locator(".header-actions .user-avatar")).toHaveCount(0);
+    expect(await page.evaluate(() => localStorage.getItem("maker_access_token"))).toBeNull();
+});

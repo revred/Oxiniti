@@ -826,6 +826,10 @@
             confirmDeleteId = null;
             await LoadAsync();
         }
+        catch (StaffDemoException ex) when (ex.Error == StaffDemoError.NotSignedIn)
+        {
+            Nav.NavigateTo("/login");
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"[MyDemos] Delete failed: {ex}");

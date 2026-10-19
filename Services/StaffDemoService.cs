@@ -67,9 +67,7 @@ public sealed class StaffDemoService
 
     private async Task<string> PostAsync(string route, object body)
     {
-        var token = await _auth.GetAccessTokenAsync();
-        if (string.IsNullOrEmpty(token))
-            throw new StaffDemoException(StaffDemoError.NotSignedIn);
+        var token = await GetFreshTokenAsync();
 
         using var request = new HttpRequestMessage(HttpMethod.Post, route)
         {
@@ -94,6 +92,8 @@ public sealed class StaffDemoService
             if (response.IsSuccessStatusCode) return text;
 
             Console.WriteLine($"[StaffDemoService] {route} answered {(int)response.StatusCode}: {text}");
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                await _auth.LogoutAsync();
             throw new StaffDemoException(response.StatusCode switch
             {
                 HttpStatusCode.Unauthorized => StaffDemoError.NotSignedIn,
@@ -102,6 +102,30 @@ public sealed class StaffDemoService
                 _ => StaffDemoError.Server,
             });
         }
+    }
+
+    // The access token only lasts an hour. IMakerClient's BearerTokenHandler
+    // renews it before each call; this service bypasses that handler, so it
+    // used to send an expired token after a staff member left the tab idle --
+    // a 401 that bounced them to /login while the header still showed them
+    // signed in. Renew the same way, and when the session can't be renewed,
+    // sign out so every page agrees the visitor is a guest.
+    private async Task<string> GetFreshTokenAsync()
+    {
+        var expiry = await _auth.GetAccessTokenExpiryAsync();
+        if (expiry is not { } exp || exp <= DateTime.UtcNow.AddMinutes(1))
+        {
+            if (!await _auth.RefreshTokenAsync())
+            {
+                await _auth.LogoutAsync();
+                throw new StaffDemoException(StaffDemoError.NotSignedIn);
+            }
+        }
+
+        var token = await _auth.GetAccessTokenAsync();
+        if (string.IsNullOrEmpty(token))
+            throw new StaffDemoException(StaffDemoError.NotSignedIn);
+        return token;
     }
 
     private static object ToWire(StaffDemoForm form, IReadOnlyList<DemoPhotoUpload> photos, IReadOnlyCollection<string> removePhotoPaths, ulong? demoBarId)

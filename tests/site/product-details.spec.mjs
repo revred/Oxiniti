@@ -1,7 +1,7 @@
 // Product page (Pages/ProductDetails.razor, /product/{slug}). tools/Prerender
 // ships this page as static HTML without Blazor, so every control on it has to
 // work without an @onclick: thumbnails switch slides through Bootstrap's data
-// API, and "Login/Register to Buy" and "You may also like" are real links. A
+// API, and "Contact us" and "You may also like" are real links. A
 // page with a 3D model is marked data-prerender-incomplete so the build leaves
 // it on the app (its viewer URL is signed and expires). This file checks the
 // app rendering those pieces; the products come from this file, never the live API.
@@ -30,7 +30,7 @@ async function answerProduct(page, { assets }) {
     }));
 }
 
-test("works without Blazor handlers: thumbnails, login and related products", async ({ page }) => {
+test("works without Blazor handlers: thumbnails, contact and related products", async ({ page }) => {
     await answerProduct(page, { assets: [image("/oxyniti.png"), image("/icon-192.png")] });
     await page.goto("/product/gen-1-5-hp");
 
@@ -39,7 +39,8 @@ test("works without Blazor handlers: thumbnails, login and related products", as
     await expect(thumbs.nth(1)).toHaveAttribute("data-bs-slide-to", "1");
     await expect(page.locator("[data-prerender-incomplete]")).toHaveCount(0);
 
-    await expect(page.locator('a.btn-gradient[href="/login"]')).toBeVisible();
+    await expect(page.locator('a.btn-gradient[href="/contact"]')).toBeVisible();
+    await expect(page.locator('a[href="/login"]', { hasText: "to Buy" })).toHaveCount(0);
     await expect(page.locator('a.card[href="/product/gen-4-hp"]')).toBeVisible();
 
     await thumbs.nth(1).click();

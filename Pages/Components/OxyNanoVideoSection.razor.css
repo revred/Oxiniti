@@ -1,229 +1,149 @@
+/*
+    A slim band rather than a full-height block: copy on the left, the
+    outbound YouTube link on the right. Same gradient as the species band
+    in FarmingTypesSection ("Built for every South Indian farm").
+*/
 .oxy-video-section {
-    padding: 4.5rem 0 4rem;
-    margin: 1rem 0;
-    background:
-        radial-gradient(circle at 15% 20%, rgba(61, 143, 181, 0.13), transparent 32%),
-        linear-gradient(135deg, #061b24 0%, #082b35 52%, #061922 100%);
-    border-radius: 1.5rem;
-    overflow: hidden;
     position: relative;
-}
-
-.oxy-video-section::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: radial-gradient(rgba(88, 214, 210, 0.24) 1px, transparent 1px);
-    background-size: 42px 42px;
-    opacity: 0.22;
+    overflow: hidden;
+    margin: 0.5rem 0;
+    padding: 2.75rem clamp(1.5rem, 5vw, 4.5rem);
+    border-radius: 0.75rem;
+    background: linear-gradient(90deg, #3D8FB5 0%, #0B1F33 100%);
 }
 
 .oxy-video-inner {
     position: relative;
     z-index: 1;
-    width: min(1180px, calc(100% - 2.5rem));
-    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
 }
 
 .oxy-video-heading {
-    max-width: 760px;
-    margin: 0 auto 2rem;
-    text-align: center;
+    max-width: 880px;
 }
 
 .oxy-video-kicker {
     display: inline-block;
-    margin-bottom: 0.7rem;
-    color: #27d0ca;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.22em;
+    margin-bottom: 0.6rem;
+    color: #D4F3FF;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
 }
 
 .oxy-video-heading h2 {
     margin: 0;
     color: #ffffff;
-    font-size: clamp(2rem, 4vw, 3.1rem);
-    line-height: 1.1;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    line-height: 1.2;
     font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 .oxy-video-heading p {
-    margin: 1rem auto 0;
-    max-width: 680px;
-    color: rgba(235, 247, 249, 0.76);
-    font-size: 1rem;
-    line-height: 1.7;
+    margin: 0.65rem 0 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
-.oxy-video-card {
-    border: 1px solid rgba(80, 209, 205, 0.25);
-    border-radius: 1.25rem;
-    overflow: hidden;
-    background: rgba(3, 18, 25, 0.78);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(8px);
-}
+/* ---- Outbound "Watch on YouTube" call to action -------------------------
+   The same navy pill as SkyViewSection and FieldFootageSection, so every
+   "Watch on YouTube" button on the site looks alike. The only difference is
+   a faint light border, so the button still reads against the navy end of
+   this band. */
 
-.oxy-video-frame {
-    position: relative;
-    aspect-ratio: 16 / 9;
-    background: #03151c;
-}
-
-.oxy-video-frame video {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background: #03151c;
-}
-
-.oxy-video-play {
-    display: block;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    margin: 0;
-    cursor: pointer;
-    background: #03151c;
-}
-
-.oxy-video-play img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.oxy-video-play-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    display: flex;
+.oxy-video-cta {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 50%;
-    background: rgba(3, 18, 25, 0.72);
-    border: 1px solid rgba(39, 208, 202, 0.55);
-    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
-    transform: translate(-50%, -50%);
-    transition: transform 0.2s ease, background 0.2s ease;
+    gap: 0.75rem;
+    flex: none;
+    padding: 0.8rem 1.5rem 0.8rem 0.95rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(212, 243, 255, 0.28);
+    background: linear-gradient(135deg, #1A2C54 0%, #24406F 100%);
+    color: #F2FAFF;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 14px 30px -16px rgba(11, 31, 51, 0.85);
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                box-shadow 0.35s ease;
 }
 
-.oxy-video-play-icon::before {
-    content: "";
-    margin-left: 0.3rem;
-    border-style: solid;
-    border-width: 0.75rem 0 0.75rem 1.2rem;
-    border-color: transparent transparent transparent #ffffff;
+.oxy-video-cta:hover,
+.oxy-video-cta:focus-visible {
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 20px 38px -16px rgba(11, 31, 51, 0.9);
 }
 
-.oxy-video-play:hover .oxy-video-play-icon,
-.oxy-video-play:focus-visible .oxy-video-play-icon {
-    background: rgba(39, 208, 202, 0.85);
-    transform: translate(-50%, -50%) scale(1.06);
-}
-
-.oxy-video-play:focus-visible {
-    outline: 2px solid #27d0ca;
+.oxy-video-cta:focus-visible {
+    outline: 2px solid #D4F3FF;
     outline-offset: 3px;
 }
 
-.oxy-video-duration {
-    position: absolute;
-    left: 1rem;
-    top: 1rem;
+/* The red mark sits on its own light plate so it reads against the navy. */
+.oxy-yt-mark {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.45rem 0.7rem;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 999px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(3, 18, 25, 0.68);
-    backdrop-filter: blur(8px);
-    font-size: 0.75rem;
-    font-weight: 700;
-    pointer-events: none;
-}
-
-.oxy-video-dot {
-    width: 7px;
-    height: 7px;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
     border-radius: 50%;
-    background: #27d0ca;
-    box-shadow: 0 0 10px rgba(39, 208, 202, 0.75);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px -2px rgba(2, 13, 25, 0.6);
 }
 
-.oxy-video-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding: 1.25rem 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+.oxy-yt-mark svg {
+    width: 21px;
+    height: 21px;
+    fill: #FF0033;
 }
 
-.oxy-video-meta strong {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: #ffffff;
-    font-size: 1rem;
+.oxy-yt-mark .oxy-yt-tri {
+    fill: #FFFFFF;
 }
 
-.oxy-video-meta > div:first-child span {
-    display: block;
-    color: rgba(235, 247, 249, 0.62);
-    font-size: 0.86rem;
-    line-height: 1.45;
+.oxy-cta-arrow {
+    width: 15px;
+    height: 15px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.7;
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                opacity 0.35s ease;
 }
 
-.oxy-models {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 0.5rem;
+.oxy-video-cta:hover .oxy-cta-arrow,
+.oxy-video-cta:focus-visible .oxy-cta-arrow {
+    transform: translate(2px, -2px);
+    opacity: 1;
 }
 
-.oxy-models span {
-    padding: 0.45rem 0.7rem;
-    border: 1px solid rgba(39, 208, 202, 0.28);
-    border-radius: 999px;
-    color: #bfeeed;
-    background: rgba(39, 208, 202, 0.06);
-    font-size: 0.75rem;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-@media (max-width: 700px) {
+/* Stack on tablets and phones. */
+@media (max-width: 860px) {
     .oxy-video-section {
-        padding: 3.25rem 0 3rem;
+        padding: 2rem 1.5rem;
         border-radius: 1rem;
     }
 
     .oxy-video-inner {
-        width: min(100% - 1.25rem, 1180px);
-    }
-
-    .oxy-video-meta {
-        align-items: flex-start;
         flex-direction: column;
-    }
-
-    .oxy-models {
-        justify-content: flex-start;
-    }
-
-    .oxy-video-duration {
-        left: 0.65rem;
-        top: 0.65rem;
-        font-size: 0.7rem;
+        align-items: flex-start;
+        gap: 1.5rem;
     }
 }

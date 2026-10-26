@@ -39,7 +39,6 @@
         initWhatsAppQrCodes();
         initFreeDemoForm();
         initVideos();
-        initOxyNanoClickToPlay();
         initFaqAccordion();
         initYieldCalculator();
         initProductTypePage();
@@ -476,40 +475,6 @@
             });
         }).catch(function (err) {
             console.error("[marketingIslands] Error attaching background video(s):", err);
-        });
-    }
-
-    // ---- OXY-Nano Series click-to-play ---------------------------------------
-    function initOxyNanoClickToPlay() {
-        var button = document.querySelector(".oxy-video-play");
-        if (!button) return;
-
-        button.addEventListener("click", function () {
-            var frame = button.closest(".oxy-video-frame");
-            if (!frame) return;
-
-            var video = document.createElement("video");
-            video.controls = true;
-            video.autoplay = true;
-            video.playsInline = true;
-            video.preload = "auto";
-            video.poster = "/images/oxy-nano-poster.webp";
-            video.setAttribute("aria-label", button.getAttribute("aria-label") || "OXY-Nano Series product video");
-
-            var source = document.createElement("source");
-            // The Tamil variant (Services/LocalizationService) only ever
-            // applies on a locale-prefixed page; the homepage isn't
-            // prerendered per-locale (see tools/StaticSiteMeta's route
-            // table), so this island only ever needs the English source.
-            source.src = "/videos/oxy-nano-series.mp4";
-            source.type = "video/mp4";
-            video.appendChild(source);
-            video.appendChild(document.createTextNode("Your browser does not support the video tag."));
-
-            frame.replaceChild(video, button);
-            video.play().catch(function () {
-                // Autoplay may be blocked; controls are already visible.
-            });
         });
     }
 

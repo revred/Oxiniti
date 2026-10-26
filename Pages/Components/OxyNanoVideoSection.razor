@@ -1,7 +1,5 @@
-@using Microsoft.JSInterop
-@implements IAsyncDisposable
-@inject IJSRuntime JS
 @inject LocalizationService Loc
+@implements IDisposable
 
 <section class="oxy-video-section" id="oxy-nano-video" aria-labelledby="oxy-video-title">
 
@@ -23,112 +21,32 @@
             <p>
                 @Loc.T(
                     "oxyNano.description",
-                    "Explore Oxyniti's nano-bubble technology and the OXY-Nano 1.5, 3 and 5 HP solutions in this complete product overview."
+                    "From low-oxygen ponds to bigger harvests: see how OXY-Nano nano-bubbles reach the whole pond floor, the 1.5, 3 and 5 HP models, and the yield gains farmers are seeing."
                 )
             </p>
 
         </div>
 
-
-        <div class="oxy-video-card">
-
-            <div class="oxy-video-frame">
-
-                @if (_playing)
-                {
-                    <video @ref="_videoElement"
-                           controls
-                           autoplay
-                           playsinline
-                           preload="auto"
-                           poster="/images/oxy-nano-poster.webp"
-                           aria-label="@Loc.T(
-                               "oxyNano.videoAria",
-                               "OXY-Nano Series product video"
-                           )">
-
-                        <source src="@VideoSource" type="video/mp4" />
-
-                        @Loc.T(
-                            "oxyNano.videoUnsupported",
-                            "Your browser does not support the video tag."
-                        )
-
-                    </video>
-                }
-                else
-                {
-                    <button type="button"
-                            class="oxy-video-play"
-                            @onclick="Play"
-                            aria-label="@Loc.T(
-                                "oxyNano.videoAria",
-                                "OXY-Nano Series product video"
-                            )">
-
-                        <img src="/images/oxy-nano-poster.webp"
-                             alt=""
-                             width="1280"
-                             height="720"
-                             loading="lazy" />
-
-                        <span class="oxy-video-play-icon" aria-hidden="true"></span>
-
-                    </button>
-                }
-
-
-                <div class="oxy-video-duration" aria-hidden="true">
-
-                    <span class="oxy-video-dot"></span>
-
-                    @Loc.T(
-                        "oxyNano.productVideo",
-                        "Product video"
-                    )
-                    · 6:53
-
-                </div>
-
-            </div>
-
-
-            <div class="oxy-video-meta">
-
-                <div>
-
-                    <strong>
-                        @Loc.T(
-                            "oxyNano.powerOptions",
-                            "Three power options"
-                        )
-                    </strong>
-
-                    <span>
-                        @Loc.T(
-                            "oxyNano.powerDescription",
-                            "Choose the model that matches your pond and available power supply."
-                        )
-                    </span>
-
-                </div>
-
-
-                <div class="oxy-models"
-                     aria-label="@Loc.T(
-                         "oxyNano.modelsAria",
-                         "OXY-Nano models"
-                     )">
-
-                    <span>OXY-Nano-1.5</span>
-                    <span>OXY-Nano-3</span>
-                    <span>OXY-Nano-5</span>
-
-                </div>
-
-            </div>
-
-        </div>
+        @*
+            The product overview lives on YouTube rather than being streamed
+            from the homepage -- same reasoning as the drone clip in
+            SkyViewSection: no video download for visitors who scroll past.
+        *@
+        <a class="oxy-video-cta"
+           href="@YouTubeUrl"
+           target="_blank"
+           rel="noopener noreferrer">
+            <span class="oxy-yt-mark">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M21.6 7.2a2.5 2.5 0 0 0-1.75-1.77C18.28 5 12 5 12 5s-6.28 0-7.85.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.75 1.77C5.72 19 12 19 12 19s6.28 0 7.85-.43a2.5 2.5 0 0 0 1.75-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8z" />
+                    <path class="oxy-yt-tri" d="M10.15 15.1V8.9L15.5 12z" />
+                </svg>
+            </span>
+            <span>@Loc.T("sky.cta", "Watch on YouTube")</span>
+            <svg class="oxy-cta-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 17 17 7M9 7h8v8" />
+            </svg>
+        </a>
 
     </div>
 
@@ -136,105 +54,16 @@
 
 
 @code {
-
-    private ElementReference _videoElement;
-
-    private IJSObjectReference? _videoModule;
-    private IJSObjectReference? _videoController;
-
-    private bool _playing;
-
-
-    private string VideoSource =>
-        string.Equals(
-            Loc.CurrentLanguage,
-            "ta",
-            StringComparison.OrdinalIgnoreCase)
-            ? "/videos/oxyniti_explainer_16x9_tamil.mp4"
-            : "/videos/oxy-nano-series.mp4";
-
+    /// <summary>The OXY-Nano Series product overview on the Oxyniti YouTube channel.</summary>
+    private const string YouTubeUrl = "https://www.youtube.com/watch?v=wRUlzXs4LWs";
 
     protected override void OnInitialized()
     {
-        Loc.OnChange += OnLanguageChanged;
+        Loc.OnChange += StateHasChanged;
     }
 
-
-    private void Play()
+    public void Dispose()
     {
-        _playing = true;
-    }
-
-
-    private async void OnLanguageChanged()
-    {
-        await InvokeAsync(async () =>
-        {
-            // Refresh all translated text (and the poster/button when not yet playing).
-            StateHasChanged();
-
-            if (!_playing)
-                return;
-
-            // Allow Blazor to update the <source>.
-            await Task.Yield();
-
-            // Reload the newly selected language video.
-            if (_videoController is not null)
-            {
-                await _videoController.InvokeVoidAsync("reload");
-            }
-        });
-    }
-
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        // The <video> element only exists in the DOM once the visitor
-        // clicks play, so the JS module is loaded lazily on that render
-        // instead of on first render (which would still be the poster
-        // button and has no element to attach to).
-        if (!_playing || _videoModule is not null)
-            return;
-
-        try
-        {
-            _videoModule = await JS.InvokeAsync<IJSObjectReference>(
-                "import",
-                "./js/oxyNanoVideo.js");
-
-            _videoController =
-                await _videoModule.InvokeAsync<IJSObjectReference>(
-                    "init",
-                    _videoElement);
-        }
-        catch (JSException)
-        {
-            // Prevent page from breaking if JS is unavailable.
-        }
-    }
-
-
-    public async ValueTask DisposeAsync()
-    {
-        Loc.OnChange -= OnLanguageChanged;
-
-        try
-        {
-            if (_videoController is not null)
-            {
-                await _videoController.InvokeVoidAsync("dispose");
-                await _videoController.DisposeAsync();
-            }
-
-            if (_videoModule is not null)
-            {
-                await _videoModule.DisposeAsync();
-            }
-        }
-        catch (JSDisconnectedException)
-        {
-            // Safe to ignore when Blazor circuit disconnects.
-        }
+        Loc.OnChange -= StateHasChanged;
     }
 }

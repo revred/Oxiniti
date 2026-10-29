@@ -799,6 +799,7 @@ html.shell-app-route .shell-route-loading {
 @keyframes yt-lightbox-in {
     from { opacity: 0; }
     to { opacity: 1; }
+}
 
 /* "+ GST" after a product price (ProductDetails, ProductsByFilter, Search). */
 .price-gst {

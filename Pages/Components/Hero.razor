@@ -4,12 +4,12 @@
 @inject LocalizationService Loc
 
 <div class="hero-container">
-    <img @ref="_posterElement" class="hero-poster" src="/images/hero-poster-wide.avif" width="1280" height="720"
+    <img @ref="_posterElement" class="hero-poster" src="/images/hero-poster-wide.avif?v=5" width="1280" height="720"
          fetchpriority="high" decoding="async" alt="" />
-    <video @ref="_videoElement" class="hero-video" muted loop playsinline poster="/images/hero-poster-wide.avif"
+    <video @ref="_videoElement" class="hero-video" muted loop playsinline poster="/images/hero-poster-wide.avif?v=5"
            data-video-init="lazy-eager">
-        <source data-src="/videos/hero.webm" type="video/webm" />
-        <source data-src="/videos/hero.mp4" type="video/mp4" />
+        <source data-src="/videos/hero.webm?v=5" type="video/webm" />
+        <source data-src="/videos/hero.mp4?v=5" type="video/mp4" />
     </video>
     <div class="gradient-overlay"></div>
 
@@ -21,7 +21,7 @@
         </p>
         <div class="hero-ctas">
             <a href="#free-demo" class="btn btn-explore">@Loc.T("hero.cta1", "Book a Free Pond Demo")</a>
-            <a href="#sky-view" class="btn btn-ghost">@Loc.T("hero.cta2", "▶  Watch it work")</a>
+            <a href="#sky-view" class="btn btn-ghost"><span class="play-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13l11-6.5z" /></svg></span>@Loc.T("hero.cta2", "Watch it work")</a>
         </div>
         <div class="hero-stats">
             <div class="hero-stat">

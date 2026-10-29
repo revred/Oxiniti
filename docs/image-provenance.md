@@ -29,9 +29,6 @@ a labelled render or a plain decorative/UI image that makes no such claim.
 | Asset | Used in | Claim made by surrounding copy | Source | Status |
 |---|---|---|---|---|
 | `hero.webm` / `hero.mp4` | `Hero.razor` | Implicit real-product claim (hero background loop) | Real footage (matches `hero-poster-wide.jpg`) | OK |
-| `drone.webm` / `drone.mp4` | Not referenced anywhere in current code (the clip now plays from YouTube via `SkyViewSection.razor`) | none | Real aerial footage (matches `pond-still-frame.jpg`) | **Orphaned** — safe to delete once the YouTube link is confirmed live |
-| `plume-portrait.webm` / `plume-portrait.mp4` | Not referenced anywhere in current code (the Use Cases clip now plays from YouTube via `FieldFootageSection.razor`) | none | Real footage (matches `plume-poster.jpg`); explicitly called out in #78 as reading genuine | **Orphaned** — safe to delete once the YouTube link is confirmed live |
-| `drone_enhanced.mp4` | Not referenced anywhere in current code | none | Unknown (unused) | **Orphaned** — likely a superseded edit of `drone.mp4`; confirm and delete if so |
 
 ## Decorative / UI assets (no provenance claim)
 
@@ -62,7 +59,8 @@ displayed images/videos. `unit-pondside*` and `unit-fishfarm*` (both flagged
 in #78) are the only assets that were AI-generated/composited and shown
 under an authenticity claim; both have been removed from every page that
 displays them (this PR completes the fix that #78's interim change started).
-Two video files (`hero-poster.*`, `drone_enhanced.mp4`) and two image files
+The orphaned drone and plume-portrait videos were deleted (28 Oct 2026; both
+clips play from YouTube). `hero-poster.*` and two image files
 appear orphaned (unreferenced) and are noted above for cleanup, not because
 they pose a trust risk.
 

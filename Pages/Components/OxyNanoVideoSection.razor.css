@@ -1,66 +1,155 @@
 /*
-    A slim band rather than a full-height block: copy on the left, the
-    outbound YouTube link on the right. Same gradient as the species band
-    in FarmingTypesSection ("Built for every South Indian farm").
+    A centred feature band: kicker, headline, line of copy and one "Watch
+    video" button that opens the popup player (js/videoLightbox.js).
+
+    Base is FarmingTypesSection's brand gradient ("Built for every South
+    Indian farm"); on top sit a soft glow, a faint dot texture and a few
+    rising nano-bubbles -- all CSS, so the band downloads nothing.
 */
 .oxy-video-section {
     position: relative;
     overflow: hidden;
+    isolation: isolate;
     margin: 0.5rem 0;
-    padding: 2.75rem clamp(1.5rem, 5vw, 4.5rem);
-    border-radius: 0.75rem;
+    padding: clamp(1.75rem, 3vw, 2.25rem) clamp(1.5rem, 5vw, 4.5rem);
+    border-radius: 1.25rem;
     background: linear-gradient(90deg, #3D8FB5 0%, #0B1F33 100%);
+    box-shadow:
+        inset 0 0 0 1px rgba(212, 243, 255, 0.12),
+        0 30px 60px -40px rgba(11, 31, 51, 0.9);
+    text-align: center;
 }
+
+/* Glow behind the headline, plus a darker vignette at the edges. */
+.oxy-video-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(ellipse 55% 70% at 50% 0%, rgba(95, 227, 255, 0.28) 0%, rgba(95, 227, 255, 0) 70%),
+        radial-gradient(ellipse 90% 90% at 50% 50%, rgba(11, 31, 51, 0) 50%, rgba(11, 31, 51, 0.45) 100%);
+    pointer-events: none;
+}
+
+/* Faint dot texture, fading out towards the edges. */
+.oxy-video-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: radial-gradient(rgba(212, 243, 255, 0.22) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(ellipse 60% 80% at 50% 50%, #000 0%, transparent 75%);
+    mask-image: radial-gradient(ellipse 60% 80% at 50% 50%, #000 0%, transparent 75%);
+    pointer-events: none;
+}
+
+/* ---- Rising nano-bubbles ------------------------------------------------ */
+
+.oxy-bubbles {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.oxy-bubbles span {
+    position: absolute;
+    bottom: -20px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(212, 243, 255, 0.45);
+    background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.55), rgba(212, 243, 255, 0.05) 70%);
+    opacity: 0;
+    animation: oxy-rise 11s linear infinite;
+}
+
+.oxy-bubbles span:nth-child(1)  { left: 6%;  animation-delay: 0s; }
+.oxy-bubbles span:nth-child(2)  { left: 14%; animation-delay: 4s;   width: 12px; height: 12px; }
+.oxy-bubbles span:nth-child(3)  { left: 22%; animation-delay: 7s;   width: 6px;  height: 6px; }
+.oxy-bubbles span:nth-child(4)  { left: 31%; animation-delay: 2s;   animation-duration: 14s; }
+.oxy-bubbles span:nth-child(5)  { left: 68%; animation-delay: 5s;   width: 10px; height: 10px; }
+.oxy-bubbles span:nth-child(6)  { left: 76%; animation-delay: 1s;   width: 6px;  height: 6px; animation-duration: 9s; }
+.oxy-bubbles span:nth-child(7)  { left: 84%; animation-delay: 8s;   width: 14px; height: 14px; animation-duration: 15s; }
+.oxy-bubbles span:nth-child(8)  { left: 91%; animation-delay: 3s; }
+.oxy-bubbles span:nth-child(9)  { left: 46%; animation-delay: 9s;   width: 5px;  height: 5px; animation-duration: 13s; }
+.oxy-bubbles span:nth-child(10) { left: 57%; animation-delay: 6s;   width: 7px;  height: 7px; animation-duration: 12s; }
+
+@keyframes oxy-rise {
+    0%   { transform: translate(0, 0);         opacity: 0; }
+    15%  { opacity: 0.9; }
+    50%  { transform: translate(8px, -180px); }
+    85%  { opacity: 0.6; }
+    100% { transform: translate(-6px, -380px); opacity: 0; }
+}
+
+/* ---- Copy --------------------------------------------------------------- */
 
 .oxy-video-inner {
-    position: relative;
-    z-index: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 2.5rem;
-}
-
-.oxy-video-heading {
-    max-width: 880px;
+    max-width: 860px;
+    margin: 0 auto;
 }
 
 .oxy-video-kicker {
-    display: inline-block;
-    margin-bottom: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.7rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(212, 243, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
     color: #D4F3FF;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.22em;
 }
 
-.oxy-video-heading h2 {
+.oxy-kicker-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #5FE3FF;
+    box-shadow: 0 0 0 4px rgba(95, 227, 255, 0.18);
+}
+
+.oxy-video-inner h2 {
     margin: 0;
-    color: #ffffff;
-    font-size: clamp(1.5rem, 2.4vw, 2rem);
-    line-height: 1.2;
+    font-size: clamp(1.5rem, 2.6vw, 2.15rem);
+    line-height: 1.12;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.025em;
+    color: #FFFFFF;
+    background: linear-gradient(180deg, #FFFFFF 30%, #BFEFFF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.oxy-video-heading p {
-    margin: 0.65rem 0 0;
+.oxy-video-inner p {
+    max-width: 760px;
+    margin: 0.5rem 0 0;
     color: rgba(255, 255, 255, 0.78);
     font-size: 0.95rem;
-    line-height: 1.6;
+    line-height: 1.55;
 }
 
-/* ---- Outbound "Watch on YouTube" call to action -------------------------
-   The same navy pill as SkyViewSection and FieldFootageSection, so every
-   "Watch on YouTube" button on the site looks alike. The only difference is
-   a faint light border, so the button still reads against the navy end of
-   this band. */
+/* ---- "Watch video" button ------------------------------------------------
+   The same navy pill and white play plate as the SkyViewSection and
+   FieldFootageSection buttons, so every video button on the site looks
+   alike. Only here: a faint light border and ring, so the navy still reads
+   against the dark end of this band. */
 
 .oxy-video-cta {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    flex: none;
+    margin-top: 1.1rem;
     padding: 0.8rem 1.5rem 0.8rem 0.95rem;
     border-radius: 2rem;
     border: 1px solid rgba(212, 243, 255, 0.28);
@@ -71,6 +160,7 @@
     text-decoration: none;
     white-space: nowrap;
     box-shadow:
+        0 0 0 5px rgba(255, 255, 255, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.16),
         0 14px 30px -16px rgba(11, 31, 51, 0.85);
     transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
@@ -82,17 +172,17 @@
     color: #FFFFFF;
     transform: translateY(-2px);
     box-shadow:
+        0 0 0 7px rgba(255, 255, 255, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         0 20px 38px -16px rgba(11, 31, 51, 0.9);
 }
 
 .oxy-video-cta:focus-visible {
     outline: 2px solid #D4F3FF;
-    outline-offset: 3px;
+    outline-offset: 4px;
 }
 
-/* The red mark sits on its own light plate so it reads against the navy. */
-.oxy-yt-mark {
+.play-mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -100,50 +190,38 @@
     height: 32px;
     flex: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.95);
+    background: #FFFFFF;
     box-shadow: 0 2px 8px -2px rgba(2, 13, 25, 0.6);
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.oxy-yt-mark svg {
-    width: 21px;
-    height: 21px;
-    fill: #FF0033;
+.play-mark svg {
+    width: 20px;
+    height: 20px;
+    margin-left: 3px;
+    fill: #1A2C54;
 }
 
-.oxy-yt-mark .oxy-yt-tri {
-    fill: #FFFFFF;
+.oxy-video-cta:hover .play-mark,
+.oxy-video-cta:focus-visible .play-mark {
+    transform: scale(1.08);
 }
 
-.oxy-cta-arrow {
-    width: 15px;
-    height: 15px;
-    flex: none;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.7;
-    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
-                opacity 0.35s ease;
-}
-
-.oxy-video-cta:hover .oxy-cta-arrow,
-.oxy-video-cta:focus-visible .oxy-cta-arrow {
-    transform: translate(2px, -2px);
-    opacity: 1;
-}
-
-/* Stack on tablets and phones. */
+/* Phones: a little less padding. */
 @media (max-width: 860px) {
     .oxy-video-section {
-        padding: 2rem 1.5rem;
+        padding: 1.75rem 1.25rem;
         border-radius: 1rem;
     }
+}
 
-    .oxy-video-inner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.5rem;
+@media (prefers-reduced-motion: reduce) {
+    .oxy-bubbles {
+        display: none;
+    }
+
+    .oxy-video-cta,
+    .play-mark {
+        transition: none;
     }
 }

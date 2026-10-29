@@ -42,7 +42,7 @@
 
     <link rel="preconnect" href="https://maker-rest-api-e5c2djh7aafkace8.uksouth-01.azurewebsites.net" crossorigin />
 
-    <link rel="preload" as="image" href="/images/hero-poster-wide.avif" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/hero-poster-wide.avif?v=5" fetchpriority="high" />
 
     <!-- app.css alone is render-blocking: it's what the pre-boot shell needs
          (see wwwroot/index.html body), and at ~12KB it doesn't meaningfully
@@ -211,7 +211,7 @@
 
         <div class="shell-hero-wrap">
             <div class="shell-hero-container">
-                <img src="/images/hero-poster-wide.avif" width="1280" height="720" fetchpriority="high" decoding="async" alt="" class="shell-hero-poster" />
+                <img src="/images/hero-poster-wide.avif?v=5" width="1280" height="720" fetchpriority="high" decoding="async" alt="" class="shell-hero-poster" />
                 <div class="shell-gradient-overlay"></div>
                 <div class="shell-hero-content">
                     <span class="shell-hero-kicker">Namaskar, Fish Farmers! 🐟</span>
@@ -219,7 +219,7 @@
                     <p class="shell-hero-sub">Oxyniti's nano-bubble generator floods your pond with trillions of invisible oxygen bubbles that stay dissolved for days &mdash; not seconds. Healthier fish, faster growth, bigger harvests.</p>
                     <div class="shell-hero-ctas">
                         <a href="#free-demo" class="shell-btn-explore">Book a Free Pond Demo</a>
-                        <a href="#sky-view" class="shell-btn-ghost">&#9654;&nbsp; Watch it work</a>
+                        <a href="#sky-view" class="shell-btn-ghost"><span class="shell-play-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13l11-6.5z" /></svg></span>Watch it work</a>
                     </div>
                     <div class="shell-hero-stats">
                         <div class="shell-hero-stat">
@@ -346,6 +346,7 @@
     <script src="./js/scrollHelper.js" defer></script>
     <script src="./js/testimonialTranslate.js" defer></script>
     <script src="./js/yieldPromo.js" defer></script>
+    <script src="./js/videoLightbox.js" defer></script>
     <script src="_framework/blazor.webassembly.js" defer></script>
 
 </body>

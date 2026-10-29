@@ -143,9 +143,11 @@
                     @Shorten(p.Description, 150)
                 </p>
 
-                @* Price hidden: pricing is by enquiry.
-                <p class="fw-bold text-purple">@InrFormat.Rupees(p.Price)</p>
-                *@
+                @* Prices are Maker-only for now; everyone else enquires via Contact us. *@
+                @if (AuthenticationService.IsMakerAIUser == true)
+                {
+                    <p class="fw-bold text-purple">@InrFormat.Rupees(p.Price)</p>
+                }
             </div>
             <div class="product-action col-auto">
                 @* Add to cart is Maker-only while ordering is tested. *@

@@ -135,16 +135,20 @@
                             }
 
 
-                            <a href="/orders"
-                               class="user-menu-item">
+                            @* My Orders is Maker-only, like My Demos: only Maker users can order. *@
+                            @if (AuthenticationService.IsMakerAIUser == true)
+                            {
+                                <a href="/orders"
+                                   class="user-menu-item">
 
-                                <i class="bi bi-receipt"></i>
+                                    <i class="bi bi-receipt"></i>
 
-                                <span>
-                                    @Loc.T("menu.orders", "My Orders")
-                                </span>
+                                    <span>
+                                        @Loc.T("menu.orders", "My Orders")
+                                    </span>
 
-                            </a>
+                                </a>
+                            }
 
 
                             @* My Demos is the staff-only demo log (Pages/MyDemos.razor). *@

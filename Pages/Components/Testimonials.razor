@@ -1,4 +1,4 @@
-﻿@using System.Text.RegularExpressions
+﻿@using System.Text
 @implements IDisposable
 @inject BusinessInfoService InfoService
 @inject LocalizationService Loc
@@ -23,21 +23,67 @@
     // The real fix belongs in the CMS template; this is defense-in-depth so a
     // future regression there degrades to no image (the .author-avatar circle
     // still renders from CSS) instead of firing duplicate document requests.
-    private static readonly Regex ImgTagPattern =
-        new(@"<img\b[^>]*>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    //
+    // Scanned by hand rather than with a Regex: keeping
+    // System.Text.RegularExpressions out of the app saves ~90 KB on every app
+    // page's first load.
+    private string SanitizedTestimonials => StripImgsWithoutUsableSrc(InfoService.Testimonials);
 
-    private static readonly Regex SrcAttrPattern =
-        new(@"\bsrc\s*=\s*(['""])(.*?)\1", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    private string SanitizedTestimonials =>
-        ImgTagPattern.Replace(InfoService.Testimonials, StripImgWithoutUsableSrc);
-
-    private static string StripImgWithoutUsableSrc(Match imgTag)
+    private static string StripImgsWithoutUsableSrc(string html)
     {
-        var srcAttr = SrcAttrPattern.Match(imgTag.Value);
-        var hasUsableSrc = srcAttr.Success && !string.IsNullOrWhiteSpace(srcAttr.Groups[2].Value);
-        return hasUsableSrc ? imgTag.Value : string.Empty;
+        var sb = new StringBuilder(html.Length);
+        var from = 0;
+        while (true)
+        {
+            var start = IndexOfImgTag(html, from);
+            var end = start < 0 ? -1 : html.IndexOf('>', start);
+            if (end < 0)
+            {
+                sb.Append(html, from, html.Length - from);
+                return sb.ToString();
+            }
+            sb.Append(html, from, start - from);
+            var tag = html.AsSpan(start, end - start + 1);
+            if (HasUsableSrc(tag)) sb.Append(tag);
+            from = end + 1;
+        }
     }
+
+    // "<img" in any case, followed by a non-word character.
+    private static int IndexOfImgTag(string html, int from)
+    {
+        while (true)
+        {
+            var at = html.IndexOf("<img", from, StringComparison.OrdinalIgnoreCase);
+            if (at < 0 || at + 4 >= html.Length) return -1;
+            if (!IsWordChar(html[at + 4])) return at;
+            from = at + 1;
+        }
+    }
+
+    // True when the tag has a quoted src="..." (or src='...') that isn't blank.
+    private static bool HasUsableSrc(ReadOnlySpan<char> tag)
+    {
+        for (var at = 0; at < tag.Length; at++)
+        {
+            var rel = tag[at..].IndexOf("src", StringComparison.OrdinalIgnoreCase);
+            if (rel < 0) return false;
+            at += rel;
+            if (at > 0 && IsWordChar(tag[at - 1])) continue;
+            var i = at + 3;
+            while (i < tag.Length && char.IsWhiteSpace(tag[i])) i++;
+            if (i >= tag.Length || tag[i] != '=') continue;
+            i++;
+            while (i < tag.Length && char.IsWhiteSpace(tag[i])) i++;
+            if (i >= tag.Length || (tag[i] != '"' && tag[i] != '\'')) continue;
+            var close = tag[(i + 1)..].IndexOf(tag[i]);
+            if (close < 0) continue;
+            return !tag.Slice(i + 1, close).IsWhiteSpace();
+        }
+        return false;
+    }
+
+    private static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '_';
 
     protected override void OnInitialized()
     {

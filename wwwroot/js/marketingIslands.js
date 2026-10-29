@@ -1,21 +1,22 @@
 // Issue #63: the marketing routes (home, about, technology,
 // aquaculture-oxygenation, ras-oxygenation, products, faqs, contact,
-// privacy, terms, sitemap) are prerendered at build time
+// privacy, terms, sitemap -- plus every /products/type/{slug} list the
+// /products grid links to, and every /product/{slug} those lists link to)
+// are prerendered at build time
 // (tools/Prerender) and shipped WITHOUT the Blazor WASM runtime -- see that
 // tool's own comment for why. Everything on those pages that used to be a
 // Blazor @onclick/@oninput/@bind handler is wired here instead, in plain JS,
 // against the exact same DOM the Razor components already render (ids/names
 // added alongside this file for the handful of elements that needed a
-// stable hook -- see FreeDemoSection.razor, ProfitCalculatorSection.razor,
-// Layout/MainLayout.razor).
+// stable hook -- see FreeDemoSection.razor, Layout/MainLayout.razor).
 //
 // Everything below is either a direct call into a JS module the app
 // *already* ships (scrollHelper.js, tankBubbles.js, testimonialTranslate.js,
 // mapLoader.js/mapHelper.js, qrLoader.js/qrHelper.js,
 // lazyBackgroundVideo.js -- none of them have ever depended on a live
 // Blazor circuit, only on JS interop calling into them) or a small,
-// deliberately-scoped port of a Razor @code block's own logic (the profit
-// calculator's arithmetic, the free-demo form's localStorage write). Nothing
+// deliberately-scoped port of a Razor @code block's own logic (the free-demo
+// form's localStorage write). Nothing
 // here talks to the not-yet-deployed Oxyniti backend
 // (Services/DemoAccountService.cs) -- every call it would make already
 // no-ops today (OxynitiApi:BaseAddress is unset in appsettings.json), so
@@ -23,8 +24,8 @@
 // call that would never succeed anyway. If that backend ships, this file
 // needs a matching fetch() added -- it will NOT pick that up automatically.
 //
-// App routes (/cart, /account, /checkout, /login, /product/{slug}, etc.)
-// still boot the real Blazor app and never load this file.
+// App routes (/cart, /account, /checkout, /login, etc.) still boot the
+// real Blazor app and never load this file.
 (function () {
     "use strict";
 
@@ -32,16 +33,93 @@
         initAuthHeader();
         initLanguageSelect();
         initNavScrollSpy();
-        initProfitCalcScrollButtons();
         initScrollToQueryParam();
         initTankBubbles();
         initTestimonialHoverTranslate();
         initWhatsAppQrCodes();
-        initProfitCalculator();
         initFreeDemoForm();
         initVideos();
-        initOxyNanoClickToPlay();
         initFaqAccordion();
+        initYieldCalculator();
+        initProductTypePage();
+        initProductDetailPage();
+    }
+
+    // ---- Product page (/product/{slug}) --------------------------------------
+    // The thumbnails switch slides through Bootstrap's own data-bs-slide-to
+    // (Pages/ProductDetails.razor); this only keeps the highlighted thumbnail
+    // in step with the slide, as the page's attachCarouselEvent does in the app.
+    function initProductDetailPage() {
+        var carousel = document.getElementById("carouselExampleControls");
+        if (!carousel) return;
+        carousel.addEventListener("slid.bs.carousel", function (event) {
+            var thumbs = document.querySelectorAll(".thumb-box");
+            Array.prototype.forEach.call(thumbs, function (t, i) {
+                t.classList.toggle("active", i === event.to);
+            });
+        });
+    }
+
+    // ---- Product type list (/products/type/{slug}) ---------------------------
+    // Pages/ProductsByFilter.razor asks the API again for every search, sort
+    // and type change. The static copy has every product of the type on the
+    // page already (tools/Prerender only ships single-page lists), so the same
+    // three controls work on those rows here: search hides rows that don't
+    // contain the text, "Name" sorts them, and a type change opens that type.
+    function initProductTypePage() {
+        var root = document.querySelector("[data-product-type-page]");
+        if (!root) return;
+
+        var rows = Array.prototype.slice.call(root.querySelectorAll("[data-product-row]"));
+        var none = root.querySelector("[data-product-none]");
+        var search = root.querySelector("[data-product-search]");
+        var sort = root.querySelector("[data-product-sort]");
+        var filter = root.querySelector("[data-product-filter]");
+
+        if (filter) {
+            filter.addEventListener("change", function () {
+                if (filter.value) location.href = "/products/type/" + encodeURIComponent(filter.value);
+            });
+        }
+
+        if (!rows.length) return;
+        var parent = rows[0].parentNode;
+        var after = rows[rows.length - 1].nextSibling;
+
+        if (sort) {
+            sort.addEventListener("change", function () {
+                var ordered = rows.slice();
+                if (sort.value === "name") {
+                    ordered.sort(function (a, b) {
+                        return (a.getAttribute("data-name") || "").localeCompare(b.getAttribute("data-name") || "");
+                    });
+                }
+                ordered.forEach(function (row) { parent.insertBefore(row, after); });
+            });
+        }
+
+        if (search) {
+            search.addEventListener("input", function () {
+                var q = search.value.trim().toLowerCase();
+                var shown = 0;
+                rows.forEach(function (row) {
+                    var match = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+                    row.hidden = !match;
+                    if (match) shown++;
+                });
+                if (none) none.hidden = shown > 0;
+            });
+        }
+    }
+
+    // ---- Yield calculator (/yield-calculator) -------------------------------
+    // The same start-up Pages/YieldCalculator.razor runs once Blazor renders it;
+    // see yieldCalculator.js.
+    function initYieldCalculator() {
+        if (!document.getElementById("yc-root")) return;
+        import("./yieldCalculator.js").catch(function (err) {
+            console.error("[marketingIslands] Error loading the yield calculator:", err);
+        });
     }
 
     // ---- FAQ accordion -----------------------------------------------------
@@ -228,27 +306,6 @@
         }
     }
 
-    // ---- Profit-calculator scroll buttons (header + floating) --------------
-    function initProfitCalcScrollButtons() {
-        var buttons = document.querySelectorAll(".profit-btn, .floating-btn-profit");
-        if (!buttons.length) return;
-
-        buttons.forEach(function (btn) {
-            btn.addEventListener("click", function (e) {
-                var isHome = location.pathname === "/" || location.pathname === "";
-                if (isHome && typeof window.oxynitiScroll !== "undefined") {
-                    e.preventDefault();
-                    window.oxynitiScroll.toId("profit-calculator");
-                } else if (!document.getElementById("profit-calculator")) {
-                    // Only relevant off the homepage, where the calculator
-                    // doesn't exist on the page at all yet.
-                    e.preventDefault();
-                    location.href = "/?scrollTo=profit-calculator";
-                }
-            });
-        });
-    }
-
     // ---- Tank bubble decoration (Technology section) ------------------------
     function initTankBubbles() {
         if (document.querySelector(".tank.regular .tank-bubble-layer") && window.oxynitiTankBubbles) {
@@ -283,57 +340,6 @@
         });
     }
 
-    // ---- Profit calculator (ports ProfitCalculatorSection.razor's @code) ----
-    function initProfitCalculator() {
-        var acresInput = document.getElementById("calc-acres");
-        var priceInput = document.getElementById("calc-price");
-        if (!acresInput || !priceInput) return;
-
-        var acresLabel = document.getElementById("calc-acres-label");
-        var priceLabel = document.getElementById("calc-price-label");
-        var kgOut = document.getElementById("calc-kg");
-        var revenueOut = document.getElementById("calc-revenue");
-
-        var BASE_YIELD_KG_PER_ACRE = 2500;
-        var UPLIFT_LOW = 0.20;
-        var UPLIFT_HIGH = 0.30;
-
-        function fmtInr(n) {
-            return "₹" + Math.round(n).toLocaleString("en-IN");
-        }
-
-        function render() {
-            var acres = parseFloat(acresInput.value);
-            var pricePerKg = parseInt(priceInput.value, 10);
-
-            var lowKg = acres * BASE_YIELD_KG_PER_ACRE * UPLIFT_LOW;
-            var highKg = acres * BASE_YIELD_KG_PER_ACRE * UPLIFT_HIGH;
-            var lowRevenue = lowKg * pricePerKg;
-            var highRevenue = highKg * pricePerKg;
-
-            if (acresLabel) {
-                var acreWord = acres === 1 ? "acre" : "acres";
-                acresLabel.textContent = trimTrailingZero(acres) + " " + acreWord;
-            }
-            if (priceLabel) {
-                priceLabel.textContent = fmtInr(pricePerKg) + "/kg";
-            }
-            if (kgOut) {
-                kgOut.textContent = "+" + Math.round(lowKg).toLocaleString("en-IN") + " – " + Math.round(highKg).toLocaleString("en-IN") + " kg / year";
-            }
-            if (revenueOut) {
-                revenueOut.textContent = fmtInr(lowRevenue) + " – " + fmtInr(highRevenue);
-            }
-        }
-
-        function trimTrailingZero(n) {
-            return n % 1 === 0 ? n.toFixed(0) : n.toFixed(1);
-        }
-
-        acresInput.addEventListener("input", render);
-        priceInput.addEventListener("input", render);
-    }
-
     // ---- Free-demo form (ports FreeDemoSection.razor's @code) ---------------
     function initFreeDemoForm() {
         var form = document.getElementById("free-demo-form");
@@ -355,10 +361,7 @@
 
             var location_ = readPickedMapLocation();
 
-            // Matches Services/DemoBooking.cs's shape exactly -- Pages/MyDemos.razor
-            // reads this same localStorage key back through Services/DemoService.cs.
             var booking = {
-                Id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())).replace(/-/g, ""),
                 Name: name,
                 Phone: phone,
                 Place: place,
@@ -366,24 +369,40 @@
                 Species: fieldValue(form, "species") || "Tilapia / GIFT",
                 Latitude: location_ ? location_[0] : null,
                 Longitude: location_ ? location_[1] : null,
-                CreatedAtUtc: new Date().toISOString(),
             };
 
-            try {
-                var existingJson = window.localStorage.getItem("oxyniti_demos");
-                var existing = existingJson ? JSON.parse(existingJson) : [];
-                existing.push(booking);
-                window.localStorage.setItem("oxyniti_demos", JSON.stringify(existing));
-            } catch (err) {
-                console.error("[marketingIslands] Error saving demo booking:", err);
-            }
-
-            // Services/DemoAccountService.cs's own fallback message for an
-            // unconfigured OxynitiApi:BaseAddress -- which is this app's
-            // actual state today (see this file's header comment).
-            showFormStatus(form, "Demo request received! We'll contact you shortly.");
+            // The request only reaches the team once the farmer sends this
+            // pre-filled WhatsApp message (no backend stores demo requests
+            // yet) -- same as FreeDemoSection.razor's whatsAppLink block.
+            showDemoWhatsAppStep(form, buildDemoWhatsAppMessage(booking));
             form.reset();
         });
+    }
+
+    // Kept in step with BuildWhatsAppMessage in FreeDemoSection.razor.
+    function buildDemoWhatsAppMessage(booking) {
+        var lines = [
+            "Hi, I'd like a free Oxyniti pond demo.",
+            "Name: " + booking.Name,
+            "Phone: " + booking.Phone,
+            "Village / Town: " + booking.Place,
+            "Pond size: " + booking.Size,
+            "Species: " + booking.Species,
+        ];
+        if (booking.Latitude != null && booking.Longitude != null) {
+            lines.push("Pond location: https://www.google.com/maps?q=" +
+                booking.Latitude.toFixed(6) + "," + booking.Longitude.toFixed(6));
+        }
+        return lines.join("\n");
+    }
+
+    function showDemoWhatsAppStep(form, message) {
+        var block = form.querySelector('[data-field="wa"]');
+        var link = form.querySelector('[data-field="wa-link"]');
+        if (!block || !link) return;
+        // Matches SiteContact.WhatsAppNumber (C#).
+        link.href = "https://wa.me/919659727477?text=" + encodeURIComponent(message);
+        block.hidden = false;
     }
 
     function fieldValue(form, name) {
@@ -456,40 +475,6 @@
             });
         }).catch(function (err) {
             console.error("[marketingIslands] Error attaching background video(s):", err);
-        });
-    }
-
-    // ---- OXY-Nano Series click-to-play ---------------------------------------
-    function initOxyNanoClickToPlay() {
-        var button = document.querySelector(".oxy-video-play");
-        if (!button) return;
-
-        button.addEventListener("click", function () {
-            var frame = button.closest(".oxy-video-frame");
-            if (!frame) return;
-
-            var video = document.createElement("video");
-            video.controls = true;
-            video.autoplay = true;
-            video.playsInline = true;
-            video.preload = "auto";
-            video.poster = "/images/oxy-nano-poster.webp";
-            video.setAttribute("aria-label", button.getAttribute("aria-label") || "OXY-Nano Series product video");
-
-            var source = document.createElement("source");
-            // The Tamil variant (Services/LocalizationService) only ever
-            // applies on a locale-prefixed page; the homepage isn't
-            // prerendered per-locale (see tools/StaticSiteMeta's route
-            // table), so this island only ever needs the English source.
-            source.src = "/videos/oxy-nano-series.mp4";
-            source.type = "video/mp4";
-            video.appendChild(source);
-            video.appendChild(document.createTextNode("Your browser does not support the video tag."));
-
-            frame.replaceChild(video, button);
-            video.play().catch(function () {
-                // Autoplay may be blocked; controls are already visible.
-            });
         });
     }
 

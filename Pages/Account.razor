@@ -1,5 +1,6 @@
 @page "/account"
 @using System.IdentityModel.Tokens.Jwt
+@using System.Text.Json
 @using Oxyniti.Services
 @inject IJSRuntime JSRuntime
 @inject IAuthenticationService AuthenticationService
@@ -27,9 +28,12 @@ else
                 <span class="sidebar-item active">
                     <i class="bi bi-person-fill"></i> @Loc.T("account.nav.profile", "Profile")
                 </span>
-                <a class="sidebar-item" href="/my-demos">
-                    <i class="bi bi-geo-alt-fill"></i> @Loc.T("account.nav.demos", "My Demos")
-                </a>
+                @if (AuthenticationService.IsMakerAIUser == true)
+                {
+                    <a class="sidebar-item" href="/my-demos">
+                        <i class="bi bi-geo-alt-fill"></i> @Loc.T("account.nav.demos", "My Demos")
+                    </a>
+                }
                 @* My Orders hidden for now (ordering is paused); the /orders page still exists.
                 <a class="sidebar-item" href="/orders">
                     <i class="bi bi-box-seam-fill"></i> @Loc.T("account.nav.orders", "My Orders")
@@ -47,6 +51,8 @@ else
                     <h2 class="mb-1">@Loc.T("account.title", "My Account")</h2>
                     <p class="text-muted mb-0">@Loc.T("account.subtitle", "Manage your account details")</p>
                 </div>
+                @* "Verified" badge hidden with the WhatsApp-passcode login (see Login.razor):
+                   it only showed after a passcode login, which confirmed the phone number.
                 @if (isPasscodeVerified)
                 {
                     <div class="verified-badge">
@@ -57,6 +63,7 @@ else
                         </span>
                     </div>
                 }
+                *@
             </div>
 
             <div class="account-card">
@@ -72,15 +79,15 @@ else
                     <div class="profile-grid">
                         <div class="field">
                             <label>@Loc.T("account.field.name", "Full Name") <span class="req">*</span></label>
-                            <InputText class="acc-input" @bind-Value="profileVm.Name" />
+                            <InputText id="profile-name" class="acc-input" @bind-Value="profileVm.Name" />
                         </div>
                         <div class="field">
                             <label>@Loc.T("account.field.whatsapp", "WhatsApp Number") <span class="req">*</span></label>
                             <div class="input-with-icon">
-                                <input class="acc-input" value="@profileVm.Phone" disabled />
+                                <InputText id="profile-whatsapp" class="acc-input" type="tel" inputmode="tel" autocomplete="tel" @bind-Value="profileVm.Phone" placeholder="@Loc.T("account.field.whatsapp.ph", "e.g. 98765 43210")" />
                                 <i class="bi bi-whatsapp"></i>
                             </div>
-                            <small class="field-hint">@Loc.T("account.field.whatsapp.hint", "This number is used to login and cannot be changed.")</small>
+                            <small class="field-hint">@Loc.T("account.field.whatsapp.hint2", "We'll contact you about demos on this number.")</small>
                         </div>
                         <div class="field">
                             <label>@Loc.T("account.field.email", "Email")</label>
@@ -93,15 +100,15 @@ else
                         </div>
                         <div class="field">
                             <label>@Loc.T("account.field.place", "Village / Town") <span class="req">*</span></label>
-                            <InputText class="acc-input" @bind-Value="profileVm.Place" />
+                            <InputText id="profile-place" class="acc-input" @bind-Value="profileVm.Place" />
                         </div>
                         <div class="field">
                             <label>@Loc.T("account.field.state", "State") <span class="req">*</span></label>
-                            <InputText class="acc-input" @bind-Value="profileVm.State" />
+                            <InputText id="profile-state" class="acc-input" @bind-Value="profileVm.State" />
                         </div>
                         <div class="field">
                             <label>@Loc.T("account.field.pondlocation", "Pond Location") <span class="req">*</span></label>
-                            <InputText class="acc-input" @bind-Value="profileVm.PondLocation" placeholder="@Loc.T("account.field.pondlocation.ph", "e.g. Near Lalgudi Main Road")" />
+                            <InputText id="profile-pond-location" class="acc-input" @bind-Value="profileVm.PondLocation" placeholder="@Loc.T("account.field.pondlocation.ph", "e.g. Near Lalgudi Main Road")" />
                         </div>
                         <div class="field">
                             <label>@Loc.T("account.field.size", "Pond Size") <span class="req">*</span></label>
@@ -128,7 +135,7 @@ else
 
                     @if (!string.IsNullOrEmpty(profileStatusMessage))
                     {
-                        <p class="profile-status @(profileStatusIsError ? "is-error" : "is-success")">@profileStatusMessage</p>
+                        <p class="profile-status @(profileStatusIsError ? "is-error" : "is-success")" data-testid="profile-status">@profileStatusMessage</p>
                     }
 
                     <button type="submit" class="btn-save" disabled="@profileSaving">
@@ -150,8 +157,11 @@ else
 </div>
 
 @code {
+    // Until the Maker API can store a profile, Save keeps it on this device
+    // (one entry per login email) so the form opens filled in next time.
+    private const string ProfileStoragePrefix = "oxyniti_profile:";
+
     private bool isReady;
-    private bool isPasscodeVerified;
     private ProfileEditorVm profileVm = new();
     private bool profileSaving;
     private string? profileStatusMessage;
@@ -174,21 +184,29 @@ else
             return;
         }
 
-        profileVm.Email = GetClaimFromAccessToken(AuthenticationService.AccessToken, "email", JwtRegisteredClaimNames.Email) ?? string.Empty;
-        profileVm.Phone = GetClaimFromAccessToken(AuthenticationService.AccessToken, "phone_number", "phone") ?? string.Empty;
-
-        var loginMethod = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "oxyniti_login_method");
-        isPasscodeVerified = loginMethod == "passcode";
+        var email = GetClaimFromAccessToken(AuthenticationService.AccessToken, "email", JwtRegisteredClaimNames.Email) ?? string.Empty;
+        profileVm = await LoadSavedProfileAsync(email) ?? new ProfileEditorVm();
+        profileVm.Email = email;
+        if (string.IsNullOrWhiteSpace(profileVm.Phone))
+            profileVm.Phone = GetClaimFromAccessToken(AuthenticationService.AccessToken, "phone_number", "phone") ?? string.Empty;
 
         isReady = true;
     }
 
     private async Task SaveProfileAsync()
     {
-        profileSaving = true;
         profileStatusMessage = null;
+        if (new[] { profileVm.Name, profileVm.Phone, profileVm.Place, profileVm.State, profileVm.PondLocation }.Any(string.IsNullOrWhiteSpace))
+        {
+            profileStatusMessage = Loc.T("account.profile.required", "Please fill in every box marked *.");
+            profileStatusIsError = true;
+            return;
+        }
+
+        profileSaving = true;
         try
         {
+            var savedHere = await SaveProfileLocallyAsync();
             var result = await DemoAccountService.UpdateProfileAsync(new UpdateDemoProfileRequest
             {
                 Name = profileVm.Name,
@@ -201,8 +219,18 @@ else
                 Size = profileVm.Size,
                 Species = profileVm.Species
             });
-            profileStatusMessage = result.Message;
-            profileStatusIsError = !result.IsSuccess;
+            if (result.IsSuccess)
+            {
+                profileStatusMessage = result.Message;
+                profileStatusIsError = false;
+            }
+            else
+            {
+                profileStatusMessage = savedHere
+                    ? Loc.T("account.profile.savedlocal", "Saved. Your details will be filled in next time you open this page on this device.")
+                    : result.Message;
+                profileStatusIsError = !savedHere;
+            }
         }
         finally
         {
@@ -231,6 +259,36 @@ else
         }
 
         Nav.NavigateTo("/");
+    }
+
+    private async Task<ProfileEditorVm?> LoadSavedProfileAsync(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return null;
+        try
+        {
+            var json = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", ProfileStoragePrefix + email.ToLowerInvariant());
+            return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<ProfileEditorVm>(json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Account] Could not read the saved profile: {ex.Message}");
+            return null;
+        }
+    }
+
+    private async Task<bool> SaveProfileLocallyAsync()
+    {
+        if (string.IsNullOrWhiteSpace(profileVm.Email)) return false;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", ProfileStoragePrefix + profileVm.Email.ToLowerInvariant(), JsonSerializer.Serialize(profileVm));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Account] Could not save the profile on this device: {ex.Message}");
+            return false;
+        }
     }
 
     private static string? GetClaimFromAccessToken(string? accessToken, params string[] claimTypes)

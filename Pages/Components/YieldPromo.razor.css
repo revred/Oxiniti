@@ -1,0 +1,289 @@
+/* =========================================================
+   YIELD CALCULATOR PROMO CARD
+
+   A small slide-in card, not a modal: no backdrop, no scroll lock, nothing to
+   fight before the page is usable again. It sits bottom-right, beside the
+   floating WhatsApp / calculator buttons, and on a phone becomes a sheet
+   along the bottom edge. Colours are the header's navy with the logo's
+   teal-to-cyan and its orange bubble; wwwroot/js/yieldPromo.js opens it by
+   setting data-state="open".
+   ========================================================= */
+
+.yield-promo {
+    --yp-navy: #071321;
+    --yp-navy-2: #0d2238;
+    --yp-teal: #1dd9c8;
+    --yp-cyan: #5ce1ff;
+    --yp-orange: #ffa53d;
+
+    position: fixed;
+
+    /* Left of the 52px floating buttons (FloatingActionButtons.razor.css). */
+    right: calc(1.5rem + 52px + 1rem);
+    bottom: 1.5rem;
+
+    z-index: 1040;
+
+    width: min(300px, calc(100vw - 2rem));
+
+    box-sizing: border-box;
+
+    border-radius: 16px;
+
+    background: linear-gradient(160deg, var(--yp-navy-2) 0%, var(--yp-navy) 62%);
+
+    border: 1px solid rgba(29, 217, 200, 0.28);
+
+    box-shadow:
+        0 24px 60px rgba(2, 8, 23, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+
+    color: #e9f0f5;
+
+    overflow: hidden;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(28px) scale(0.97);
+    transform-origin: bottom right;
+    pointer-events: none;
+
+    transition:
+        opacity 0.35s ease,
+        transform 0.55s cubic-bezier(0.2, 0.9, 0.25, 1.15),
+        visibility 0s linear 0.55s;
+}
+
+
+.yield-promo[data-state="open"] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+
+    transition:
+        opacity 0.35s ease,
+        transform 0.55s cubic-bezier(0.2, 0.9, 0.25, 1.15),
+        visibility 0s;
+}
+
+
+/* ---- Close ------------------------------------------------------------ */
+
+.yp-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+
+    z-index: 2;
+
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(2, 8, 23, 0.45);
+
+    color: rgba(233, 240, 245, 0.8);
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+
+.yp-close:hover,
+.yp-close:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+
+    color: #ffffff;
+}
+
+
+/* ---- Copy ------------------------------------------------------------- */
+
+.yp-body {
+    padding: 14px 16px 16px;
+}
+
+
+.yp-eyebrow {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin: 0 0 6px;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    letter-spacing: 1.1px;
+
+    text-transform: uppercase;
+
+    color: var(--yp-teal);
+}
+
+
+.yp-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--yp-orange);
+
+    box-shadow: 0 0 0 4px rgba(255, 165, 61, 0.18);
+}
+
+
+.yp-title {
+    margin: 0 30px 6px 0;
+
+    font-size: 16.5px;
+    font-weight: 800;
+
+    line-height: 1.22;
+
+    letter-spacing: -0.3px;
+
+    color: #ffffff;
+}
+
+
+.yp-text {
+    margin: 0 0 12px;
+
+    font-size: 12.5px;
+
+    line-height: 1.5;
+
+    color: rgba(233, 240, 245, 0.78);
+}
+
+
+.yp-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.yp-cta {
+    flex: 1 1 auto;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 9px 14px;
+
+    border-radius: 10px;
+
+    background: linear-gradient(90deg, var(--yp-teal), var(--yp-cyan));
+
+    color: #021018;
+
+    font-size: 13.5px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    box-shadow: 0 10px 24px rgba(29, 217, 200, 0.28);
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+
+.yp-cta i {
+    transition: transform 0.2s ease;
+}
+
+
+.yp-cta:hover,
+.yp-cta:focus-visible {
+    color: #021018;
+
+    transform: translateY(-1px);
+
+    filter: brightness(1.06);
+
+    box-shadow: 0 14px 30px rgba(29, 217, 200, 0.38);
+}
+
+
+.yp-cta:hover i,
+.yp-cta:focus-visible i {
+    transform: translateX(3px);
+}
+
+
+.yp-later {
+    flex-shrink: 0;
+
+    padding: 6px 2px;
+
+    border: none;
+
+    background: none;
+
+    color: rgba(233, 240, 245, 0.6);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.yp-later:hover,
+.yp-later:focus-visible {
+    color: #ffffff;
+}
+
+
+/* ---- Phone: a sheet along the bottom ---------------------------------- */
+
+@media (max-width: 768px) {
+
+    .yield-promo {
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 0.75rem;
+
+        width: auto;
+
+        transform: translateY(110%);
+        transform-origin: bottom center;
+    }
+
+    .yp-body {
+        padding: 12px 14px 14px;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .yield-promo,
+    .yield-promo[data-state="open"] {
+        transition: opacity 0.2s ease, visibility 0s;
+    }
+
+    .yield-promo {
+        transform: none;
+    }
+}

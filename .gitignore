@@ -45,3 +45,8 @@
 # Two developers patching one TOML file conflicted on every concurrent edit.
 # Nothing reads it now; kept locally as history, no longer tracked.
 .sharc/evolution/manifest.toml
+
+# tests/site: Playwright dependencies and run output.
+/tests/site/node_modules
+/tests/site/test-results
+/tests/site/playwright-report

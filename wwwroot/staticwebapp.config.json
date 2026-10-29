@@ -18,7 +18,8 @@
       "/css/*",
       "/vendor/*",
       "/i18n/*",
-      "/bootstrap/*"
+      "/bootstrap/*",
+      "/yield-calculator/*"
     ]
   },
   "mimeTypes": {

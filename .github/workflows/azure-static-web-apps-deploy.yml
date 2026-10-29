@@ -108,6 +108,11 @@ jobs:
       # static content is what a crawler (or a browser with JS disabled)
       # sees; the Blazor app then mounts over the same #app root and
       # hydrates the live, interactive page on top.
+      #
+      # Since then the prerender step above captures most product pages in
+      # full (header, menu, footer, no WASM); this step keeps those and only
+      # writes its template for the products that step skipped. It still adds
+      # every product to sitemap.xml.
       - name: Generate static product pages + sitemap entries
         run: dotnet run --project tools/StaticProductPages/StaticProductPages.csproj -c Release -- --wwwroot "$GITHUB_WORKSPACE/bin/Release/publish/wwwroot"
 

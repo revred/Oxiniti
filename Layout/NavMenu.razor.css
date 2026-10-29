@@ -196,7 +196,8 @@
    The clamps above shrink type/gaps smoothly instead of in steps, and the
    hamburger now takes over at 1024px -- while the row still fits unwrapped
    -- rather than at 860px, long after links had silently scrolled out of
-   view. MainLayout drops the search field at 1200px to fund the same budget.
+   view. (The header's search field, once dropped at 1200px for the same
+   budget, now lives on the /search page, linked from the footer.)
    ========================================================= */
 
 @media (max-width: 1150px) {
@@ -292,5 +293,106 @@
 @media (max-width: 520px) {
     .brand-tag {
         display: none; /* No room for the tagline once the logo/name itself is shrinking */
+    }
+}
+
+
+/* =========================================================
+   YIELD CALCULATOR PILL
+
+   Follows Contact Us. A twin of the header's language pill
+   (MainLayout.razor.css: same height, radius, navy fill, border and icon
+   colour), with the chart icon in the globe's place and no dropdown
+   arrow.
+   ========================================================= */
+
+.yield-pill {
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 0 14px 0 12px;
+
+    box-sizing: border-box;
+
+    border-radius: 19px;
+
+    background: #101d2d;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+
+    text-decoration: none;
+
+    white-space: nowrap;
+
+    flex-shrink: 0;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.yield-pill-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    color: #28dce5;
+
+    font-size: 18px;
+}
+
+
+.yield-pill-text {
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: #ffffff;
+}
+
+
+.yield-pill:hover,
+.yield-pill:focus-visible {
+    border-color: rgba(40, 220, 229, 0.55);
+
+    box-shadow: 0 0 0 3px rgba(40, 220, 229, 0.12);
+}
+
+
+/* Where there is no room for the words, the pill shrinks to its icon, as
+   the language pill does at 860px (aria-label still names it): on a phone,
+   and in the band just above 1024px where the full nav row is still shown
+   and the words would push "Contact Us" off its end. */
+@media (max-width: 520px), (min-width: 1025px) and (max-width: 1120px) {
+
+    .yield-pill {
+        width: 42px;
+        height: 42px;
+
+        padding: 0;
+
+        justify-content: center;
+    }
+
+    .yield-pill-text {
+        display: none;
+    }
+}
+
+
+/* Once the links fold into the menu, the pill is the last thing in this bar
+   and sits against the header's WhatsApp button; give it the same space the
+   header's actions keep between themselves (MainLayout.razor.css). */
+@media (max-width: 1024px) {
+
+    .yield-pill {
+        margin-right: clamp(8px, 1vw, 18px);
     }
 }

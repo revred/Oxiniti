@@ -1,0 +1,380 @@
+// Staff-only demo log (Pages/MyDemos.razor + Services/StaffDemoService.cs).
+// Signs in by planting a fake token in localStorage the way
+// Maker.RampEdge's AuthenticationService stores a real one, and answers
+// /api/demo/* from this file -- nothing here reaches the live Maker API.
+import { test, expect } from "@playwright/test";
+
+const BOOT_TIMEOUT = 90_000;
+
+function fakeJwt(email) {
+    const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+    const now = Math.floor(Date.now() / 1000);
+    return `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ email, sub: "test-user", iat: now, exp: now + 3600 })}.c2ln`;
+}
+
+async function signIn(page, { staff }) {
+    const token = fakeJwt("staff@example.com");
+    await page.addInitScript(([token, staff]) => {
+        localStorage.setItem("maker_access_token", token);
+        localStorage.setItem("maker_refresh_token", "refresh");
+        localStorage.setItem("is_maker_user", staff ? "true" : "false");
+    }, [token, staff]);
+}
+
+const savedDemos = () => ({
+    demos: [
+        {
+            barID: 101,
+            demoDateUtc: "2026-10-05T12:00:00Z",
+            place: "Lalgudi",
+            district: "Trichy",
+            state: "Tamil Nadu",
+            latitude: 11,
+            longitude: 79,
+            farmerName: "Murugan",
+            farmerPhone: "+91 98765 43210",
+            species: "Tilapia / GIFT",
+            pondSize: "1 – 3 acres",
+            productUsed: "Oxyniti nano-bubble unit",
+            doBefore: 3,
+            doAfter: 7,
+            outcome: "Interested",
+            notes: 'Farmer wants a quote.\n\n[[oxyniti:{"by":"Fazil","lat":10.8705,"lng":78.8211,"doBefore":3.2,"doAfter":6.8}]]',
+            videoUrl: "https://youtube.com/watch?v=demo",
+            photos: [],
+            givenBy: "staff@example.com",
+        },
+        {
+            barID: 102,
+            demoDateUtc: "2026-09-20T12:00:00Z",
+            place: "Bhimavaram",
+            district: "West Godavari",
+            state: "Andhra Pradesh",
+            latitude: 0,
+            longitude: 0,
+            farmerName: "",
+            farmerPhone: "",
+            species: "Vannamei shrimp",
+            pondSize: "",
+            productUsed: "",
+            doBefore: 0,
+            doAfter: 0,
+            outcome: "Ordered",
+            notes: "",
+            videoUrl: "string",
+            photos: [],
+            givenBy: "staff@example.com",
+        },
+        {
+            // Saved since Maker.RampEdgeV1 1.0.12: the name and exact values are real fields.
+            barID: 103,
+            demoDateUtc: "2026-09-01T12:00:00Z",
+            place: "Kaikaluru",
+            district: "Eluru",
+            state: "Andhra Pradesh",
+            latitude: 16.5512,
+            longitude: 81.2131,
+            farmerName: "Ramesh",
+            farmerPhone: "",
+            species: "Vannamei shrimp",
+            pondSize: "",
+            productUsed: "",
+            doBefore: 4.5,
+            doAfter: 7.25,
+            outcome: "Interested",
+            notes: "Second visit next week.",
+            videoUrl: "",
+            photos: [],
+            givenBy: "staff@example.com",
+            givenByName: "Ravi",
+        },
+    ],
+});
+
+async function mockDemoApi(page) {
+    const calls = [];
+    await page.route("**/api/demo/**", async (route) => {
+        const req = route.request();
+        const name = new URL(req.url()).pathname.split("/").pop();
+        calls.push({ name, body: req.postDataJSON(), auth: req.headers()["authorization"] });
+        if (name === "GetDemos") return route.fulfill({ json: savedDemos() });
+        if (name === "DeleteDemo") return route.fulfill({ status: 204, body: "" });
+        return route.fulfill({ json: {} });
+    });
+    return calls;
+}
+
+test("signed-out visitors are sent to the login page", async ({ page }) => {
+    await page.goto("/my-demos");
+    await expect(page).toHaveURL(/\/login$/, { timeout: BOOT_TIMEOUT });
+});
+
+test("a customer login sees the staff-only notice and never calls the demo API", async ({ page }) => {
+    await signIn(page, { staff: false });
+    const calls = await mockDemoApi(page);
+    await page.goto("/my-demos");
+    await expect(page.getByTestId("demos-not-staff")).toBeVisible({ timeout: BOOT_TIMEOUT });
+    expect(calls).toEqual([]);
+    await expect(page.locator('a[href="/my-demos"]')).toHaveCount(0);
+});
+
+test("staff see every demo with who gave it and the exact DO readings", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const calls = await mockDemoApi(page);
+    await page.goto("/my-demos");
+
+    const cards = page.getByTestId("demo-card");
+    await expect(cards).toHaveCount(3, { timeout: BOOT_TIMEOUT });
+    expect(calls[0].name).toBe("GetDemos");
+    expect(calls[0].auth).toMatch(/^Bearer /);
+
+    await expect(page.getByTestId("demos-stats")).toContainText("3");
+    const first = cards.first();
+    await expect(first.locator(".demo-title")).toHaveText("Lalgudi");
+    await expect(first).toContainText("Trichy, Tamil Nadu");
+    await expect(first).toContainText("3.2");
+    await expect(first).toContainText("6.8");
+    await expect(first).toContainText("Farmer wants a quote.");
+    await expect(first).not.toContainText("[[oxyniti:");
+    await expect(first.getByTestId("demo-given-by")).toContainText("Fazil");
+    // A demo saved with the real fields shows them as they are.
+    const third = cards.nth(2);
+    await expect(third.getByTestId("demo-given-by")).toContainText("Ravi");
+    await expect(third).toContainText("4.5");
+    await expect(third).toContainText("7.25");
+    // A demo with no name at all falls back to the login that saved it.
+    await expect(cards.nth(1).getByTestId("demo-given-by")).toContainText("staff@example.com");
+    // The server's 0 means "not recorded", not 0 mg/L.
+    await expect(cards.nth(1)).not.toContainText("mg/L");
+
+    // Only real web links get a Video tile; the API's "string" placeholder does not.
+    await expect(first.locator(".video-tile")).toHaveCount(1);
+    await expect(cards.nth(1).locator(".video-tile")).toHaveCount(0);
+
+    // The second demo has no location (it was saved as 0, 0).
+    await expect(page.getByTestId("demos-map-count")).toContainText("2 of 3 demos pinned");
+    await expect(page.locator(".oxy-pin")).toHaveCount(2);
+
+    await page.getByTestId("demos-filter-by").selectOption("Fazil");
+    await expect(cards).toHaveCount(1);
+    await expect(page.getByTestId("demos-map-count")).toContainText("1 of 1 demos pinned");
+});
+
+test("staff can add a demo; the name and exact readings are sent", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const calls = await mockDemoApi(page);
+    await page.goto("/my-demos");
+    await expect(page.getByTestId("demo-card")).toHaveCount(3, { timeout: BOOT_TIMEOUT });
+
+    await page.getByTestId("demos-add").click();
+    const form = page.locator("#demo-visit-form");
+    await expect(form).toBeVisible();
+
+    // Name is required.
+    await form.locator("#demo-place").fill("Musiri");
+    await form.locator('button[type="submit"]').click();
+    await expect(page.getByTestId("demo-form-error")).toContainText("your name");
+
+    await form.locator("#demo-given-by").fill("Fazil");
+    await form.locator("#demo-district").fill("Trichy");
+    await form.locator("#demo-do-before").fill("4.5");
+    await form.locator("#demo-do-after").fill("7.25");
+    await form.locator("#demo-outcome").selectOption("Ordered");
+    await form.locator("#demo-notes").fill("Two ponds.");
+    await form.locator('button[type="submit"]').click();
+
+    await expect(form).toBeHidden();
+    const add = calls.find((c) => c.name === "AddDemo");
+    expect(add.body.place).toBe("Musiri");
+    expect(add.body.givenByName).toBe("Fazil");
+    expect(add.body.doBefore).toBe(4.5);
+    expect(add.body.doAfter).toBe(7.25);
+    expect(add.body.notes).toBe("Two ponds."); // no [[oxyniti: trailer any more
+    expect(calls.filter((c) => c.name === "GetDemos").length).toBe(2);
+
+    // The next demo starts with an empty name (devices may be shared).
+    await page.getByTestId("demos-add").click();
+    await expect(page.locator("#demo-given-by")).toHaveValue("");
+});
+
+test("an old demo edited after the fix shows the edited values, not its stale trailer", async ({ page }) => {
+    await signIn(page, { staff: true });
+    // The server keeps the old trailer on update, so only the real fields change.
+    const demo = { ...savedDemos().demos[0], latitude: 12.3456, longitude: 79.1234, doBefore: 2.5, doAfter: 7, givenByName: "Ravi" };
+    await page.route("**/api/demo/**", (route) => route.fulfill({ json: { demos: [demo] } }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await expect(card.getByTestId("demo-given-by")).toContainText("Ravi");
+    await expect(card).toContainText("2.5"); // edited
+    await expect(card).toContainText("6.8"); // untouched: 7 is still the trailer's 6.8 rounded
+    await expect(card).not.toContainText("3.2");
+    await expect(card).not.toContainText("[[oxyniti:");
+});
+
+test("staff can delete a demo after confirming", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const calls = await mockDemoApi(page);
+    await page.goto("/my-demos");
+    const first = page.getByTestId("demo-card").first();
+    await expect(first).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await first.getByRole("button", { name: "Delete" }).click();
+    expect(calls.some((c) => c.name === "DeleteDemo")).toBe(false);
+    await first.getByRole("button", { name: "Yes, delete" }).click();
+    await expect.poll(() => calls.find((c) => c.name === "DeleteDemo")?.body).toEqual({ demoBarID: 101 });
+});
+
+test("the yield-calculator promo never covers the staff demo log", async ({ page }) => {
+    await signIn(page, { staff: true });
+    await mockDemoApi(page);
+    await page.goto("/my-demos");
+    await expect(page.getByTestId("demo-card").first()).toBeVisible({ timeout: BOOT_TIMEOUT });
+    await page.waitForTimeout(4000); // the promo opens about a second after a page loads
+    await expect(page.locator("#yield-promo")).not.toHaveAttribute("data-state", "open");
+});
+
+test("tapping the map fills village, district and state separately, never over typed text", async ({ page }) => {
+    await signIn(page, { staff: true });
+    await mockDemoApi(page);
+    await page.route("**/nominatim.openstreetmap.org/**", (route) => route.fulfill({
+        json: { address: { city: "Tiruchirappalli", county: "Tiruchchirāppalli", state_district: "Tiruchirappalli District", state: "Tamil Nadu" } },
+    }));
+    await page.goto("/my-demos");
+    await expect(page.getByTestId("demo-card").first()).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await page.getByTestId("demos-add").click();
+    const form = page.locator("#demo-visit-form");
+    // A tap before Leaflet has set up the map is lost (seen on the phone size).
+    await expect(form.locator(".demo-picker-map.leaflet-container")).toBeVisible();
+    await form.locator(".demo-picker-map").click({ position: { x: 120, y: 120 } });
+    await expect(form.locator("#demo-place")).toHaveValue("Tiruchirappalli");
+    await expect(form.locator("#demo-district")).toHaveValue("Tiruchirappalli");
+    await expect(form.locator("#demo-state")).toHaveValue("Tamil Nadu");
+
+    // A box typed by hand survives the next tap; the others follow the pin.
+    await form.locator("#demo-state").fill("Kerala");
+    await form.locator(".demo-picker-map").click({ position: { x: 200, y: 140 } });
+    await page.waitForTimeout(1500);
+    await expect(form.locator("#demo-state")).toHaveValue("Kerala");
+});
+
+test("staff can remove a saved photo; its storage path is sent on save", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const pixel = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+    const demo = {
+        ...savedDemos().demos[0],
+        photos: [
+            { url: `${pixel}#a`, path: "demos/101/a.jpg" },
+            { url: `${pixel}#b`, path: "demos/101/b.jpg" },
+        ],
+    };
+    const calls = [];
+    await page.route("**/api/demo/**", (route) => {
+        const req = route.request();
+        calls.push({ name: new URL(req.url()).pathname.split("/").pop(), body: req.postDataJSON() });
+        return route.fulfill({ json: { demos: [demo] } });
+    });
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    const saved = form.getByTestId("saved-photo");
+    await expect(saved).toHaveCount(2);
+    await expect(form.locator(".photo-drop small")).toContainText("1");
+
+    await saved.first().getByRole("button", { name: "Remove photo" }).click();
+    await expect(saved).toHaveCount(1);
+    await expect(form.locator(".photo-drop small")).toContainText("2"); // the slot is free again
+
+    await form.locator("#demo-given-by").fill("Fazil");
+    await form.locator('button[type="submit"]').click();
+    await expect(form).toBeHidden();
+    const update = calls.find((c) => c.name === "UpdateDemo");
+    expect(update.body.removePhotoUrls).toEqual(["demos/101/a.jpg"]);
+});
+
+test("a saved photo is kept when the edit is cancelled", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const demo = { ...savedDemos().demos[0], photos: [{ url: "data:image/gif;base64,R0lGODlhAQABAAAAACw=", path: "demos/101/a.jpg" }] };
+    await page.route("**/api/demo/**", (route) => route.fulfill({ json: { demos: [demo] } }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    await form.getByTestId("saved-photo").getByRole("button", { name: "Remove photo" }).click();
+    await expect(form.getByTestId("saved-photo")).toHaveCount(0);
+    await form.getByRole("button", { name: "Cancel" }).click();
+    await expect(form).toBeHidden();
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    await expect(page.locator("#demo-visit-form").getByTestId("saved-photo")).toHaveCount(1);
+});
+
+test("moving a saved pin on Edit updates its place names and saves the new pin, keeping a box typed in this edit", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const demo = { ...savedDemos().demos[2] }; // Kaikaluru, Eluru, Andhra Pradesh, pinned
+    const calls = [];
+    await page.route("**/api/demo/**", (route) => {
+        const req = route.request();
+        calls.push({ name: new URL(req.url()).pathname.split("/").pop(), body: req.postDataJSON() });
+        return route.fulfill({ json: { demos: [demo] } });
+    });
+    const places = [
+        { village: "Palakollu", state_district: "West Godavari District", state: "Andhra Pradesh" },
+        { village: "Kovvur", state_district: "East Godavari District", state: "Andhra Pradesh" },
+    ];
+    let lookups = 0;
+    await page.route("**/nominatim.openstreetmap.org/**", (route) => route.fulfill({ json: { address: places[Math.min(lookups++, 1)] } }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    await expect(form.locator(".demo-picker-map.leaflet-container")).toBeVisible();
+    await page.waitForTimeout(1000); // opening a fully named pin looks nothing up
+    expect(lookups).toBe(0);
+    await expect(form.locator("#demo-place")).toHaveValue("Kaikaluru");
+
+    await form.locator(".demo-picker-map").click({ position: { x: 120, y: 120 } });
+    await expect(form.locator("#demo-place")).toHaveValue("Palakollu");
+    await expect(form.locator("#demo-district")).toHaveValue("West Godavari");
+
+    // A box typed during this edit survives the next move.
+    await form.locator("#demo-district").fill("Godavari delta");
+    await form.locator(".demo-picker-map").click({ position: { x: 200, y: 140 } });
+    await expect(form.locator("#demo-place")).toHaveValue("Kovvur");
+    await expect(form.locator("#demo-district")).toHaveValue("Godavari delta");
+
+    await form.locator('button[type="submit"]').click();
+    await expect(form).toBeHidden();
+    const update = calls.find((c) => c.name === "UpdateDemo");
+    expect(update.body.place).toBe("Kovvur");
+    expect(update.body.latitude).not.toBe(16.5512);
+    expect(update.body.longitude).not.toBe(81.2131);
+});
+
+test("editing a pinned demo fills a State left empty, keeping the saved village", async ({ page }) => {
+    await signIn(page, { staff: true });
+    const demo = { ...savedDemos().demos[0], place: "Vanagiri", district: "Mayiladuthurai", state: "" };
+    await page.route("**/api/demo/**", (route) => route.fulfill({ json: { demos: [demo] } }));
+    await page.route("**/nominatim.openstreetmap.org/**", (route) => route.fulfill({
+        json: { address: { village: "Poompuhar", county: "Sirkali", state_district: "Mayiladuthurai", state: "Tamil Nadu" } },
+    }));
+    await page.goto("/my-demos");
+    const card = page.getByTestId("demo-card").first();
+    await expect(card).toBeVisible({ timeout: BOOT_TIMEOUT });
+
+    // The saved pin is looked up once when the form opens; only the empty box is filled.
+    await card.getByRole("button", { name: "Edit" }).click();
+    const form = page.locator("#demo-visit-form");
+    await expect(form.locator("#demo-state")).toHaveValue("Tamil Nadu");
+    await expect(form.locator("#demo-place")).toHaveValue("Vanagiri");
+    await expect(form.locator("#demo-district")).toHaveValue("Mayiladuthurai");
+});

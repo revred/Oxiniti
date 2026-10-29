@@ -14,7 +14,12 @@
 {
     <HeadContent>
         <link rel="canonical" href="@CanonicalUrl" />
-        <meta name="description" content="@MetaDescription" />
+        @* Several catalogue entries have no description; leave the site-wide
+           one in place rather than publishing an empty tag. *@
+        @if (!string.IsNullOrWhiteSpace(MetaDescription))
+        {
+            <meta name="description" content="@MetaDescription" />
+        }
         <script type="application/ld+json">@((MarkupString)BuildProductJsonLd())</script>
         <script type="application/ld+json">@((MarkupString)BuildBreadcrumbJsonLd())</script>
     </HeadContent>
@@ -157,6 +162,11 @@ else
                             <div class="carousel-item @(i == 0 ? "active" : "") position-relative @(asset.Is3DFile ? "is-3d" : "")">
                                 @if (asset.Is3DFile)
                                 {
+                                    @* The viewer's fileUrl is a signed storage URL that expires
+                                       minutes after issue, so a page with a 3D model must not be
+                                       frozen into a static file by tools/Prerender: it stays on
+                                       the app, which fetches a fresh URL on every visit. *@
+                                    <span hidden data-prerender-incomplete></span>
                                     <iframe src="@($"https://happy-stone-0cb14df10.6.azurestaticapps.net?fileUrl={asset.Url}&showControls=false")"
                                             style="width: 100%; height: 500px; border: none; border-radius: 0.5rem;"
                                             allowfullscreen
@@ -193,8 +203,10 @@ else
                         {
                             var asset = SortedAssets[i];
                             var idx = i; 
+                            @* Bootstrap's own data API switches the slide, so a thumbnail
+                               also works on the prerendered copy, which ships without Blazor. *@
                             <div class="thumb-box @(i == 0 ? "active" : "")"
-                                @onclick="() => OnThumbnailClick(idx)">
+                                data-bs-target="#carouselExampleControls" data-bs-slide-to="@idx">
                                 @if (asset.Is3DFile)
                                 {
                                     <div class="thumb-3d-text">@Loc.T("pd.thumb.3d", "3D")</div>
@@ -262,12 +274,15 @@ else
                         }
                     </button>
                     *@
-                    <a class="btn btn-outline-dark w-100 mb-2" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
+                    <a class="btn btn-gradient w-100 mb-4" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
+                    @* Login/Register to Buy is hidden while buying is paused: logging in
+                       unlocks nothing here. Restore it with Add to cart above.
                     @if(!AuthenticationService.IsAuthenticated){
-                        <button class="btn btn-gradient w-100 mb-4">
+                        <a class="btn btn-gradient w-100 mb-4" href="/login">
                             @Loc.T("pd.auth.loginToBuy", "Login/Register to Buy")
-                        </button>
+                        </a>
                     }
+                    *@
 
                     <p>@Detail.Description</p>
 
@@ -287,8 +302,8 @@ else
                 @foreach (var p in AlsoLike)
                 {
                     <div class="col-6 col-md-3">
-                        <div class="card h-100 cursor-pointer"
-                             @onclick="@(() => Nav.NavigateTo($"/product/{p.Slug}"))">
+                        @* A real link, not an @onclick, so it works on the prerendered copy too. *@
+                        <a class="card h-100 text-reset text-decoration-none" href="/product/@p.Slug">
                             <img src="@p.Asset.Url"
                                  class="card-img-top"
                                  alt="@p.Name" />
@@ -298,14 +313,12 @@ else
                                 <p class="mb-0">@InrFormat.Rupees(p.Price)</p>
                                 *@
                             </div>
-                        </div>
+                        </a>
                     </div>
                 }
             </div>
         }
 
-        <!-- Footer -->
-        <Footer />
     </div>
 
     <!-- Fullscreen 3D Viewer Modal -->
@@ -555,18 +568,6 @@ else
     private void ChangeQuantity(int delta)
         => Quantity = Math.Max(1, Quantity + delta);
 
-    private async Task OnThumbnailClick(int index)
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("selectCarouselSlide", "#carouselExampleControls", index);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ProductDetail] Error selecting carousel slide: {ex}");
-        }
-    }
-
     private async Task AddToCart()
     {
         if (Detail is null) return;
@@ -632,11 +633,6 @@ else
 }
 
 <script>
-    window.selectCarouselSlide = (carouselId, index) => {
-        const carousel = bootstrap.Carousel.getOrCreateInstance(document.querySelector(carouselId));
-        carousel.to(index);
-    };
-
     window.attachCarouselEvent = (carouselId) => {
         const el = document.querySelector(carouselId);
         if (!el) return;

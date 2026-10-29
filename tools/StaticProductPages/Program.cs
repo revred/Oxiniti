@@ -99,14 +99,26 @@ internal static class Program
                 continue;
             }
 
-            var images = await RehostProductImagesAsync(downloader, wwwroot, slug, detail.Assets);
-
             var pageDir = Path.Combine(wwwroot, "product", slug);
-            Directory.CreateDirectory(pageDir);
-            File.WriteAllText(
-                Path.Combine(pageDir, "index.html"),
-                ProductPageTemplate.Render(detail, images),
-                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var pagePath = Path.Combine(pageDir, "index.html");
+
+            // tools/Prerender (the step before this one) already wrote the full
+            // page -- header, menu, footer, no WASM -- for every product it
+            // could capture. Keep that; this template is only the fallback for
+            // the ones it skipped. The sitemap entry is still added below.
+            if (File.Exists(pagePath))
+            {
+                Console.WriteLine($"[static-product-pages] '{slug}' already prerendered, keeping it.");
+            }
+            else
+            {
+                var images = await RehostProductImagesAsync(downloader, wwwroot, slug, detail.Assets);
+                Directory.CreateDirectory(pageDir);
+                File.WriteAllText(
+                    pagePath,
+                    ProductPageTemplate.Render(detail, images),
+                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            }
 
             generated.Add((slug, today));
         }
@@ -127,7 +139,7 @@ internal static class Program
             Console.Error.WriteLine($"[static-product-pages] sitemap.xml not found at '{sitemapPath}', skipping sitemap update.");
         }
 
-        Console.WriteLine($"[static-product-pages] Wrote {generated.Count} product page(s) under {Path.Combine(wwwroot, "product")}.");
+        Console.WriteLine($"[static-product-pages] {generated.Count} product page(s) under {Path.Combine(wwwroot, "product")} and in sitemap.xml.");
         return 0;
     }
 
@@ -351,7 +363,19 @@ internal static class ProductPageTemplate
         html.Append("    <script src=\"bootstrap/dist/js/bootstrap.bundle.min.js\" defer></script>\n");
         html.Append("    <div id=\"app\">\n");
         html.Append("        <div class=\"shell-loading-bar\" aria-hidden=\"true\"></div>\n");
-        html.Append("        <div class=\"shell-header-spacer\" aria-hidden=\"true\"></div>\n");
+        // Same header band as wwwroot/index.html, brand included: an empty
+        // band left a bare black bar across the top of every product page
+        // for the whole WASM boot (~10 s on a fast line, far longer on rural
+        // mobile), which reads as a broken header.
+        html.Append("        <div class=\"shell-header-spacer\" aria-hidden=\"true\">\n");
+        html.Append("            <span class=\"shell-brand\">\n");
+        html.Append("                <img src=\"/oxyniti.png\" width=\"50\" height=\"50\" alt=\"\" decoding=\"async\" class=\"shell-brand-logo\" />\n");
+        html.Append("                <span>\n");
+        html.Append("                    <span class=\"shell-brand-name\">Oxyniti</span>\n");
+        html.Append("                    <span class=\"shell-brand-tag\">Nano-bubble aeration</span>\n");
+        html.Append("                </span>\n");
+        html.Append("            </span>\n");
+        html.Append("        </div>\n");
         html.Append("        <div class=\"product-details container-fluid px-4 py-5\">\n");
         html.Append("            <nav aria-label=\"breadcrumb\" class=\"mb-3\">\n");
         html.Append("                <a href=\"/\">Home</a> &rsaquo; <a href=\"/products\">Products</a> &rsaquo; " + Enc(detail.Name) + "\n");
@@ -404,6 +428,7 @@ internal static class ProductPageTemplate
         html.Append("    <script src=\"./js/tankBubbles.js\" defer></script>\n");
         html.Append("    <script src=\"./js/scrollHelper.js\" defer></script>\n");
         html.Append("    <script src=\"./js/testimonialTranslate.js\" defer></script>\n");
+        html.Append("    <script src=\"./js/yieldPromo.js\" defer></script>\n");
         html.Append("    <script src=\"_framework/blazor.webassembly.js\" defer></script>\n");
         html.Append("</body>\n</html>\n");
 

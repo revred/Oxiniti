@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Oxyniti mark">
+  <!-- Bubble-swirl "O" — dots thicken clockwise, dissolving into rising nano-bubbles -->
+  <g>
+    <circle cx="35.8" cy="10.3" r="2.0" fill="#12B8A6"/>
+    <circle cx="24.5" cy="11.3" r="2.4" fill="#13BFAD"/>
+    <circle cx="15.1" cy="17.9" r="2.8" fill="#15C6B4"/>
+    <circle cx="10.3" cy="28.2" r="3.2" fill="#16CDBB"/>
+    <circle cx="11.3" cy="39.5" r="3.6" fill="#18D3C2"/>
+    <circle cx="17.9" cy="48.9" r="4.0" fill="#1AD9C9"/>
+    <circle cx="28.2" cy="53.7" r="4.4" fill="#2BDCD3"/>
+    <circle cx="39.5" cy="52.7" r="4.8" fill="#3CDFE0"/>
+    <circle cx="48.9" cy="46.1" r="5.2" fill="#46E0EA"/>
+    <circle cx="53.7" cy="35.8" r="5.6" fill="#50E1F4"/>
+    <circle cx="52.7" cy="24.5" r="6.0" fill="#5CE1FF"/>
+  </g>
+  <!-- nano-bubbles escaping through the gap — mango accent -->
+  <g>
+    <circle cx="47.0" cy="14.0" r="2.6" fill="#FFB03A"/>
+    <circle cx="51.5" cy="8.5" r="1.8" fill="#FF9E45"/>
+    <circle cx="55.0" cy="4.0" r="1.2" fill="#FF8A50"/>
+  </g>
+</svg>

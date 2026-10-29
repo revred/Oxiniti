@@ -11,6 +11,11 @@
 
     <div class="range-section mb-5">
         <h2 class="display-5 fw-bold">@Loc.T("search.title", "Search Results")</h2>
+        @* The header has no search field; this page is reached from the
+           footer's Search link, so the box lives here. *@
+        <div class="search-page-box">
+            <Oxyniti.Pages.Inputs.SearchBox SearchTerm="@Query" />
+        </div>
         @if (!string.IsNullOrWhiteSpace(Query))
         {
             <p class="lead">@Loc.T("search.for", "Showing results for") "@Query"</p>
@@ -86,7 +91,6 @@
         }
     }
 
-    <Footer />
 </div>
 
 @code {

@@ -24,3 +24,10 @@
         background-color: #489FB5;
     }
 }
+
+/* Hidden under the yield promo sheet while it is open (YieldPromo.razor). */
+@media (max-width: 768px) {
+    :root[data-yield-promo="open"] .mobile-cta-bar {
+        visibility: hidden;
+    }
+}

@@ -121,8 +121,18 @@
 
     private bool IsPasswordStrong(string password)
     {
-        // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
-        var regex = new System.Text.RegularExpressions.Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$");
-        return regex.IsMatch(password);
+        // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special
+        // character. Plain checks rather than a Regex: nothing else in the app
+        // needs System.Text.RegularExpressions, and keeping it out of the
+        // download saves ~90 KB on every app page's first load.
+        // A line break is never allowed (one at the very end is ignored), as
+        // the old pattern behaved.
+        var p = password.EndsWith('\n') ? password[..^1] : password;
+        return p.Length >= 8
+            && !p.Contains('\n')
+            && p.Any(char.IsAsciiLetterLower)
+            && p.Any(char.IsAsciiLetterUpper)
+            && p.Any(char.IsDigit)
+            && p.Any(c => "@$!%*?&".Contains(c));
     }
 }

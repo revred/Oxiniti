@@ -65,26 +65,27 @@
             </div>
 
 
-            <!-- Cart — hidden for the duration; site doesn't need cart right now.
-                 Uncomment to restore the header cart entry point.
-            <a href="cart"
-               class="cart-control @(HighlightCart ? "cart-highlight" : "")">
+            @* Cart is Maker-only while ordering is tested; the public enquires via Contact us. *@
+            @if (AuthenticationService.IsMakerAIUser == true)
+            {
+                <a href="cart"
+                   class="cart-control @(HighlightCart ? "cart-highlight" : "")">
 
-                <i class="bi bi-cart3"></i>
+                    <i class="bi bi-cart3"></i>
 
-                <span class="cart-label">
-                    @Loc.T("nav.cart", "Cart")
-                </span>
-
-                @if (CartCount > 0)
-                {
-                    <span class="cart-badge">
-                        @CartCount
+                    <span class="cart-label">
+                        @Loc.T("nav.cart", "Cart")
                     </span>
-                }
 
-            </a>
-            -->
+                    @if (CartCount > 0)
+                    {
+                        <span class="cart-badge">
+                            @CartCount
+                        </span>
+                    }
+
+                </a>
+            }
 
 
             <!-- User -->
@@ -134,7 +135,6 @@
                             }
 
 
-                            @* My Orders hidden from the menu for now (ordering is paused); the /orders page still exists.
                             <a href="/orders"
                                class="user-menu-item">
 
@@ -145,7 +145,6 @@
                                 </span>
 
                             </a>
-                            *@
 
 
                             @* My Demos is the staff-only demo log (Pages/MyDemos.razor). *@
@@ -225,9 +224,9 @@
 
 @code {
 
-    // Cart count/highlight — unused while the header cart entry point is hidden.
-    // private int CartCount;
-    // private bool HighlightCart;
+    // Header cart badge (Maker users only).
+    private int CartCount;
+    private bool HighlightCart;
 
     private bool IsUserMenuOpen = false;
 
@@ -275,7 +274,7 @@
 
         AuthenticationService.OnChange += StateHasChanged;
 
-        // CartService.OnChange += UpdateCartCount; // cart entry point hidden for the duration
+        CartService.OnChange += UpdateCartCount;
 
         Loc.OnChange += StateHasChanged;
 
@@ -335,7 +334,7 @@
         }
 
 
-        // await UpdateCartCountAsync(); // feeds the header cart badge, hidden for the duration
+        await UpdateCartCountAsync();
     }
 
 
@@ -484,40 +483,43 @@
     }
 
 
-    // Feeds the header cart badge, hidden for the duration. Uncomment along with
-    // CartCount/HighlightCart and the wiring above to restore.
-    // private void UpdateCartCount()
-    //     => _ = UpdateCartCountAsync();
-    //
-    // private async Task UpdateCartCountAsync()
-    // {
-    //     try
-    //     {
-    //         var items =
-    //             await CartService.GetCartItems();
-    //
-    //         CartCount =
-    //             items.Count;
-    //
-    //
-    //         HighlightCart = true;
-    //
-    //         StateHasChanged();
-    //
-    //
-    //         await Task.Delay(1000);
-    //
-    //
-    //         HighlightCart = false;
-    //
-    //         StateHasChanged();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine(
-    //             $"[MainLayout] Error updating cart count: {ex}");
-    //     }
-    // }
+    // Feeds the header cart badge. Only Maker users see the cart, so skip the
+    // server call for everyone else.
+    private void UpdateCartCount()
+        => _ = UpdateCartCountAsync();
+
+    private async Task UpdateCartCountAsync()
+    {
+        if (AuthenticationService.IsMakerAIUser != true)
+            return;
+
+        try
+        {
+            var items =
+                await CartService.GetCartItems();
+
+            CartCount =
+                items.Count;
+
+
+            HighlightCart = true;
+
+            StateHasChanged();
+
+
+            await Task.Delay(1000);
+
+
+            HighlightCart = false;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"[MainLayout] Error updating cart count: {ex}");
+        }
+    }
 
 
     bool IsGoToMakerAIRunning = false;

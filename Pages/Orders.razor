@@ -135,10 +135,12 @@ else
                                 @Loc.T("orders.placed", "Placed:") @FormatDateTime(order.CreatedDate) (@FormatRelative(order.CreatedDate))
                             </div>
                         </div>
+                        @* Order total hidden: pricing is by enquiry.
                         <div class="text-end ms-auto">
                             <div class="fw-bold">@FormatMoney(order.Price)</div>
                             <div class="text-muted small">@Loc.T("orders.total", "Order total")</div>
                         </div>
+                        *@
                     </button>
                 </h2>
 
@@ -169,8 +171,10 @@ else
                                             <div class="text-muted small">
                                                 @Loc.T("orders.item.productid", "Product ID:") @item.BarID
                                                 &middot; @Loc.T("orders.item.qty", "Qty:") @item.Quantity
+                                                @* Unit price and subtotal hidden: pricing is by enquiry.
                                                 &middot; @Loc.T("orders.item.unit", "Unit:") @FormatMoney(item.Price)
                                                 &middot; @Loc.T("orders.item.subtotal", "Subtotal:") @FormatMoney(item.Price * item.Quantity)
+                                                *@
                                             </div>
                                         </div>
                                     </li>

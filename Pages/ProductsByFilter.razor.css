@@ -40,6 +40,11 @@
     .product-row .product-action {
         position: relative;
         z-index: 2;
+        /* Add to Cart (Maker users) and Contact us sit side by side. */
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: .5rem;
     }
 
 .pagination .page-item .page-link {

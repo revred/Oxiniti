@@ -156,8 +156,8 @@
     outline-offset: 3px;
 }
 
-/* The red mark sits on its own light plate so it reads against the navy. */
-.yt-mark {
+/* White plate with a navy play icon -- the same on every video button. */
+.play-mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -165,38 +165,21 @@
     height: 32px;
     flex: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.95);
+    background: #FFFFFF;
     box-shadow: 0 2px 8px -2px rgba(2, 13, 25, 0.6);
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.yt-mark svg {
-    width: 21px;
-    height: 21px;
-    fill: #FF0033;
+.play-mark svg {
+    width: 20px;
+    height: 20px;
+    margin-left: 3px;
+    fill: #1A2C54;
 }
 
-.yt-mark .yt-tri {
-    fill: #FFFFFF;
-}
-
-.cta-arrow {
-    width: 15px;
-    height: 15px;
-    flex: none;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.7;
-    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
-                opacity 0.35s ease;
-}
-
-.footage-cta:hover .cta-arrow,
-.footage-cta:focus-visible .cta-arrow {
-    transform: translate(2px, -2px);
-    opacity: 1;
+.footage-cta:hover .play-mark,
+.footage-cta:focus-visible .play-mark {
+    transform: scale(1.08);
 }
 
 @media (max-width: 900px) {
@@ -225,7 +208,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     .footage-cta,
-    .cta-arrow {
+    .play-mark {
         transition: none;
     }
 

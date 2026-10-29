@@ -283,8 +283,13 @@ code {
 .shell-gradient-overlay {
     position: absolute;
     inset: 0;
+    /* Mirrors .gradient-overlay in Hero.razor.css exactly.
+       The brand gradient, strong across about 80% of the width, easing off
+       over the right-hand fifth so the pond footage shows through. */
     background: linear-gradient(180deg, #3D8FB5 0%, #0B1F33 100%);
-    opacity: 0.82;
+    opacity: 0.9;
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.92) 55%, rgba(0, 0, 0, 0.7) 80%, rgba(0, 0, 0, 0.35) 100%);
+    mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.92) 55%, rgba(0, 0, 0, 0.7) 80%, rgba(0, 0, 0, 0.35) 100%);
     z-index: 2;
 }
 
@@ -355,14 +360,35 @@ code {
 }
 
 .shell-btn-ghost {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
     color: white;
     font-weight: 600;
-    padding: 0.75rem 1.5rem;
+    padding: 0.55rem 1.4rem 0.55rem 0.6rem;
     border-radius: 0.5rem;
     text-decoration: none;
     border: 1.5px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.06);
     font-size: 1rem;
+}
+
+.shell-play-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border-radius: 50%;
+    background: #FFFFFF;
+}
+
+.shell-play-mark svg {
+    width: 18px;
+    height: 18px;
+    margin-left: 3px;
+    fill: #1A2C54;
 }
 
 .shell-hero-stats {
@@ -386,6 +412,13 @@ code {
 @media (max-width: 768px) {
     .shell-hero-container {
         min-height: 480px;
+    }
+
+    /* Copy spans the full width on phones: shade evenly instead. */
+    .shell-gradient-overlay {
+        opacity: 0.82;
+        -webkit-mask-image: none;
+        mask-image: none;
     }
 
     .shell-hero-content {
@@ -703,4 +736,67 @@ html.shell-app-route .shell-route-loading {
 .oxy-popup-line {
     font-size: 0.82rem;
     color: #5B6B7D;
+}
+
+/* ---- YouTube popup player (wwwroot/js/videoLightbox.js) ----------------- */
+.yt-lightbox-open,
+.yt-lightbox-open body {
+    overflow: hidden;
+}
+
+.yt-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5rem 1rem 1rem;
+    background: rgba(2, 13, 25, 0.86);
+    animation: yt-lightbox-in 0.2s ease;
+}
+
+.yt-lightbox-frame {
+    position: relative;
+    width: min(1100px, 100%, calc((100vh - 5rem) * 16 / 9));
+    aspect-ratio: 16 / 9;
+}
+
+.yt-lightbox-frame.is-vertical {
+    width: min(420px, 100%, calc((100vh - 5rem) * 9 / 16));
+    aspect-ratio: 9 / 16;
+}
+
+.yt-lightbox-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0.75rem;
+    background: #000;
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+}
+
+.yt-lightbox-close {
+    position: absolute;
+    top: -2.75rem;
+    right: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0B1F33;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.yt-lightbox-close:focus-visible {
+    outline: 2px solid #D4F3FF;
+    outline-offset: 3px;
+}
+
+@keyframes yt-lightbox-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

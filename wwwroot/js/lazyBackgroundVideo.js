@@ -31,7 +31,19 @@ export function init(video, poster, options) {
 
     let attached = false;
 
-    const onPlaying = () => video.classList.add("is-visible");
+    // Fade in, then (once the fade is done) drop the hair-smaller LCP scale so
+    // the poster underneath no longer peeks out round the edges. LCP is
+    // settled by then; resizing an already-painted video adds no new entry.
+    let settleTimer = 0;
+    const onPlaying = () => {
+        video.classList.add("is-visible");
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(() => {
+            video.classList.add("is-settled");
+            // Inline too, so it holds even with a stale cached stylesheet.
+            video.style.transform = "none";
+        }, 700);
+    };
     video.addEventListener("playing", onPlaying);
 
     /*
@@ -105,6 +117,7 @@ export function init(video, poster, options) {
         return {
             dispose() {
                 video.removeEventListener("playing", onPlaying);
+                clearTimeout(settleTimer);
             }
         };
     }
@@ -130,6 +143,7 @@ export function init(video, poster, options) {
         dispose() {
             observer.disconnect();
             video.removeEventListener("playing", onPlaying);
+            clearTimeout(settleTimer);
         }
     };
 }

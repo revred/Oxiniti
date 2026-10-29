@@ -88,7 +88,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def send_head(self):
         path = self.path.split("?", 1)[0].split("#", 1)[0]
         local = self.translate_path(path)
-        if os.path.isfile(local) or os.path.isfile(os.path.join(local, "index.html")):
+        if os.path.isfile(local):
+            return super().send_head()
+        if os.path.isfile(os.path.join(local, "index.html")):
+            # Serve the folder's page at the same URL (no redirect to a
+            # trailing slash), as Static Web Apps does.
+            self.path = path.rstrip("/") + "/index.html"
             return super().send_head()
         if path in EXCLUDE_FILES or path.startswith(EXCLUDE_PREFIXES):
             return super().send_head()  # plain 404
@@ -100,5 +105,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
-http.server.ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
+class Server(http.server.ThreadingHTTPServer):
+    # On Windows, address reuse lets a second preview bind the same port
+    # silently; fail loudly instead.
+    allow_reuse_address = False
+
+Server(("127.0.0.1", port), Handler).serve_forever()
 PY

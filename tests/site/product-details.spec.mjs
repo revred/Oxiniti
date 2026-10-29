@@ -39,7 +39,8 @@ test("works without Blazor handlers: thumbnails, contact and related products", 
     await expect(thumbs.nth(1)).toHaveAttribute("data-bs-slide-to", "1");
     await expect(page.locator("[data-prerender-incomplete]")).toHaveCount(0);
 
-    await expect(page.locator('a.btn-gradient[href="/contact"]')).toBeVisible();
+    // Contact us is the white secondary button (.btn-contact) for visitors.
+    await expect(page.locator('a.btn-contact[href="/contact"]')).toBeVisible();
     await expect(page.locator('a[href="/login"]', { hasText: "to Buy" })).toHaveCount(0);
     await expect(page.locator('a.card[href="/product/gen-4-hp"]')).toBeVisible();
 

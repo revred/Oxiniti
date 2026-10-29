@@ -153,7 +153,7 @@ else
     <div class="product-details container-fluid px-4 py-5">
         <div class="row g-5">
             <!-- Left: Main Image Only -->
-            <div class="col-12 col-lg-6">
+            <div class="col-12 col-lg-6 pd-gallery-col">
                 <div id="carouselExampleControls" class="carousel slide carousel-dark" data-bs-ride="false">
                     <div class="carousel-inner">
                         @for (int i = 0; i < SortedAssets.Count; i++)
@@ -219,6 +219,9 @@ else
                         }
                     </div>
                 </div>
+
+                @* "Why OXY-Nano" promo card; sits level with the end of the specs. *@
+                <ProductHighlights />
             </div>
 
 
@@ -228,16 +231,16 @@ else
                 {
                     @if (AuthenticationService.IsMakerAIUser == true)
                     {
-                        <div class="d-inline-flex align-items-center gap-1 small bg-white rounded px-2 py-1 border mb-2">
-                            <span class="text-muted">@Loc.T("pd.fid.label", "FID:")</span>
-                            <code class="me-1">@Detail.FriendlyID</code>
-                            <button class="btn btn-sm btn-outline-secondary"
+                        <div class="fid-chip mb-2">
+                            <span class="fid-key">@Loc.T("pd.fid.label", "FID:").TrimEnd(':')</span>
+                            <code class="fid-val">@Detail.FriendlyID</code>
+                            <button class="fid-copy @(DetailCopyState == "copied" ? "copied" : "")"
                                     title="@Loc.T("pd.fid.copy", "Copy FriendlyID")"
                                     @onclick:stopPropagation
                                     @onclick="@(() => CopyDetailFIDAsync(Detail.FriendlyID))">
                                 @if (DetailCopyState == "copied")
                                 {
-                                    <i class="bi bi-check2 text-success"></i>
+                                    <i class="bi bi-check2"></i>
                                 }
                                 else
                                 {
@@ -247,36 +250,45 @@ else
                         </div>
                     }
 
-                    <h2>@Detail.Name</h2>
+                    <div class="buy-box">
+                    <h2 class="pd-title">@Detail.Name</h2>
                     @* Prices are Maker-only for now; everyone else enquires via Contact us. *@
                     @if (AuthenticationService.IsMakerAIUser == true)
                     {
-                        <p class="fs-4 fw-bold text-purple">@InrFormat.Rupees(Detail.Price)</p>
+                        <p class="pd-price">@InrFormat.Rupees(Detail.Price)</p>
                     }
                     @* Quantity + Add to cart are Maker-only while ordering is tested;
                        the public enquires via Contact us below. *@
                     @if (AuthenticationService.IsMakerAIUser == true)
                     {
-                        <div class="mb-3">
-                            <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
-                            <div class="d-inline-flex align-items-center">
-                                <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.decrease", "Decrease quantity")" @onclick="() => ChangeQuantity(-1)">–</button>
-                                <span class="px-3">@Quantity</span>
-                                <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" @onclick="() => ChangeQuantity(+1)">+</button>
+                        <div class="pd-buy-row">
+                            <div class="qty-stepper" role="group" aria-label="@Loc.T("pd.quantity.label", "Quantity")">
+                                <button type="button" aria-label="@Loc.T("pd.quantity.decrease", "Decrease quantity")" @onclick="() => ChangeQuantity(-1)" disabled="@(Quantity <= 1)">
+                                    <i class="bi bi-dash-lg"></i>
+                                </button>
+                                <span class="qty-value" aria-live="polite">@Quantity</span>
+                                <button type="button" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" @onclick="() => ChangeQuantity(+1)">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
                             </div>
+                            <button class="btn btn-gradient pd-add @(AddedMessage != null ? "added" : "")" @onclick="AddToCart">
+                                @if (AddedMessage != null)
+                                {
+                                    <i class="bi bi-check2-circle"></i> @AddedMessage
+                                }
+                                else
+                                {
+                                    <i class="bi bi-cart-plus"></i> @Loc.T("pd.cart.add", "Add to cart")
+                                }
+                            </button>
                         </div>
-                        <button class="btn btn-outline-dark w-100 mb-2" @onclick="AddToCart">
-                            @if (AddedMessage != null)
-                            {
-                                @AddedMessage
-                            }
-                            else
-                            {
-                                <text>@Loc.T("pd.cart.add", "Add to cart")</text>
-                            }
-                        </button>
                     }
-                    <a class="btn btn-gradient w-100 mb-4" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
+                    @* Maker users order via Add to Cart; everyone else enquires here. *@
+                    @if (AuthenticationService.IsMakerAIUser != true)
+                    {
+                        <a class="btn btn-contact w-100 pd-contact" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
+                    }
+                    </div>
                     @* Login/Register to Buy is hidden while buying is paused: logging in
                        unlocks nothing here. Restore it with Add to cart above.
                     @if(!AuthenticationService.IsAuthenticated){
@@ -286,11 +298,14 @@ else
                     }
                     *@
 
-                    <p>@Detail.Description</p>
+                    @if (!string.IsNullOrWhiteSpace(Detail.Description))
+                    {
+                        <p class="pd-desc">@Detail.Description</p>
+                    }
 
                     <!-- Specs Accordion -->
-                    <div class="accordion" id="specAccordion">
-                        @((MarkupString)Detail.ReadMeHtml)
+                    <div class="accordion spec-card" id="specAccordion">
+                        @((MarkupString)FormatSpecs(Detail.ReadMeHtml))
                     </div>
                 }
             </div>
@@ -607,6 +622,24 @@ else
         await JSRuntime.InvokeVoidAsync("blazorShow3DModal");
     }
     private string? DetailCopyState;
+
+    // Turns the README's spec list into a spec sheet:
+    //   <p><strong>Pump &amp; Motor</strong></p>  -> section heading
+    //   <li>Power Rating: 1.5 HP</li>            -> label | value row
+    // Lines without a short "Label:" prefix stay plain list items.
+    private static readonly System.Text.RegularExpressions.Regex SpecHeading =
+        new(@"<p>\s*<strong>([^<]+)</strong>\s*</p>");
+
+    private static readonly System.Text.RegularExpressions.Regex SpecRow =
+        new(@"<li>\s*([^<:]{1,40}):\s*(.+?)</li>", System.Text.RegularExpressions.RegexOptions.Singleline);
+
+    private static string FormatSpecs(string? html)
+    {
+        if (string.IsNullOrWhiteSpace(html)) return "";
+        html = SpecHeading.Replace(html, "<h6 class=\"spec-h\">$1</h6>");
+        return SpecRow.Replace(html,
+            "<li class=\"spec-row\"><span class=\"spec-k\">$1</span><span class=\"spec-v\">$2</span></li>");
+    }
 
     private async Task CopyDetailFIDAsync(string fid)
     {

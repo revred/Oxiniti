@@ -1,0 +1,228 @@
+/*
+    Same brand gradient, glow and rising nano-bubbles as OxyNanoVideoSection,
+    sized for the column under the product photo. On wide screens it sits at
+    the bottom of that column, level with the end of the spec sheet.
+*/
+.pd-highlights {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    margin-top: 24px;
+    padding: 28px;
+    border-radius: 1.25rem;
+    background: linear-gradient(135deg, #3D8FB5 0%, #0B1F33 100%);
+    box-shadow:
+        inset 0 0 0 1px rgba(212, 243, 255, 0.12),
+        0 30px 60px -40px rgba(11, 31, 51, 0.9);
+    color: #FFFFFF;
+}
+
+/* Glow at the top, darker vignette at the edges. */
+.pd-highlights::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(ellipse 60% 70% at 20% 0%, rgba(95, 227, 255, 0.28) 0%, rgba(95, 227, 255, 0) 70%),
+        radial-gradient(ellipse 90% 90% at 50% 50%, rgba(11, 31, 51, 0) 50%, rgba(11, 31, 51, 0.45) 100%);
+    pointer-events: none;
+}
+
+/* ---- Rising nano-bubbles ------------------------------------------------ */
+
+.hl-bubbles {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.hl-bubbles span {
+    position: absolute;
+    bottom: -20px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(212, 243, 255, 0.45);
+    background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.55), rgba(212, 243, 255, 0.05) 70%);
+    opacity: 0;
+    animation: hl-rise 11s linear infinite;
+}
+
+.hl-bubbles span:nth-child(1) { left: 8%;  animation-delay: 0s; }
+.hl-bubbles span:nth-child(2) { left: 20%; animation-delay: 4s;  width: 12px; height: 12px; }
+.hl-bubbles span:nth-child(3) { left: 34%; animation-delay: 7s;  width: 6px;  height: 6px; }
+.hl-bubbles span:nth-child(4) { left: 48%; animation-delay: 2s;  animation-duration: 14s; }
+.hl-bubbles span:nth-child(5) { left: 62%; animation-delay: 5s;  width: 10px; height: 10px; }
+.hl-bubbles span:nth-child(6) { left: 74%; animation-delay: 1s;  width: 6px;  height: 6px; animation-duration: 9s; }
+.hl-bubbles span:nth-child(7) { left: 85%; animation-delay: 8s;  width: 14px; height: 14px; animation-duration: 15s; }
+.hl-bubbles span:nth-child(8) { left: 93%; animation-delay: 3s; }
+
+@keyframes hl-rise {
+    0%   { transform: translate(0, 0);         opacity: 0; }
+    15%  { opacity: 0.9; }
+    50%  { transform: translate(8px, -200px); }
+    85%  { opacity: 0.6; }
+    100% { transform: translate(-6px, -420px); opacity: 0; }
+}
+
+/* ---- Copy --------------------------------------------------------------- */
+
+.hl-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(212, 243, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    color: #D4F3FF;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+}
+
+.hl-kicker-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #5FE3FF;
+    box-shadow: 0 0 0 4px rgba(95, 227, 255, 0.18);
+}
+
+.pd-highlights h3 {
+    margin: 14px 0 20px;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg, #FFFFFF 30%, #BFEFFF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ---- Highlight tiles ---------------------------------------------------- */
+
+.hl-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+    .hl-tiles li {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px;
+        border: 1px solid rgba(212, 243, 255, 0.18);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(2px);
+    }
+
+        .hl-tiles li i {
+            margin-bottom: 4px;
+            color: #5FE3FF;
+            font-size: 1.25rem;
+        }
+
+        .hl-tiles li strong {
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .hl-tiles li span {
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+.hl-proof {
+    margin: 20px 0 14px;
+    color: #D4F3FF;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ---- Buttons ------------------------------------------------------------ */
+
+.hl-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.hl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.25s ease, background 0.2s ease, color 0.2s ease;
+}
+
+    .hl-btn:hover,
+    .hl-btn:focus-visible {
+        transform: translateY(-2px);
+    }
+
+    .hl-btn:focus-visible {
+        outline: 2px solid #D4F3FF;
+        outline-offset: 3px;
+    }
+
+.hl-btn-primary {
+    background: #FFFFFF;
+    color: #0B1F33;
+    box-shadow: 0 10px 24px -12px rgba(2, 13, 25, 0.8);
+}
+
+    .hl-btn-primary:hover {
+        color: #0B1F33;
+        background: #EAF8FF;
+    }
+
+.hl-btn-ghost {
+    border: 1px solid rgba(212, 243, 255, 0.4);
+    color: #FFFFFF;
+}
+
+    .hl-btn-ghost:hover {
+        color: #FFFFFF;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+@media (max-width: 576px) {
+    .pd-highlights {
+        padding: 22px 18px;
+    }
+
+    .hl-tiles {
+        grid-template-columns: 1fr;
+    }
+
+    .hl-btn {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hl-bubbles {
+        display: none;
+    }
+
+    .hl-btn {
+        transition: none;
+    }
+}

@@ -462,6 +462,19 @@
 }
 
 
+/* The page you are on: a quiet accent tint plus a thin rail, so it reads
+   as "you are here" without competing with the hover state. */
+.user-menu-item.active {
+    background: rgba(45, 224, 229, 0.12);
+
+    color: #2de0e5;
+
+    box-shadow: inset 2px 0 0 #2de0e5;
+
+    font-weight: 600;
+}
+
+
 /* =========================================================
    CART ANIMATION
    ========================================================= */

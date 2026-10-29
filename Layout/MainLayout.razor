@@ -105,10 +105,11 @@
 
                     @if (IsUserMenuOpen)
                     {
-                        <div id="user-menu" class="user-menu">
+                        @* Any item click bubbles here, so picking an item closes the menu. *@
+                        <div id="user-menu" class="user-menu" @onclick="CloseUserMenu">
 
                             <a href="/account"
-                               class="user-menu-item">
+                               class="@MenuItemClass("/account")">
 
                                 <i class="bi bi-person-circle"></i>
 
@@ -139,7 +140,7 @@
                             @if (AuthenticationService.IsMakerAIUser == true)
                             {
                                 <a href="/orders"
-                                   class="user-menu-item">
+                                   class="@MenuItemClass("/orders")">
 
                                     <i class="bi bi-receipt"></i>
 
@@ -155,7 +156,7 @@
                             @if (AuthenticationService.IsMakerAIUser == true)
                             {
                                 <a href="/my-demos"
-                                   class="user-menu-item">
+                                   class="@MenuItemClass("/my-demos")">
 
                                     <i class="bi bi-geo-alt"></i>
 
@@ -295,7 +296,9 @@
         try
         {
             await AuthenticationService.InitializeAsync();
-            await DropExpiredSessionAsync();
+            // The refresh is a network call; don't let a slow server hold up
+            // every page waiting on AuthReady.
+            await DropExpiredSessionAsync().WaitAsync(TimeSpan.FromSeconds(8));
         }
         catch (Exception ex)
         {
@@ -457,6 +460,14 @@
             StateHasChanged();
         }
     }
+
+
+    // Marks the user-menu item for the page you are on ("you are here").
+    private string MenuItemClass(string path) =>
+        Nav.ToBaseRelativePath(Nav.Uri).Split('?', '#')[0].TrimEnd('/')
+            .Equals(path.TrimStart('/'), StringComparison.OrdinalIgnoreCase)
+            ? "user-menu-item active"
+            : "user-menu-item";
 
 
     private async Task Logout()

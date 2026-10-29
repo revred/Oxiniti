@@ -292,7 +292,7 @@
         flex-direction: column;
     }
 
-    .pd-gallery-col ::deep .pd-highlights {
+    .pd-gallery-col .pd-hl-desktop {
         margin-top: auto;
     }
 }

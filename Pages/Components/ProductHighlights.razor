@@ -7,7 +7,7 @@
     appears elsewhere on the site (spec sheet, home page, footer), so this
     card only gathers them -- it adds none of its own.
 *@
-<aside class="pd-highlights" aria-labelledby="pd-hl-title">
+<aside class="pd-highlights" aria-labelledby="@TitleId">
 
     @* Rising nano-bubbles, drawn in CSS only -- nothing to download. *@
     <div class="hl-bubbles" aria-hidden="true">
@@ -22,7 +22,7 @@
         @Loc.T("pd.hl.kicker", "WHY OXY-NANO")
     </span>
 
-    <h3 id="pd-hl-title">@Loc.T("pd.hl.title", "Oxygen that reaches the whole pond floor.")</h3>
+    <h3 id="@TitleId">@Loc.T("pd.hl.title", "Oxygen that reaches the whole pond floor.")</h3>
 
     <ul class="hl-tiles">
         <li>
@@ -58,6 +58,11 @@
 </aside>
 
 @code {
+    /// <summary>Where the card sits (e.g. "desktop", "mobile"); keeps the title id unique when a page shows it twice.</summary>
+    [Parameter] public string Placement { get; set; } = "main";
+
+    private string TitleId => $"pd-hl-title-{Placement}";
+
     protected override void OnInitialized()
     {
         Loc.OnChange += StateHasChanged;

@@ -44,3 +44,10 @@
     justify-content: flex-end;
     gap: .5rem;
 }
+
+/* Same main-action button as the product pages (ProductsByFilter.razor.css). */
+.btn-gradient {
+    background: linear-gradient(180deg, #3D8FB5 0%, #1C4E6E 100%);
+    border: none;
+    color: white;
+}

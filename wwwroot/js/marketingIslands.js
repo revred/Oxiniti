@@ -43,26 +43,57 @@
         initYieldCalculator();
         initProductTypePage();
         initProductDetailPage();
-        initMakerApp();
+        initCart();
     }
 
-    // ---- Maker users on product pages: boot the real app --------------------
-    // These pages are captured logged out and ship without Blazor, so the
-    // Maker-only parts (Add to Cart, quantity, header Cart, My Orders) never
-    // render here. For a signed-in Maker user only, load the runtime the app
-    // shell would have loaded: Blazor then re-renders #app with their real
-    // session. Everyone else keeps the light page and downloads nothing more.
-    // is_maker_user is written by Maker.RampEdge's AuthenticationService next
-    // to maker_access_token.
-    var MAKER_APP_PAGES = /^\/(?:(?:hi|ta|te|kn|ml|bn)\/)?products?(?:\/|$)/i;
+    // ---- Cart on product pages: boot the real app when it is needed --------
+    // These pages are captured logged out and ship without Blazor, so their
+    // Add to Cart, quantity stepper and header Cart do nothing on their own.
+    //   - Signed in: load the runtime straight away, as the app shell would;
+    //     Blazor re-renders #app with their session and server-side cart.
+    //   - Not signed in: stay light. The stepper is wired here; Add to Cart
+    //     parks {slug, qty} in sessionStorage (CartService.TakePendingAdd)
+    //     and only then loads the runtime, so only a visitor who wants to buy
+    //     downloads it. The page that renders adds the item for real.
+    var CART_PAGES = /^\/(?:(?:hi|ta|te|kn|ml|bn)\/)?products?(?:\/|$)/i;
+    var PENDING_ADD_KEY = "oxy.pendingCartAdd";
 
-    function initMakerApp() {
-        if (!MAKER_APP_PAGES.test(location.pathname)) return;
-        if (!safeGetItem("maker_access_token")) return;
+    function initCart() {
+        if (!CART_PAGES.test(location.pathname)) return;
 
-        var isMaker = String(safeGetItem("is_maker_user") || "").toLowerCase();
-        if (isMaker !== "true" && isMaker !== "1") return;
+        if (safeGetItem("maker_access_token")) {
+            bootApp();
+            return;
+        }
 
+        var qtyEl = document.querySelector("[data-cart-qty]");
+        Array.prototype.forEach.call(document.querySelectorAll("[data-cart-step]"), function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                if (!qtyEl) return;
+                var next = (parseInt(qtyEl.textContent, 10) || 1) + parseInt(btn.getAttribute("data-cart-step"), 10);
+                qtyEl.textContent = String(Math.max(1, next));
+            });
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll("[data-cart-add]"), function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var qty = qtyEl ? parseInt(qtyEl.textContent, 10) || 1 : 1;
+                try {
+                    window.sessionStorage.setItem(PENDING_ADD_KEY,
+                        JSON.stringify({ slug: btn.getAttribute("data-cart-add"), qty: qty }));
+                } catch (err) { /* private mode: the app still boots, just without the add */ }
+                btn.disabled = true;
+                btn.setAttribute("aria-busy", "true");
+                btn.textContent = btn.textContent.trim() + " …";
+                bootApp();
+            });
+        });
+    }
+
+    function bootApp() {
         if (document.querySelector('script[src*="_framework/blazor.webassembly.js"]')) return;
 
         // Same error box wwwroot/index.html creates before Blazor runs; the

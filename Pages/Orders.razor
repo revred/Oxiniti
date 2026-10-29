@@ -242,13 +242,6 @@ else
             return;
         }
 
-        // Maker-only, like My Demos: everyone else goes back to their account.
-        if (AuthenticationService.IsMakerAIUser != true)
-        {
-            Nav.NavigateTo("/account");
-            return;
-        }
-
         await LoadOrders();
     }
 

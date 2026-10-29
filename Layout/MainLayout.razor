@@ -65,27 +65,23 @@
             </div>
 
 
-            @* Cart is Maker-only while ordering is tested; the public enquires via Contact us. *@
-            @if (AuthenticationService.IsMakerAIUser == true)
-            {
-                <a href="cart"
-                   class="cart-control @(HighlightCart ? "cart-highlight" : "")">
+            <a href="cart"
+               class="cart-control @(HighlightCart ? "cart-highlight" : "")">
 
-                    <i class="bi bi-cart3"></i>
+                <i class="bi bi-cart3"></i>
 
-                    <span class="cart-label">
-                        @Loc.T("nav.cart", "Cart")
+                <span class="cart-label">
+                    @Loc.T("nav.cart", "Cart")
+                </span>
+
+                @if (CartCount > 0)
+                {
+                    <span class="cart-badge">
+                        @CartCount
                     </span>
+                }
 
-                    @if (CartCount > 0)
-                    {
-                        <span class="cart-badge">
-                            @CartCount
-                        </span>
-                    }
-
-                </a>
-            }
+            </a>
 
 
             <!-- User -->
@@ -135,20 +131,16 @@
                             }
 
 
-                            @* My Orders is Maker-only, like My Demos: only Maker users can order. *@
-                            @if (AuthenticationService.IsMakerAIUser == true)
-                            {
-                                <a href="/orders"
-                                   class="user-menu-item">
+                            <a href="/orders"
+                               class="user-menu-item">
 
-                                    <i class="bi bi-receipt"></i>
+                                <i class="bi bi-receipt"></i>
 
-                                    <span>
-                                        @Loc.T("menu.orders", "My Orders")
-                                    </span>
+                                <span>
+                                    @Loc.T("menu.orders", "My Orders")
+                                </span>
 
-                                </a>
-                            }
+                            </a>
 
 
                             @* My Demos is the staff-only demo log (Pages/MyDemos.razor). *@
@@ -487,16 +479,15 @@
     }
 
 
-    // Feeds the header cart badge. Only Maker users see the cart, so skip the
-    // server call for everyone else.
+    // Feeds the header cart badge. The flash marks a change, so the first
+    // load (page open, or the prerender capture) just sets the count.
+    private bool _cartCountLoaded;
+
     private void UpdateCartCount()
         => _ = UpdateCartCountAsync();
 
     private async Task UpdateCartCountAsync()
     {
-        if (AuthenticationService.IsMakerAIUser != true)
-            return;
-
         try
         {
             var items =
@@ -504,6 +495,13 @@
 
             CartCount =
                 items.Count;
+
+            if (!_cartCountLoaded)
+            {
+                _cartCountLoaded = true;
+                StateHasChanged();
+                return;
+            }
 
 
             HighlightCart = true;

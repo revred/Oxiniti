@@ -253,30 +253,25 @@ else
                     {
                         <p class="fs-4 fw-bold text-purple">@InrFormat.Lakhs(Detail.Price) <span class="price-gst">@Loc.T("pd.price.gst", "+ GST")</span></p>
                     }
-                    @* Quantity + Add to cart are Maker-only while ordering is tested;
-                       the public enquires via Contact us below. *@
-                    @if (AuthenticationService.IsMakerAIUser == true)
-                    {
-                        <div class="mb-3">
-                            <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
-                            <div class="d-inline-flex align-items-center">
-                                <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.decrease", "Decrease quantity")" @onclick="() => ChangeQuantity(-1)">–</button>
-                                <span class="px-3">@Quantity</span>
-                                <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" @onclick="() => ChangeQuantity(+1)">+</button>
-                            </div>
+                    <div class="mb-3">
+                        <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
+                        <div class="d-inline-flex align-items-center">
+                            <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.decrease", "Decrease quantity")" data-cart-step="-1" @onclick="() => ChangeQuantity(-1)">–</button>
+                            <span class="px-3" data-cart-qty>@Quantity</span>
+                            <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" data-cart-step="1" @onclick="() => ChangeQuantity(+1)">+</button>
                         </div>
-                        <button class="btn btn-outline-dark w-100 mb-2" @onclick="AddToCart">
-                            @if (AddedMessage != null)
-                            {
-                                @AddedMessage
-                            }
-                            else
-                            {
-                                <text>@Loc.T("pd.cart.add", "Add to cart")</text>
-                            }
-                        </button>
-                    }
-                    <a class="btn btn-gradient w-100 mb-4" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
+                    </div>
+                    <button class="btn btn-gradient w-100 mb-2" data-cart-add="@Detail.Slug" @onclick="AddToCart">
+                        @if (AddedMessage != null)
+                        {
+                            @AddedMessage
+                        }
+                        else
+                        {
+                            <text>@Loc.T("pd.cart.add", "Add to cart")</text>
+                        }
+                    </button>
+                    <a class="btn btn-contact w-100 mb-4" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
                     @* Login/Register to Buy is hidden while buying is paused: logging in
                        unlocks nothing here. Restore it with Add to cart above.
                     @if(!AuthenticationService.IsAuthenticated){
@@ -526,6 +521,13 @@ else
         StateHasChanged();
 
         await Task.WhenAll(similarTask, cartTask);
+
+        // Finish an Add to Cart clicked on the prerendered page before the app booted.
+        if (Detail is not null && await CartService.TakePendingAdd() is { } pending && pending.Slug == Slug)
+        {
+            Quantity = pending.Quantity;
+            await AddToCart();
+        }
     }
 
     private async Task LoadDetailAsync()

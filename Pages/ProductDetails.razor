@@ -251,7 +251,7 @@ else
                     @* Prices are Maker-only for now; everyone else enquires via Contact us. *@
                     @if (AuthenticationService.IsMakerAIUser == true)
                     {
-                        <p class="fs-4 fw-bold text-purple">@InrFormat.Lakhs(Detail.Price) <span class="price-gst">@Loc.T("pd.price.gst", "+ GST")</span></p>
+                        <p class="fs-4 fw-bold text-purple">@InrFormat.Rupees(Detail.Price)</p>
                     }
                     @* Quantity + Add to cart are Maker-only while ordering is tested;
                        the public enquires via Contact us below. *@
@@ -314,7 +314,7 @@ else
                                 @* Prices are Maker-only for now; everyone else enquires via Contact us. *@
                                 @if (AuthenticationService.IsMakerAIUser == true)
                                 {
-                                    <p class="mb-0">@InrFormat.Lakhs(p.Price) <span class="price-gst">@Loc.T("pd.price.gst", "+ GST")</span></p>
+                                    <p class="mb-0">@InrFormat.Rupees(p.Price)</p>
                                 }
                             </div>
                         </a>

@@ -5,7 +5,7 @@
 @inject LocalizationService Loc
 @inject AuthReadyGate AuthReady
 
-<div class="container-fluid px-4 py-5">
+<div class="container-fluid px-4 py-5 cart-page">
     <h2 class="mb-4">@Loc.T("cart.title", "Your Cart")</h2>
     @if (CartItems == null)
     {
@@ -47,41 +47,87 @@
     }
     else if (!CartItems.Any())
     {
-        <p>@Loc.T("cart.empty", "Your cart is empty.")</p>
+        <div class="cart-empty">
+            <i class="bi bi-cart3"></i>
+            <p>@Loc.T("cart.empty", "Your cart is empty.")</p>
+            <a class="btn btn-gradient" href="/products">@Loc.T("cart.browse", "Browse products")</a>
+        </div>
     }
     else
     {
-        @foreach (var p in CartItems)
-        {
-            <div class="product-row row align-items-center mb-4 p-3 rounded-3 bg-light">
-                <div class="product-img col-auto">
-                    <img src="@p.Assets.FirstOrDefault(a => !a.Is3DFile)?.Url"
-                         class="img-fluid rounded"
-                         alt="@p.Name"
-                         style="width:200px;" />
-                </div>
-                <div class="product-info col">
-                    <h5 class="mb-1">@p.Name</h5>
-                    <p class="text-muted mb-2 description">
-                        @Shorten(p.Description, 150)
-                    </p>
-                    <p class="mb-2"><strong>@Loc.T("cart.quantity", "Quantity:")</strong> @p.Quantity</p>
-                    <button class="btn btn-outline-danger btn-sm mb-2" @onclick="() => RemoveFromCart(p.Slug)">
-                        @Loc.T("cart.remove", "Remove")
-                    </button>
-                </div>
-                <div class="product-action col-auto">
-                    <button class="btn btn-gradient btn-lg"
-                            @onclick="@(() => Nav.NavigateTo($"/product/{p.Slug}"))">
-                        @Loc.T("cart.viewdetails", "View Details →")
-                    </button>
-                </div>
-            </div>
-        }
+        @* Prices are Maker-only for now, same as the product pages. *@
+        var showPrices = AuthenticationService.IsMakerAIUser == true;
+        var itemCount = CartItems.Sum(i => i.Quantity);
+        var total = CartItems.Sum(i => i.Price * i.Quantity);
 
-        <div class="d-flex gap-3 mt-4">
-            <button class="btn btn-secondary" @onclick="ClearCart">@Loc.T("cart.clear", "Clear Cart")</button>
-            <button class="btn btn-primary" @onclick="HandleCheckout">@Loc.T("cart.proceedcheckout", "Proceed to Checkout")</button>
+        <div class="cart-layout">
+            <section class="cart-items">
+                @foreach (var p in CartItems)
+                {
+                    <article class="cart-item">
+                        <a class="cart-item-img" href="/product/@p.Slug">
+                            <img src="@p.Assets.FirstOrDefault(a => !a.Is3DFile)?.Url" alt="@p.Name" />
+                        </a>
+
+                        <div class="cart-item-body">
+                            <div class="cart-item-head">
+                                <h5 class="cart-item-name">
+                                    <a href="/product/@p.Slug">@p.Name</a>
+                                </h5>
+                                @if (showPrices)
+                                {
+                                    <div class="cart-item-linetotal">@InrFormat.Rupees(p.Price * p.Quantity)</div>
+                                }
+                            </div>
+
+                            <p class="cart-item-desc">@Shorten(p.Description, 150)</p>
+
+                            <div class="cart-item-meta">
+                                <span class="qty-pill">@Loc.T("cart.quantity", "Quantity:") <strong>@p.Quantity</strong></span>
+                                @if (showPrices && p.Quantity > 1)
+                                {
+                                    <span class="cart-item-unit">@InrFormat.Rupees(p.Price) &times; @p.Quantity</span>
+                                }
+                            </div>
+
+                            <div class="cart-item-actions">
+                                <a class="cart-link" href="/product/@p.Slug">@Loc.T("cart.viewdetails", "View Details →")</a>
+                                <button type="button" class="cart-link cart-link-danger" @onclick="() => RemoveFromCart(p.Slug)">
+                                    <i class="bi bi-trash3"></i> @Loc.T("cart.remove", "Remove")
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </section>
+
+            <aside class="cart-summary">
+                <h5 class="cart-summary-title">@Loc.T("cart.summary", "Order summary")</h5>
+
+                <div class="cart-summary-row">
+                    <span>@Loc.T("cart.itemcount", "Items")</span>
+                    <span>@itemCount</span>
+                </div>
+                @if (showPrices)
+                {
+                    <div class="cart-summary-total">
+                        <span>@Loc.T("cart.total", "Total")</span>
+                        <span class="cart-summary-amount">@InrFormat.Rupees(total)</span>
+                    </div>
+                }
+
+                <button class="btn btn-gradient cart-checkout" @onclick="HandleCheckout">
+                    @Loc.T("cart.proceedcheckout", "Proceed to Checkout") <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <div class="cart-secure">
+                    <i class="bi bi-shield-lock"></i> @Loc.T("cart.secure", "Secure checkout")
+                </div>
+
+                <button type="button" class="cart-link cart-clear" @onclick="ClearCart">
+                    @Loc.T("cart.clear", "Clear Cart")
+                </button>
+            </aside>
         </div>
     }
 </div>

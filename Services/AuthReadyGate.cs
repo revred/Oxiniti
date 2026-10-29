@@ -9,10 +9,16 @@ namespace Oxyniti.Services;
 // Pages that guard on auth state should await Ready first.
 public class AuthReadyGate
 {
+    // Safety net: a page never waits longer than this, even if the layout
+    // never signals (a hung call or an exception before the finally block).
+    private static readonly TimeSpan MaxWait = TimeSpan.FromSeconds(10);
+
     private readonly TaskCompletionSource _tcs =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    public Task Ready => _tcs.Task;
+    public Task Ready => _tcs.Task.IsCompleted
+        ? Task.CompletedTask
+        : Task.WhenAny(_tcs.Task, Task.Delay(MaxWait));
 
     public void SignalReady() => _tcs.TrySetResult();
 }

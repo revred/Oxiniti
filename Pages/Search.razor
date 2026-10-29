@@ -90,7 +90,11 @@
                                             )
                         </button>
                     }
-                    <a href="/contact" @onclick:stopPropagation class="btn btn-gradient btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
+                    @* Maker users order via Add to Cart; everyone else enquires here. *@
+                    @if (AuthenticationService.IsMakerAIUser != true)
+                    {
+                        <a href="/contact" @onclick:stopPropagation class="btn btn-contact btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
+                    }
                 </div>
             </div>
         }

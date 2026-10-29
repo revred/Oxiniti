@@ -114,16 +114,16 @@
                 @* Admin FID: TOP-LEFT of the whole product element *@
                 @if (AuthenticationService.IsMakerAIUser == true)
                 {
-                    <div class="fid-badge" @onclick:stopPropagation>
-                        <span class="text-muted">@Loc.T("productsfilter.fid", "FID:")</span>
-                        <code class="me-1">@p.FriendlyID</code>
-                        <button class="btn btn-sm btn-outline-secondary"
+                    <div class="fid-badge fid-chip" @onclick:stopPropagation>
+                        <span class="fid-key">@Loc.T("productsfilter.fid", "FID:").TrimEnd(':')</span>
+                        <code class="fid-val">@p.FriendlyID</code>
+                        <button class="fid-copy @(CopyHints.TryGetValue(p.Slug, out var h) && h == "copied" ? "copied" : "")"
                                 title="@Loc.T("productsfilter.copyfid", "Copy FriendlyID")"
                                 @onclick:stopPropagation
                                 @onclick="@(() => CopyMetaAsync(p.Slug, p.FriendlyID, label: "FriendlyID"))">
                             @if (CopyHints.TryGetValue(p.Slug, out var hint) && hint == "copied")
                             {
-                                <i class="bi bi-check2 text-success"></i>
+                                <i class="bi bi-check2"></i>
                             }
                             else
                             {
@@ -163,7 +163,11 @@
                                         )
                     </button>
                 }
-                <a href="/contact" class="btn btn-gradient btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
+                @* Maker users order via Add to Cart; everyone else enquires here. *@
+                @if (AuthenticationService.IsMakerAIUser != true)
+                {
+                    <a href="/contact" class="btn btn-contact btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
+                }
             </div>
         </div>
 

@@ -1,0 +1,70 @@
+@inject LocalizationService Loc
+@implements IDisposable
+
+@*
+    "Why OXY-Nano" promo card under the product photo, in the same bubble
+    style as the home page's OxyNanoVideoSection. Every claim here already
+    appears elsewhere on the site (spec sheet, home page, footer), so this
+    card only gathers them -- it adds none of its own.
+*@
+<aside class="pd-highlights" aria-labelledby="pd-hl-title">
+
+    @* Rising nano-bubbles, drawn in CSS only -- nothing to download. *@
+    <div class="hl-bubbles" aria-hidden="true">
+        @for (var i = 0; i < 8; i++)
+        {
+            <span></span>
+        }
+    </div>
+
+    <span class="hl-kicker">
+        <span class="hl-kicker-dot" aria-hidden="true"></span>
+        @Loc.T("pd.hl.kicker", "WHY OXY-NANO")
+    </span>
+
+    <h3 id="pd-hl-title">@Loc.T("pd.hl.title", "Oxygen that reaches the whole pond floor.")</h3>
+
+    <ul class="hl-tiles">
+        <li>
+            <i class="bi bi-circle" aria-hidden="true"></i>
+            <strong>@Loc.T("pd.hl.size.value", "<100 nm")</strong>
+            <span>@Loc.T("pd.hl.size.text", "Nano-bubbles: about 450 span a single human hair")</span>
+        </li>
+        <li>
+            <i class="bi bi-water" aria-hidden="true"></i>
+            <strong>@Loc.T("pd.hl.floor.value", "Whole pond")</strong>
+            <span>@Loc.T("pd.hl.floor.text", "Oxygen reaches all the way to the pond floor")</span>
+        </li>
+        <li>
+            <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+            <strong>@Loc.T("pd.hl.yield.value", "Bigger harvests")</strong>
+            <span>@Loc.T("pd.hl.yield.text", "The yield gains farmers are seeing")</span>
+        </li>
+    </ul>
+
+    <p class="hl-proof">@Loc.T("pd.hl.proof", "Prove it on your pond before you spend a rupee.")</p>
+
+    <div class="hl-actions">
+        <a class="hl-btn hl-btn-primary" href="/#free-demo">
+            <i class="bi bi-calendar-check" aria-hidden="true"></i>
+            @Loc.T("pd.hl.demo", "Book a free demo")
+        </a>
+        <a class="hl-btn hl-btn-ghost" href="/yield-calculator">
+            @Loc.T("pd.hl.yieldcalc", "Estimate my yield gain")
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+    </div>
+
+</aside>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Loc.OnChange -= StateHasChanged;
+    }
+}

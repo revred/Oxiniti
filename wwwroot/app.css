@@ -800,3 +800,79 @@ html.shell-app-route .shell-route-loading {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* ---- "Contact us" beside Add to Cart ------------------------------------
+   Plain white secondary button, so Add to Cart (.btn-gradient) is the one
+   main action on product pages (ProductDetails, ProductsByFilter, Search). */
+.btn.btn-contact {
+    background: #FFFFFF;
+    color: #1A2C54;
+    border: 1px solid #C7D3DF;
+    font-weight: 600;
+}
+
+.btn.btn-contact:hover,
+.btn.btn-contact:focus-visible {
+    background: #F2F7FB;
+    color: #0B1F33;
+    border-color: #3D8FB5;
+}
+
+/* ---- FID chip (Maker users: product page + product list) ----------------
+   Slim pill: small "FID" label, the code in navy monospace, and a copy
+   button that turns green with a tick once copied. */
+.fid-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 3px 3px 12px;
+    border: 1px solid #DCE6EE;
+    border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(12, 35, 58, 0.06);
+    font-size: 0.82rem;
+    line-height: 1;
+}
+
+.fid-chip .fid-key {
+    color: #5B6B7D;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fid-chip .fid-val {
+    padding: 0;
+    background: none;
+    color: #0C233A;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.fid-chip .fid-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: #EEF6FB;
+    color: #1C4E6E;
+    font-size: 0.85rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fid-chip .fid-copy:hover,
+.fid-chip .fid-copy:focus-visible {
+    background: #1C4E6E;
+    color: #FFFFFF;
+}
+
+.fid-chip .fid-copy.copied {
+    background: #E7F6EE;
+    color: #15803D;
+}

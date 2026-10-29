@@ -6,9 +6,24 @@
 @inject NavigationManager Nav
 @inject LocalizationService Loc
 @inject AuthReadyGate AuthReady
+@inject CartService CartService
 
-<div class="container-fluid px-4 py-5">
-<h2 class="mb-4">@Loc.T("checkout.title", "Checkout")</h2>
+<div class="container-fluid px-4 py-5 checkout-page">
+<div class="checkout-head">
+    <h2 class="mb-0">@Loc.T("checkout.title", "Checkout")</h2>
+    <ol class="checkout-steps">
+        <li class="done"><span><i class="bi bi-check-lg"></i></span>@Loc.T("checkout.step.cart", "Cart")</li>
+        <li class="current"><span>2</span>@Loc.T("checkout.step.address", "Address")</li>
+        <li><span>3</span>@Loc.T("checkout.step.payment", "Payment")</li>
+    </ol>
+</div>
+
+<div class="checkout-layout">
+<section class="checkout-main">
+<div class="checkout-card">
+<div class="checkout-card-head">
+    <h5 class="mb-0"><i class="bi bi-geo-alt"></i> @Loc.T("checkout.youraddresses", "Your Addresses")</h5>
+</div>
 
 @if (!isReady)
 {
@@ -24,163 +39,199 @@ else if (loadFailed)
         <button class="btn btn-outline-secondary" @onclick="RetryLoadAsync">@Loc.T("checkout.retry", "Try again")</button>
     </div>
 }
-else if (addresses.Count == 0)
-{
-    <div class="alert alert-info d-flex align-items-center justify-content-between">
-        <div>
-            @Loc.T("checkout.noaddresses", "You don’t have any saved addresses yet. Add one to continue.")
-        </div>
-        <button class="btn btn-primary" @onclick="() => OpenEditor(new AddressDetails())">
-            <i class="bi bi-plus-lg"></i> @Loc.T("checkout.addaddress", "Add Address")
-        </button>
-    </div>
-}
 else
 {
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">@Loc.T("checkout.youraddresses", "Your Addresses")</h5>
-        <button class="btn btn-primary" @onclick="() => OpenEditor(new AddressDetails())">
-            <i class="bi bi-plus-lg"></i> @Loc.T("checkout.addaddress", "Add Address")
-        </button>
-    </div>
+    @if (addresses.Count == 0)
+    {
+        <p class="checkout-hint">@Loc.T("checkout.noaddresses", "You don’t have any saved addresses yet. Add one to continue.")</p>
+    }
 
-    <div class="row g-3">
+    <div class="address-grid" role="radiogroup">
         @foreach (var addr in addresses)
         {
             var isSelected = selectedBarId == addr.BarID;
-            <div class="col-12 col-md-6">
-                <div class="card h-100 @(isSelected ? "border-success" : "")">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="form-check">
-                                <input class="form-check-input"
-                                       type="radio"
-                                       name="selectedAddress"
-                                       id="addr-@addr.BarID"
-                                       checked="@isSelected"
-                                       @onchange="@(_ => Select(addr.BarID))" />
-                                <label class="form-check-label fw-semibold" for="addr-@addr.BarID">
-                                    @(!string.IsNullOrWhiteSpace(addr.Site) ? addr.Site : Loc.T("checkout.unnamed", "Unnamed"))
-                                </label>
-                            </div>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    title="@Loc.T("checkout.edit", "Edit")"
-                                    @onclick="() => OpenEditor(Clone(addr))">
-                                <i class="bi bi-pencil"></i> @Loc.T("checkout.edit", "Edit")
-                            </button>
-                        </div>
-
-                        <div class="mt-2 small text-muted">
-                            @if (!string.IsNullOrWhiteSpace(addr.Address))
-                            {
-                                <div>@addr.Address</div>
-                            }
-                            <div>
-                                @addr.State @((!string.IsNullOrWhiteSpace(addr.State) && (!string.IsNullOrWhiteSpace(addr.Pincode) || !string.IsNullOrWhiteSpace(addr.Country))) ? "," : "")
-                                @addr.Pincode @((!string.IsNullOrWhiteSpace(addr.Pincode) && !string.IsNullOrWhiteSpace(addr.Country)) ? "," : "")
-                                @addr.Country
-                            </div>
-                            @if (!string.IsNullOrWhiteSpace(addr.PhoneNumber))
-                            {
-                                <div>📞 @addr.PhoneNumber</div>
-                            }
-                            @if (!string.IsNullOrWhiteSpace(addr.Email))
-                            {
-                                <div>✉️ @addr.Email</div>
-                            }
-                        </div>
-                    </div>
-
-                    @if (isSelected)
-                    {
-                        <div class="card-footer bg-transparent border-0">
-                            <button class="btn btn-success w-100" @onclick="ProceedWithSelected">
-                                @Loc.T("checkout.proceedtopayment", "Proceed to Payment")
-                            </button>
-                        </div>
-                    }
+            <div class="address-tile @(isSelected ? "selected" : "")"
+                 role="radio" aria-checked="@(isSelected ? "true" : "false")" tabindex="0"
+                 @onclick="() => Select(addr.BarID)"
+                 @onkeydown="@(e => { if (e.Key is "Enter" or " ") Select(addr.BarID); })">
+                <div class="address-tile-head">
+                    <span class="address-radio"><i class="bi bi-check-lg"></i></span>
+                    <span class="address-name">
+                        @(!string.IsNullOrWhiteSpace(addr.Site) ? addr.Site : Loc.T("checkout.unnamed", "Unnamed"))
+                    </span>
+                    <button type="button" class="address-edit"
+                            title="@Loc.T("checkout.edit", "Edit")"
+                            @onclick="() => OpenEditor(Clone(addr))" @onclick:stopPropagation="true">
+                        <i class="bi bi-pencil"></i> @Loc.T("checkout.edit", "Edit")
+                    </button>
                 </div>
+
+                <div class="address-lines">
+                    @if (!string.IsNullOrWhiteSpace(addr.Address))
+                    {
+                        <div>@addr.Address</div>
+                    }
+                    <div>@string.Join(", ", new[] { addr.State, addr.Pincode, addr.Country }.Where(s => !string.IsNullOrWhiteSpace(s)))</div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(addr.PhoneNumber) || !string.IsNullOrWhiteSpace(addr.Email))
+                {
+                    <div class="address-contact">
+                        @if (!string.IsNullOrWhiteSpace(addr.PhoneNumber))
+                        {
+                            <span><i class="bi bi-telephone"></i> @addr.PhoneNumber</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(addr.Email))
+                        {
+                            <span><i class="bi bi-envelope"></i> @addr.Email</span>
+                        }
+                    </div>
+                }
             </div>
         }
+
+        <button type="button" class="address-tile address-add" @onclick="() => OpenEditor(new AddressDetails())">
+            <i class="bi bi-plus-lg"></i>
+            <span>@Loc.T("checkout.addaddress", "Add Address")</span>
+        </button>
+    </div>
+}
+</div>
+</section>
+
+<aside class="checkout-summary">
+    <h5 class="checkout-summary-title">@Loc.T("cart.summary", "Order summary")</h5>
+
+    @if (cartItems is null)
+    {
+        <div class="placeholder-wave mb-3"><span class="placeholder col-12" style="height:56px"></span></div>
+    }
+    else
+    {
+        @foreach (var item in cartItems)
+        {
+            <div class="summary-item">
+                <img src="@item.Assets.FirstOrDefault(a => !a.Is3DFile)?.Url" alt="@item.Name" />
+                <div class="summary-item-info">
+                    <div class="summary-item-name">@item.Name</div>
+                    <div class="summary-item-qty">@Loc.T("cart.quantity", "Quantity:") @item.Quantity</div>
+                </div>
+                @* Prices are Maker-only for now, same as the product pages. *@
+                @if (showPrices)
+                {
+                    <div class="summary-item-price">@InrFormat.Rupees(item.Price * item.Quantity)</div>
+                }
+            </div>
+        }
+
+        @if (showPrices)
+        {
+            <div class="checkout-summary-total">
+                <span>@Loc.T("cart.total", "Total")</span>
+                <span class="checkout-summary-amount">@InrFormat.Rupees(cartItems.Sum(i => i.Price * i.Quantity))</span>
+            </div>
+        }
+    }
+
+    <button class="btn btn-gradient checkout-pay"
+            disabled="@(selectedBarId == 0)"
+            @onclick="ProceedWithSelected">
+        @Loc.T("checkout.proceedtopayment", "Proceed to Payment") <i class="bi bi-arrow-right"></i>
+    </button>
+
+    @if (isReady && !loadFailed && selectedBarId == 0)
+    {
+        <div class="checkout-hint text-center mt-2">@Loc.T("checkout.selectaddress", "Please select an address to continue.")</div>
+    }
+
+    <div class="checkout-secure">
+        <i class="bi bi-shield-lock"></i> @Loc.T("cart.secure", "Secure checkout")
     </div>
 
-    @if (selectedBarId == 0)
-    {
-        <div class="alert alert-warning mt-3">
-            @Loc.T("checkout.selectaddress", "Please select an address to continue.")
-        </div>
-        <button class="btn btn-success mt-2" disabled>@Loc.T("checkout.proceedtopayment", "Proceed to Payment")</button>
-    }
-}
+    <a class="checkout-back" href="/cart"><i class="bi bi-arrow-left"></i> @Loc.T("checkout.backtocart", "Back to cart")</a>
+</aside>
+</div>
 
 <!-- Address Editor Modal -->
 @if (editing != null)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,.5);" role="dialog" aria-modal="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">@((editing.BarID > 0) ? Loc.T("checkout.editaddress", "Edit Address") : Loc.T("checkout.addaddress", "Add Address"))</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseEditor"></button>
+    <div class="addr-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="addr-modal-title">
+        <div class="addr-modal">
+            <div class="addr-modal-head">
+                <span class="addr-modal-icon"><i class="bi bi-geo-alt"></i></span>
+                <div class="flex-grow-1">
+                    <h5 id="addr-modal-title" class="mb-0">@((editing.BarID > 0) ? Loc.T("checkout.editaddress", "Edit Address") : Loc.T("checkout.addaddress", "Add Address"))</h5>
+                    <p class="addr-modal-sub">@Loc.T("checkout.address.subtitle", "Where should we deliver your order?")</p>
                 </div>
-                <EditForm Model="editorVm" OnValidSubmit="SaveAsync">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
+                <button type="button" class="addr-modal-close" aria-label="Close" @onclick="CloseEditor" disabled="@saving">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
 
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("checkout.field.site", "Site")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Site" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("checkout.field.email", "Email")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Email" />
-                            </div>
+            <EditForm Model="editorVm" OnValidSubmit="SaveAsync">
+                <DataAnnotationsValidator />
 
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("checkout.field.phone", "Phone Number")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.PhoneNumber" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">@Loc.T("checkout.field.state", "State/City")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.State" />
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label">@Loc.T("checkout.field.pincode", "ZIP / Pincode")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Pincode" />
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label">@Loc.T("checkout.field.country", "Country")</label>
-                                <InputText class="form-control" @bind-Value="editorVm.Country" />
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label">@Loc.T("checkout.field.address", "Street Address")</label>
-                                <InputTextArea class="form-control" rows="3" @bind-Value="editorVm.Address" />
-                            </div>
+                <div class="addr-modal-body">
+                    <div class="addr-section-title">@Loc.T("checkout.section.location", "Delivery location")</div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="addr-label">@Loc.T("checkout.field.site", "Site") <span class="req">*</span></label>
+                            <InputText class="form-control addr-input" @bind-Value="editorVm.Site"
+                                       placeholder="@Loc.T("checkout.placeholder.site", "e.g. Main farm, Pond 3")" />
+                            <ValidationMessage For="() => editorVm.Site" class="addr-error" />
+                        </div>
+                        <div class="col-12">
+                            <label class="addr-label">@Loc.T("checkout.field.address", "Street Address") <span class="req">*</span></label>
+                            <InputTextArea class="form-control addr-input" rows="2" @bind-Value="editorVm.Address" />
+                            <ValidationMessage For="() => editorVm.Address" class="addr-error" />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="addr-label">@Loc.T("checkout.field.state", "State/City")</label>
+                            <InputText class="form-control addr-input" @bind-Value="editorVm.State" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="addr-label">@Loc.T("checkout.field.pincode", "ZIP / Pincode")</label>
+                            <InputText class="form-control addr-input" @bind-Value="editorVm.Pincode" inputmode="numeric" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="addr-label">@Loc.T("checkout.field.country", "Country")</label>
+                            <InputText class="form-control addr-input" @bind-Value="editorVm.Country" />
                         </div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button type="button"
-                                class="btn btn-outline-secondary"
-                                @onclick="CloseEditor"
-                                disabled="@saving">
-                            @Loc.T("checkout.cancel", "Cancel")
-                        </button>
-                        <button type="submit" class="btn btn-primary" disabled="@saving">
-                            @if (saving)
-                            {
-                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            }
-                            @Loc.T("checkout.save", "Save")
-                        </button>
+                    <div class="addr-section-title mt-4">@Loc.T("checkout.section.contact", "Contact details")</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="addr-label">@Loc.T("checkout.field.phone", "Phone Number")</label>
+                            <div class="addr-icon-input">
+                                <i class="bi bi-telephone"></i>
+                                <InputText class="form-control addr-input" @bind-Value="editorVm.PhoneNumber" type="tel" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="addr-label">@Loc.T("checkout.field.email", "Email") <span class="req">*</span></label>
+                            <div class="addr-icon-input">
+                                <i class="bi bi-envelope"></i>
+                                <InputText class="form-control addr-input" @bind-Value="editorVm.Email" type="email" />
+                            </div>
+                            <ValidationMessage For="() => editorVm.Email" class="addr-error" />
+                        </div>
                     </div>
-                </EditForm>
-            </div>
+                </div>
+
+                <div class="addr-modal-foot">
+                    <button type="button" class="btn addr-cancel" @onclick="CloseEditor" disabled="@saving">
+                        @Loc.T("checkout.cancel", "Cancel")
+                    </button>
+                    <button type="submit" class="btn btn-gradient addr-save" disabled="@saving">
+                        @if (saving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        }
+                        @Loc.T("checkout.save", "Save")
+                    </button>
+                </div>
+            </EditForm>
         </div>
     </div>
 }
@@ -195,6 +246,9 @@ else
     private AddressDetails? editing;
     private AddressEditorVm editorVm = new();
     private bool saving;
+    private List<CartItem>? cartItems;
+
+    private bool showPrices => AuthenticationService.IsMakerAIUser == true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -211,7 +265,10 @@ else
             return;
         }
 
+        // Cart for the order summary loads alongside the addresses.
+        var cartTask = CartService.GetCartItems();
         await TryLoadAddressesAsync();
+        cartItems = await cartTask;
         isReady = true;
     }
 
@@ -269,6 +326,8 @@ else
     {
         editing = toEdit;
         editorVm = AddressEditorVm.From(toEdit);
+        if (toEdit.BarID == 0 && string.IsNullOrWhiteSpace(editorVm.Country))
+            editorVm.Country = "India";
 
         // Prefill email if empty using the auth token (optional)
         if (string.IsNullOrWhiteSpace(editorVm.Email))

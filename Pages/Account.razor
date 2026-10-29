@@ -26,19 +26,20 @@ else
         <aside class="account-sidebar">
             <nav class="sidebar-nav">
                 <span class="sidebar-item active">
-                    <i class="bi bi-person-fill"></i> @Loc.T("account.nav.profile", "Profile")
+                    <i class="bi bi-person-circle"></i> @Loc.T("account.nav.profile", "Profile")
                 </span>
+                @* Same icons and order as the header user menu (Layout/MainLayout.razor). *@
                 @if (AuthenticationService.IsMakerAIUser == true)
                 {
-                    <a class="sidebar-item" href="/my-demos">
-                        <i class="bi bi-geo-alt-fill"></i> @Loc.T("account.nav.demos", "My Demos")
-                    </a>
                     <a class="sidebar-item" href="/orders">
-                        <i class="bi bi-box-seam-fill"></i> @Loc.T("account.nav.orders", "My Orders")
+                        <i class="bi bi-receipt"></i> @Loc.T("account.nav.orders", "My Orders")
+                    </a>
+                    <a class="sidebar-item" href="/my-demos">
+                        <i class="bi bi-geo-alt"></i> @Loc.T("account.nav.demos", "My Demos")
                     </a>
                 }
                 <button type="button" class="sidebar-item sidebar-logout" @onclick="HandleLogout">
-                    <i class="bi bi-box-arrow-right"></i> @Loc.T("account.nav.logout", "Logout")
+                    <i class="bi bi-box-arrow-left"></i> @Loc.T("account.nav.logout", "Logout")
                 </button>
             </nav>
         </aside>

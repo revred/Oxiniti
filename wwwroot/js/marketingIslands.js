@@ -43,6 +43,43 @@
         initYieldCalculator();
         initProductTypePage();
         initProductDetailPage();
+        initMakerApp();
+    }
+
+    // ---- Maker users on product pages: boot the real app --------------------
+    // These pages are captured logged out and ship without Blazor, so the
+    // Maker-only parts (Add to Cart, quantity, header Cart, My Orders) never
+    // render here. For a signed-in Maker user only, load the runtime the app
+    // shell would have loaded: Blazor then re-renders #app with their real
+    // session. Everyone else keeps the light page and downloads nothing more.
+    // is_maker_user is written by Maker.RampEdge's AuthenticationService next
+    // to maker_access_token.
+    var MAKER_APP_PAGES = /^\/(?:(?:hi|ta|te|kn|ml|bn)\/)?products?(?:\/|$)/i;
+
+    function initMakerApp() {
+        if (!MAKER_APP_PAGES.test(location.pathname)) return;
+        if (!safeGetItem("maker_access_token")) return;
+
+        var isMaker = String(safeGetItem("is_maker_user") || "").toLowerCase();
+        if (isMaker !== "true" && isMaker !== "1") return;
+
+        if (document.querySelector('script[src*="_framework/blazor.webassembly.js"]')) return;
+
+        // Same error box wwwroot/index.html creates before Blazor runs; the
+        // prerender step strips it from these pages.
+        if (!document.getElementById("blazor-error-ui")) {
+            var errorUi = document.createElement("div");
+            errorUi.id = "blazor-error-ui";
+            errorUi.setAttribute("data-nosnippet", "");
+            errorUi.innerHTML = 'An unhandled error has occurred.'
+                + '<a href="." class="reload">Reload</a>'
+                + '<span class="dismiss">🗙</span>';
+            document.body.appendChild(errorUi);
+        }
+
+        var script = document.createElement("script");
+        script.src = "/_framework/blazor.webassembly.js";
+        document.body.appendChild(script);
     }
 
     // ---- Product page (/product/{slug}) --------------------------------------

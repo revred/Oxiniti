@@ -220,8 +220,12 @@ else
                     </div>
                 </div>
 
-                @* "Why OXY-Nano" promo card; sits level with the end of the specs. *@
-                <ProductHighlights />
+                @* "Why OXY-Nano" promo card; sits level with the end of the specs.
+                   Desktop only: on phones it would land before the name, price
+                   and Add to cart, so there it follows the specs instead (below). *@
+                <div class="pd-hl-desktop d-none d-lg-block">
+                    <ProductHighlights Placement="desktop" />
+                </div>
             </div>
 
 
@@ -308,6 +312,11 @@ else
                         @((MarkupString)FormatSpecs(Detail.ReadMeHtml))
                     </div>
                 }
+
+                @* Phones and tablets: the promo card comes after the product details. *@
+                <div class="d-lg-none">
+                    <ProductHighlights Placement="mobile" />
+                </div>
             </div>
         </div>
 

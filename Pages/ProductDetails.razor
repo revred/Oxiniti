@@ -251,29 +251,29 @@ else
                     @* Price hidden: the site shows product details only, pricing is by enquiry.
                     <p class="fs-4 fw-bold text-purple">@InrFormat.Rupees(Detail.Price)</p>
                     *@
-                    @* Quantity only fed Add to cart, which is paused below; restore both together.
-                    <div class="mb-3">
-                        <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
-                        <div class="d-inline-flex align-items-center">
-                            <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.decrease", "Decrease quantity")" @onclick="() => ChangeQuantity(-1)">–</button>
-                            <span class="px-3">@Quantity</span>
-                            <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" @onclick="() => ChangeQuantity(+1)">+</button>
+                    @* Quantity + Add to cart are Maker-only while ordering is tested;
+                       the public enquires via Contact us below. *@
+                    @if (AuthenticationService.IsMakerAIUser == true)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">@Loc.T("pd.quantity.label", "Quantity")</label>
+                            <div class="d-inline-flex align-items-center">
+                                <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.decrease", "Decrease quantity")" @onclick="() => ChangeQuantity(-1)">–</button>
+                                <span class="px-3">@Quantity</span>
+                                <button class="btn btn-outline-secondary" aria-label="@Loc.T("pd.quantity.increase", "Increase quantity")" @onclick="() => ChangeQuantity(+1)">+</button>
+                            </div>
                         </div>
-                    </div>
-                    *@
-
-                    @* Add to cart is paused: enquiries go through Contact us for now.
-                    <button class="btn btn-outline-dark w-100 mb-2" @onclick="AddToCart">
-                        @if (AddedMessage != null)
-                        {
-                            @AddedMessage
-                        }
-                        else
-                        {
-                            <text>@Loc.T("pd.cart.add", "Add to cart")</text>
-                        }
-                    </button>
-                    *@
+                        <button class="btn btn-outline-dark w-100 mb-2" @onclick="AddToCart">
+                            @if (AddedMessage != null)
+                            {
+                                @AddedMessage
+                            }
+                            else
+                            {
+                                <text>@Loc.T("pd.cart.add", "Add to cart")</text>
+                            }
+                        </button>
+                    }
                     <a class="btn btn-gradient w-100 mb-4" href="/contact">@Loc.T("pd.contactus", "Contact us")</a>
                     @* Login/Register to Buy is hidden while buying is paused: logging in
                        unlocks nothing here. Restore it with Add to cart above.

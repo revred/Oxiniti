@@ -36,3 +36,11 @@
 .search-page-box ::deep .search-input::placeholder {
     color: #6b7a8a;
 }
+
+/* Add to Cart (Maker users) and Contact us sit side by side. */
+.product-action {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .5rem;
+}

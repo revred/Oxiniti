@@ -704,3 +704,10 @@ html.shell-app-route .shell-route-loading {
     font-size: 0.82rem;
     color: #5B6B7D;
 }
+
+/* "+ GST" after a product price (ProductDetails, ProductsByFilter, Search). */
+.price-gst {
+    font-size: 0.8em;
+    font-weight: 600;
+    color: #5B6B7D;
+}

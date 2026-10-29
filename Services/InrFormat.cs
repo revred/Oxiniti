@@ -17,6 +17,16 @@ public static class InrFormat
     // Without this an int price is ambiguous between the decimal and double overloads.
     public static string Rupees(long amount) => Rupees((decimal)amount);
 
+    /// <summary>Product prices in lakhs, e.g. 125000 → "₹1.25 L"; under a lakh, plain rupees.</summary>
+    public static string Lakhs(decimal amount)
+    {
+        if (Math.Abs(amount) < 100000) return Rupees(amount);
+        var lakhs = Math.Round(amount / 100000m, 2, MidpointRounding.AwayFromZero);
+        return "₹" + lakhs.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + " L";
+    }
+
+    public static string Lakhs(double amount) => Lakhs((decimal)amount);
+
     /// <summary>Rupees with paise, e.g. 100000.5 → "₹1,00,000.50".</summary>
     public static string RupeesAndPaise(decimal amount)
     {

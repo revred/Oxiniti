@@ -704,3 +704,20 @@ html.shell-app-route .shell-route-loading {
     font-size: 0.82rem;
     color: #5B6B7D;
 }
+
+/* ---- "Contact us" beside Add to Cart ------------------------------------
+   Plain white secondary button, so Add to Cart (.btn-gradient) is the one
+   main action on product pages (ProductDetails, ProductsByFilter, Search). */
+.btn.btn-contact {
+    background: #FFFFFF;
+    color: #1A2C54;
+    border: 1px solid #C7D3DF;
+    font-weight: 600;
+}
+
+.btn.btn-contact:hover,
+.btn.btn-contact:focus-visible {
+    background: #F2F7FB;
+    color: #0B1F33;
+    border-color: #3D8FB5;
+}

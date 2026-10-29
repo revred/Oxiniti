@@ -201,6 +201,37 @@ public class CartService(IJSRuntime jsRuntime, IAuthenticationService authentica
         _isSyncing = false;
     }
 
+    // Add to Cart clicked on a prerendered page, which has no Blazor: the
+    // click is parked here by wwwroot/js/marketingIslands.js, which then boots
+    // the app; the page that renders takes it and adds it through AddToCart.
+    private const string PendingAddKey = "oxy.pendingCartAdd";
+
+    public async Task<(string Slug, int Quantity)?> TakePendingAdd()
+    {
+        try
+        {
+            var json = await _jsRuntime.InvokeAsync<string?>("sessionStorage.getItem", PendingAddKey);
+            if (string.IsNullOrEmpty(json))
+                return null;
+
+            await _jsRuntime.InvokeVoidAsync("sessionStorage.removeItem", PendingAddKey);
+
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            var slug = root.TryGetProperty("slug", out var s) ? s.GetString() : null;
+            if (string.IsNullOrEmpty(slug))
+                return null;
+
+            var quantity = root.TryGetProperty("qty", out var q) && q.TryGetInt32(out var n) ? n : 1;
+            return (slug, NormalizeQuantity(quantity));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CartService] Error in TakePendingAdd: {ex}");
+            return null;
+        }
+    }
+
     private async Task<List<CartItem>> GetLocalCartItems()
     {
         var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", StorageKey);

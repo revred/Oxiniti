@@ -75,20 +75,16 @@
                     *@
                 </div>
                 <div class="product-action col-auto">
-                    @* Add to cart is Maker-only while ordering is tested. *@
-                    @if (AuthenticationService.IsMakerAIUser == true)
-                    {
-                        <button @onclick:stopPropagation
-                                @onclick="() => AddToCart(p)"
-                                class="btn btn-gradient btn-lg @(HighlightedQuantities.ContainsKey(p.Slug) ? "added-highlight" : "")">
-                            @(
-                                            HighlightedQuantities.TryGetValue(p.Slug, out var q)
-                                            ? string.Format(Loc.T("productsfilter.itemsadded", "{0} Item{1} Added!"), q, q > 1 ? "s" : "")
-                                            : Loc.T("productsfilter.addtocart", "Add to Cart →")
-                                            )
-                        </button>
-                    }
-                    <a href="/contact" @onclick:stopPropagation class="btn btn-gradient btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
+                    <button @onclick:stopPropagation
+                            @onclick="() => AddToCart(p)"
+                            class="btn btn-gradient btn-lg @(HighlightedQuantities.ContainsKey(p.Slug) ? "added-highlight" : "")">
+                        @(
+                                        HighlightedQuantities.TryGetValue(p.Slug, out var q)
+                                        ? string.Format(Loc.T("productsfilter.itemsadded", "{0} Item{1} Added!"), q, q > 1 ? "s" : "")
+                                        : Loc.T("productsfilter.addtocart", "Add to Cart →")
+                                        )
+                    </button>
+                    <a href="/contact" @onclick:stopPropagation class="btn btn-contact btn-lg">@Loc.T("pd.contactus", "Contact us")</a>
                 </div>
             </div>
         }

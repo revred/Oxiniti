@@ -6,7 +6,8 @@ namespace Oxyniti.Services
 {
     /// <summary>
     /// The product-type catalogue (<see cref="IMakerClient.ProductGroupsAsync"/>),
-    /// fetched ONCE per app boot and shared by every component that needs it.
+    /// fetched once per app boot (then quietly re-fetched for fresh image URLs,
+    /// see <see cref="ScheduleRenewal"/>) and shared by every component that needs it.
     ///
     /// Before this, /products (DiscoverProductTypes), the homepage
     /// (FeaturedProducts), /products/type/{slug} and /search each made their
@@ -41,15 +42,34 @@ namespace Oxyniti.Services
         // just under the limit is never rendered as a broken image.
         private static readonly TimeSpan ImageUrlMaxAge = TimeSpan.FromMinutes(4);
 
+        // Fresh URLs are fetched this long after the last ones, while the old
+        // ones still work, so a page opened at any moment has images ready.
+        private static readonly TimeSpan RenewAfter = TimeSpan.FromSeconds(210);
+
+        // Stop renewing once nobody has opened a product section for this
+        // long, so a forgotten tab doesn't call the API forever. The next
+        // visit to a product section starts it again.
+        private static readonly TimeSpan RenewWhileIdleFor = TimeSpan.FromMinutes(30);
+
         private readonly IMakerClient _makerClient;
         private readonly IJSRuntime _js;
         private Task? _loading;
+        private Timer? _renewTimer;
+        private DateTimeOffset _lastAskedAt = DateTimeOffset.UtcNow;
 
         /// <summary>The catalogue, or null until either the stored copy or the live call has produced one.</summary>
         public IReadOnlyList<ProductData>? Groups { get; private set; }
 
-        /// <summary>True when <see cref="Groups"/>' image URLs are fresh enough to render.</summary>
-        public bool ImagesUsable { get; private set; }
+        // When the image URLs in Groups were issued (live answer or stored copy).
+        private DateTimeOffset? _imagesIssuedAt;
+
+        /// <summary>
+        /// True when <see cref="Groups"/>' image URLs are fresh enough to render.
+        /// Goes false on its own as they age, so a visit that outlives the
+        /// signed URLs shows plain tiles rather than broken images.
+        /// </summary>
+        public bool ImagesUsable =>
+            _imagesIssuedAt is { } issued && DateTimeOffset.UtcNow - issued < ImageUrlMaxAge;
 
         /// <summary>True once the live call has settled (success or failure) this session.</summary>
         public bool IsLoaded { get; private set; }
@@ -65,9 +85,19 @@ namespace Oxyniti.Services
 
         /// <summary>
         /// Starts the load if it has not started already, and never throws --
-        /// safe to fire-and-forget from Program.cs.
+        /// safe to fire-and-forget from Program.cs. Once the first load has
+        /// finished, a call after the image URLs have expired fetches fresh
+        /// ones, so a page opened late in a long visit still gets its images.
         /// </summary>
-        public Task EnsureLoadedAsync() => _loading ??= LoadCoreAsync();
+        public Task EnsureLoadedAsync()
+        {
+            _lastAskedAt = DateTimeOffset.UtcNow;
+
+            if (_loading is { IsCompleted: true } && !ImagesUsable && Groups is { Count: > 0 })
+                _loading = RefreshAsync();
+
+            return _loading ??= LoadCoreAsync();
+        }
 
         /// <summary>The catalogue once the live call has settled; empty (never null) on failure.</summary>
         public async Task<IReadOnlyList<ProductData>> GetGroupsAsync()
@@ -91,7 +121,8 @@ namespace Oxyniti.Services
                 if (products.Count > 0 || Groups is null)
                 {
                     Groups = products;
-                    ImagesUsable = true;
+                    _imagesIssuedAt = DateTimeOffset.UtcNow;
+                    ScheduleRenewal();
                     await SaveSnapshotAsync(products);
                 }
             }
@@ -105,6 +136,45 @@ namespace Oxyniti.Services
                 IsLoaded = true;
                 OnChange?.Invoke();
             }
+        }
+
+        // Re-fetches the catalogue for fresh image URLs. Keeps what is shown
+        // on failure or an empty answer: the tiles just stay plain.
+        private async Task RefreshAsync()
+        {
+            try
+            {
+                var result = await _makerClient.ProductGroupsAsync();
+                var products = result.Products?.ToList() ?? new List<ProductData>();
+                if (products.Count == 0) return;
+
+                Groups = products;
+                _imagesIssuedAt = DateTimeOffset.UtcNow;
+                ScheduleRenewal();
+                await SaveSnapshotAsync(products);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ProductCatalogService] Failed to refresh product groups: {ex.Message}");
+            }
+            finally
+            {
+                OnChange?.Invoke();
+            }
+        }
+
+        // Fetches fresh image URLs shortly before the current ones expire, so
+        // the next product section to open shows its images at once instead
+        // of waiting on the API. Skipped once the visit has gone idle.
+        private void ScheduleRenewal()
+        {
+            _renewTimer?.Dispose();
+            _renewTimer = new Timer(_ =>
+            {
+                if (DateTimeOffset.UtcNow - _lastAskedAt > RenewWhileIdleFor) return;
+                if (_loading is { IsCompleted: false }) return;
+                _loading = RefreshAsync();
+            }, null, RenewAfter, Timeout.InfiniteTimeSpan);
         }
 
         private async Task RestoreSnapshotAsync()
@@ -121,7 +191,7 @@ namespace Oxyniti.Services
                 if (age > SnapshotMaxAge) return;
 
                 Groups = snapshot.Products;
-                ImagesUsable = age < ImageUrlMaxAge;
+                _imagesIssuedAt = snapshot.SavedAt;
                 OnChange?.Invoke();
             }
             catch (Exception ex)
